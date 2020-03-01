@@ -1,0 +1,11 @@
+{
+  "name": "Transport_Drones",
+  "version": "0.1.0",
+  "title": "Transport Drones",
+  "author": "Klonan",
+  "contact": "",
+  "homepage": "",
+  "description": "Adds transport drones and tranport depots",
+  "dependencies": ["base >= 0.18.0"],
+  "factorio_version": "0.18"
+}
