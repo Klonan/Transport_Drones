@@ -287,4 +287,30 @@ util.shift_layer = function(layer, shift)
   return layer
 end
 
+util.item_types = function()
+  return
+  {
+    "item",
+    "rail-planner",
+    "item-with-entity-data",
+    "capsule",
+    "mining-tool",
+    "repair-tool",
+    "blueprint",
+    --"deconstruction-item",
+    --"upgrade-item",
+    --"blueprint-book",
+    --"copy-paste-tool",
+    "module",
+    "tool",
+    "gun",
+    "ammo",
+    --"armor",
+    --"selection-tool",
+    --"item-with-inventory",
+    "item-with-label",
+    "item-with-tags"
+  }
+end
+
 return util
