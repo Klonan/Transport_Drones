@@ -3,7 +3,7 @@ local name = "transport-drone"
 local sprite_base = util.copy(data.raw.car.tank)
 
 util.recursive_hack_make_hr(sprite_base)
-util.recursive_hack_scale(sprite_base, 0.5)
+util.recursive_hack_scale(sprite_base, 0.33)
 --[[
 
   for k, layer in pairs (sprite_base.animation.layers) do

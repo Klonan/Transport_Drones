@@ -1,4 +1,4 @@
-
+local transport_drone = require("script/transport_drone")
 
 local script_data = 
 {
@@ -36,7 +36,8 @@ function request_depot.new(entity)
   {
     entity = machine,
     corpse = corpse,
-    index = tostring(machine.unit_number)
+    index = tostring(machine.unit_number),
+    on_the_way = 0
   }
   setmetatable(depot, depot_metatable)
 
@@ -73,6 +74,34 @@ function request_depot:get_requested_item()
   return recipe.products[1].name
 end
 
+function request_depot:get_stack_size()
+  return game.item_prototypes[self.item].stack_size
+end
+
+function request_depot:get_needed_item_count()
+  local stack_size = self:get_stack_size()
+  local needed = 100 * stack_size
+  needed = needed - self.on_the_way
+  return needed
+end
+
+function request_depot:handle_offer(supply_depot, name, count)
+  local needed_count = self:get_needed_item_count()
+  needed_count = math.min(needed_count, self:get_stack_size(), count)
+
+  if math.random() < 0.5 then return 0 end
+
+  self.on_the_way = self.on_the_way + needed_count
+
+  local drone = transport_drone.new(self, supply_depot, name, needed_count)
+
+  return needed_count
+end
+
+function request_depot:take_item(name, count)
+  self.on_the_way = self.on_the_way - count
+  self.entity.get_output_inventory().insert({name = name, count = count})
+end
 
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity

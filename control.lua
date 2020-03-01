@@ -6,6 +6,7 @@ local handler = require("event_handler")
 
 handler.add_lib(require("script/supply_depot"))
 handler.add_lib(require("script/request_depot"))
+handler.add_lib(require("script/transport_drone"))
 
 --handler.add_lib(require("script/mining_drone"))
 --handler.add_lib(require("script/mining_depot"))

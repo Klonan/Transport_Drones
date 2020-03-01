@@ -31,6 +31,7 @@ function supply_depot.new(entity)
   {
     entity = chest,
     corpse = corpse,
+    to_be_taken = {},
     index = tostring(chest.unit_number)
   }
   setmetatable(depot, depot_metatable)
@@ -38,12 +39,42 @@ function supply_depot.new(entity)
   script_data.supply_depots[depot.index] = depot
 end
 
+function supply_depot:check_requests_for_item(name, count)
+
+  local to_be_taken_count = self.to_be_taken[name] or 0
+  local available = count - to_be_taken_count
+  if available <= 0 then return end
+
+  local request_depots = request_depot.get_depots_for_item(name)
+  if not request_depots then return end
+  if not next(request_depots) then return end
+
+  for k, depot in pairs (request_depots) do
+    local requested = depot:handle_offer(self, name, count)
+    self.to_be_taken[name] = (self.to_be_taken[name] or 0) + requested
+    count = count - requested
+    if count <= 0 then return end
+  end
+
+end
+
 function supply_depot:update()
-  self:say("oh hi :)")
+  local items = self.entity.get_output_inventory().get_contents()
+  for name, count in pairs(items) do
+    self:check_requests_for_item(name, count)
+  end
+  --self:say("oh hi :)")
 end
 
 function supply_depot:say(string)
   self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+end
+
+function supply_depot:give_item(requested_name, requested_count)
+  self.to_be_taken[requested_name] = self.to_be_taken[requested_name] - requested_count
+  local inventory = self.entity.get_output_inventory()
+  local removed_count = inventory.remove({name = requested_name, count = requested_count})
+  return removed_count
 end
 
 local on_created_entity = function(event)
