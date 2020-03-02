@@ -4,6 +4,7 @@ util = require("script/script_util")
 
 local handler = require("event_handler")
 
+handler.add_lib(require("script/road_network"))
 handler.add_lib(require("script/supply_depot"))
 handler.add_lib(require("script/request_depot"))
 handler.add_lib(require("script/transport_drone"))

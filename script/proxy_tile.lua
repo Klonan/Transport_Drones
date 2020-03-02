@@ -1,5 +1,7 @@
 --lets not wallop player things
 
+local road_network = require("script/road_network")
+
 local real_name = "transport-drone-road"
 
 local on_built_tile = function(event)
@@ -22,6 +24,7 @@ local on_built_tile = function(event)
       }
     ) then
       new_tiles[k] = {name = real_name, position = position}
+      road_network.add_node(event.surface_index, position.x, position.y)
     else
       new_tiles[k] = {name = tile.old_tile.name, position = position}
       refund_count = refund_count + 1
@@ -49,12 +52,23 @@ local on_built_tile = function(event)
 
 end
 
+local on_mined_tile = function(event)
+  local tiles = event.tiles
+  for k, tile in pairs (tiles) do
+    if tile.old_tile.name == real_name then
+      road_network.remove_node(event.surface_index, tile.position.x, tile.position.y)
+    end
+  end
+end
+
 local lib = {}
 
 lib.events = 
 {
   [defines.events.on_player_built_tile] = on_built_tile,
   [defines.events.on_robot_built_tile] = on_built_tile,
+
+  [defines.events.on_player_mined_tile] = on_mined_tile,
 }
 
 return lib
