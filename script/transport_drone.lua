@@ -117,7 +117,7 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
   }
 
   entity.ai_settings.path_resolution_modifier = 0
-  entity.speed = entity.speed + (math.random() * 0.1)
+  entity.speed = (entity.speed + (math.random() * 0.01)) * 0.5
   
   setmetatable(drone, transport_drone.metatable)
 

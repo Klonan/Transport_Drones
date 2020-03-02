@@ -1,4 +1,5 @@
 local request_depot = require("script/request_depot")
+local road_network = require("script/road_network")
 
 local script_data = 
 {
@@ -24,7 +25,8 @@ function supply_depot.new(entity)
   local offset = corpse_offsets[direction]
   entity.destroy()
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force}
-  local corpse = surface.create_entity{name = "caution-corpse", position = {position.x + offset[1], position.y + offset[2]}}
+  local corpse_position = {position.x + offset[1], position.y + offset[2]}
+  local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
 
   local depot =
@@ -32,11 +34,16 @@ function supply_depot.new(entity)
     entity = chest,
     corpse = corpse,
     to_be_taken = {},
+    node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     index = tostring(chest.unit_number)
   }
   setmetatable(depot, depot_metatable)
 
+  
   script_data.supply_depots[depot.index] = depot
+
+  depot.network_id = road_network.add_supply_depot(depot)
+
 end
 
 function supply_depot:check_requests_for_item(name, count)
@@ -45,7 +52,7 @@ function supply_depot:check_requests_for_item(name, count)
   local available = count - to_be_taken_count
   if available <= 0 then return end
 
-  local request_depots = request_depot.get_depots_for_item(name)
+  local request_depots = road_network.get_request_depots(self.network_id, name)
   if not request_depots then return end
   if not next(request_depots) then return end
 

@@ -1,4 +1,5 @@
 local transport_drone = require("script/transport_drone")
+local road_network = require("script/road_network")
 
 local script_data = 
 {
@@ -29,7 +30,8 @@ function request_depot.new(entity)
 
   local machine = surface.create_entity{name = "request-depot-machine", position = position, force = force}
   machine.active = false
-  local corpse = surface.create_entity{name = "caution-corpse", position = {position.x + offset[1], position.y + offset[2]}}
+  local corpse_position = {position.x + offset[1], position.y + offset[2]}
+  local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
   
   local depot =
@@ -37,13 +39,13 @@ function request_depot.new(entity)
     entity = machine,
     corpse = corpse,
     index = tostring(machine.unit_number),
-    on_the_way = 0
+    on_the_way = 0,
+    node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
   }
   setmetatable(depot, depot_metatable)
 
   script_data.request_depots[depot.index] = depot
 
-  return depot
 
 end
 
@@ -52,7 +54,7 @@ function request_depot:check_request_change()
   if self.item == requested_item then return end
 
   if self.item then
-    script_data.item_map[self.item][self.index] = nil
+    road_network.remove_request_depot(depot, self.item)
     --cancel shit...
   end
 
@@ -60,11 +62,13 @@ function request_depot:check_request_change()
 
   if not self.item then return end
 
+  road_network.add_request_depot(self, self.item)
+
   if not script_data.item_map[self.item] then
     script_data.item_map[self.item] = {}
   end
 
-  script_data.item_map[self.item][self.index] = self
+  --script_data.item_map[self.item][self.index] = self
 
 end
 

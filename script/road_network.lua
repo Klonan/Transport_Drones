@@ -42,7 +42,7 @@ local neighbor_offsets =
   {0, 1},
 }
 
-local get_node_id = function(surface, x, y)
+local get_node = function(surface, x, y)
 
   local surface_map = script_data.node_map[surface]
   if not surface_map then return end
@@ -56,15 +56,11 @@ end
 
 local set_node_id = function(surface, x, y, id)
   
-  local surface_map = script_data.node_map[surface]
-  if not surface_map then return end
+  local node = get_node(surface, x, y)
+  if not node then return end
+  node.id = id
 
-  local x_map = surface_map[x]
-  if not x_map then return end
-
-  x_map[y] = id
-
-  game.surfaces[surface].create_entity{name = "flying-text", position =  {x, y}, text = id or "nil"}
+  game.surfaces[surface].create_entity{name = "flying-text", position =  {x, y}, text = node.id or "nil"}
 
   return true
 
@@ -74,9 +70,9 @@ local get_neighbors = function(surface, x, y)
   local neighbors = {}
 
   for k, offset in pairs (neighbor_offsets) do
-    local id = get_node_id(surface, x + offset[1], y + offset[2])
-    if id then
-      neighbors[k] = id
+    local node = get_node(surface, x + offset[1], y + offset[2])
+    if node then
+      neighbors[k] = node
     end
   end
 
@@ -87,7 +83,7 @@ end
 local get_neighbor_count = function(surface, x, y)
   local count = 0
   for k, offset in pairs (neighbor_offsets) do
-    if get_node_id(surface, x + offset[1], y + offset[2]) then
+    if get_node(surface, x + offset[1], y + offset[2]) then
       count = count + 1
     end
   end
@@ -110,8 +106,8 @@ recursive_connection_check = function(surface, x, y, tx, ty, checked, n)
 
   for k, offset in pairs (neighbor_offsets) do
     local nx, ny = x + offset[1], y + offset[2]
-    local node_id = get_node_id(surface, nx, ny)
-    if node_id then
+    local node = get_node(surface, nx, ny)
+    if node then
       local result = recursive_connection_check(surface, nx, ny, tx, ty, checked, n)
       if result then return true end
     end
@@ -121,12 +117,11 @@ end
 local recursive_set_id
 recursive_set_id = function(surface, x, y, id)
   
-  
   set_node_id(surface, x, y, id)
   
   for k, offset in pairs (neighbor_offsets) do
-    local node_id = get_node_id(surface, x + offset[1], y + offset[2])
-    if node_id and node_id ~= id then
+    local node = get_node(surface, x + offset[1], y + offset[2])
+    if node and node.id ~= id then
       recursive_set_id(surface, x + offset[1], y + offset[2], id)
     end
   end
@@ -146,42 +141,58 @@ road_network.add_node = function(surface, x, y)
   local x_map = surface_map[x]
   if not x_map then
     x_map = {}
-    surface_map[x] = {}
+    surface_map[x] = x_map
   end
+  
+  local node =
+  {
+    id = 0
+  }
+  x_map[y] = node
 
+  
   local prospective_id
   local merge_networks = false
   local neighbors = get_neighbors(surface, x, y)
-  for k, id in pairs (neighbors) do
+  for k, node in pairs (neighbors) do
     if not prospective_id then
-      prospective_id = id
-    elseif id ~= prospective_id then
+      prospective_id = node.id
+    elseif node.id ~= prospective_id then
+      prospective_id = math.min(node.id, prospective_id)
       --will need to merge network
       merge_networks = true
     end
   end
-
+  
   if not prospective_id then
     prospective_id = new_id()
   end
 
+  
   set_node_id(surface, x, y, prospective_id)
 
   if merge_networks then
     local network = get_network_by_id(prospective_id)
-    for k, neighbor_id in pairs (neighbors) do
-      if neighbor_id ~= prospective_id then
-        merge_network(network, get_network_by_id(neighbor_id))
+    for k, neighbor_node in pairs (neighbors) do
+      if neighbor_node.id ~= prospective_id then
+        local target_network = get_network_by_id(neighbor_node.id)
+        if target_network then
+          merge_network(network, target_network)
+        end
       end
     end
     recursive_set_id(surface, x, y, prospective_id)
   end
 
-
 end
 
 road_network.remove_node = function(surface, x, y)
-  set_node_id(surface, x, y, nil)
+
+  local node = get_node(surface, x, y)
+  if not node then return end
+
+  script_data.node_map[surface][x][y] = nil
+
   local count = get_neighbor_count(surface, x, y)
   if count == 1 then
     -- only 1 neighbor, no need to worry about anything.
@@ -192,8 +203,8 @@ road_network.remove_node = function(surface, x, y)
   local fx, fy
   for k, offset in pairs (neighbor_offsets) do
     local nx, ny = x + offset[1], y + offset[2]
-    local id = get_node_id(surface, nx, ny)
-    if id then
+    local neighbor = get_node(surface, nx, ny)
+    if neighbor then
       if not fx then
         fx, fy = nx, ny 
       else
@@ -207,8 +218,68 @@ road_network.remove_node = function(surface, x, y)
 end
 
 road_network.get_network = function(surface, x, y)
-  local id = get_node_id(surface, x, y)
-  if id then return get_network_by_id(id) end
+  local node = get_node(surface, x, y)
+  if not node then return end
+
+  return get_network_by_id(node.id)
+end
+
+road_network.add_supply_depot = function(depot)
+  local x, y = depot.node_position[1], depot.node_position[2]
+  local surface = depot.entity.surface.index
+  local node = get_node(surface, x, y)
+  if not node then
+    game.print("Oh no node for add supply??")
+    return
+  end
+
+  
+  
+  node.supply = node.supply or {}
+  node.supply[depot.index] = depot
+
+  local network = get_network_by_id(node.id)
+  network.supply[depot.index] = depot
+
+  
+  game.print("Added supply to network "..network.id)
+
+  return network.id
+end
+
+road_network.add_request_depot = function(depot, item_name)
+  local x, y = depot.node_position[1], depot.node_position[2]
+  local surface = depot.entity.surface.index
+  local node = get_node(surface, x, y)
+  if not node then
+    game.print("Oh no node for add requester??")
+    return
+  end
+
+  node.requesters = node.requesters or {}
+  node.requesters[depot.index] = depot
+
+  local network = get_network_by_id(node.id)
+
+  local item_map = network.requesters[item_name]
+  if not item_map then
+    item_map = {}
+    network.requesters[item_name] = item_map
+  end
+
+  item_map[depot.index] = depot
+
+  game.print("Added requester to network "..network.id)
+  return network.id
+end
+
+road_network.remove_request_depot = function(depot, item_name)
+
+end
+
+road_network.get_request_depots = function(id, name)
+  local network = get_network_by_id(id)
+  return network.requesters[name]
 end
 
 road_network.on_init = function()

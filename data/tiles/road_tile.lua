@@ -22,7 +22,8 @@ local proxy_entity =
   max_health = 1,
   collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
   pictures = util.empty_sprite(),
-  render_layer = "object"
+  render_layer = "object",
+  collision_mask = shared.tile_collision_mask
 }
 
 local item = 
