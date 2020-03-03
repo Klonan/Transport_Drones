@@ -54,18 +54,6 @@ local get_node = function(surface, x, y)
 
 end
 
-local set_node_id = function(surface, x, y, id)
-  
-  local node = get_node(surface, x, y)
-  if not node then return end
-  node.id = id
-
-  game.surfaces[surface].create_entity{name = "flying-text", position =  {x, y}, text = node.id or "nil"}
-
-  return true
-
-end
-
 local get_neighbors = function(surface, x, y)
   local neighbors = {}
 
@@ -93,48 +81,55 @@ end
 local recursive_connection_check
 recursive_connection_check = function(surface, x, y, tx, ty, checked, n)
 
+  local node = get_node(surface, x, y)
+  if not node then return end
+
+  if checked[node] then return end
+
+  checked[node] = true
+
   n = n + 1 
   
-  game.surfaces[surface].create_entity{name = "flying-text", position =  {x, y}, text = n}
-
-  if checked[x] and checked[x][y] then return end
-
-  checked[x] = checked[x] or {}
-  checked[x][y] = true
+  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = n}
 
   if x == tx and y == ty then return true end
 
   for k, offset in pairs (neighbor_offsets) do
     local nx, ny = x + offset[1], y + offset[2]
-    local node = get_node(surface, nx, ny)
-    if node then
-      local result = recursive_connection_check(surface, nx, ny, tx, ty, checked, n)
-      if result then return true end
-    end
+    local result = recursive_connection_check(surface, nx, ny, tx, ty, checked, n)
+    if result then return true end
   end
 end
 
 local recursive_set_id
 recursive_set_id = function(surface, x, y, id)
   
-  set_node_id(surface, x, y, id)
-  
-  for k, offset in pairs (neighbor_offsets) do
-    local node = get_node(surface, x + offset[1], y + offset[2])
-    if node and node.id ~= id then
-      recursive_set_id(surface, x + offset[1], y + offset[2], id)
+  local node = get_node(surface, x, y)
+  if not node then return end
+  if node.id == id then return end
+
+  game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = id}
+
+  node.id = id
+
+  if node.supply then
+    for k, depot in pairs (node.supply) do
+      depot:remove_from_network()
+      depot:add_to_network()
     end
   end
 
-end
-
-local rebuild_network_from_node = function(surface, x, y)
-  local node = get_node(surface, x, y)
-
-  local old_network = get_network_by_id(node.id)
-  if not old_network then
-    game.print("HUH? no old network when trying to rebuild network")
+  if node.requesters then
+    for k, depot in pairs (node.requesters) do
+      depot:remove_from_network()
+      depot:add_to_network()
+    end
   end
+  
+  for k, offset in pairs (neighbor_offsets) do
+    recursive_set_id(surface, x + offset[1], y + offset[2], id)
+  end
+
 end
 
 local road_network = {}
@@ -177,20 +172,18 @@ road_network.add_node = function(surface, x, y)
     prospective_id = new_id()
   end
 
-  
-  set_node_id(surface, x, y, prospective_id)
+  node.id = prospective_id
 
   if merge_networks then
-    local network = get_network_by_id(prospective_id)
-    for k, neighbor_node in pairs (neighbors) do
-      if neighbor_node.id ~= prospective_id then
-        local target_network = get_network_by_id(neighbor_node.id)
-        if target_network then
-          merge_network(network, target_network)
+    for k, offset in pairs (neighbor_offsets) do
+      local nx, ny = x + offset[1], y + offset[2]
+      local node = get_node(surface, nx, ny)
+      if node then
+        if node.id ~= prospective_id then
+          recursive_set_id(surface, nx, ny, prospective_id)
         end
       end
     end
-    recursive_set_id(surface, x, y, prospective_id)
   end
 
 end
@@ -221,11 +214,8 @@ road_network.remove_node = function(surface, x, y)
       if not fx then
         fx, fy = nx, ny 
       else
-        if not (recursive_connection_check(surface, fx, fy, nx, ny, {}, 0)) then
-          game.print("Gonna split the networks bois.")
-          if neighbor.id ~= node.id then
-            rebuild_network_from_node(surface, nx, ny)
-          end
+        if not (recursive_connection_check(surface, fx, fy, nx, ny, {}, 0)) then              
+          recursive_set_id(surface, nx, ny, new_id()) 
         end
       end
     end
@@ -259,7 +249,7 @@ road_network.add_supply_depot = function(depot)
   network.supply[depot.index] = depot
 
   
-  game.print("Added supply to network "..network.id)
+  --game.print("Added supply to network "..network.id)
 
   return network.id
 end
@@ -286,7 +276,7 @@ road_network.add_request_depot = function(depot, item_name)
 
   item_map[depot.index] = depot
 
-  game.print("Added requester to network "..network.id)
+  --game.print("Added requester to network "..network.id)
 
   return network.id
 end

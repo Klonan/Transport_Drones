@@ -67,7 +67,6 @@ local non_road_tile_built = function(event)
   
   if event.item then
     
-    game.print("HI")
     if refund_count > 0 then
       if event.player_index then
         local player = game.get_player(event.player_index)

@@ -101,17 +101,20 @@ function request_depot:take_item(name, count)
   self.entity.get_output_inventory().insert({name = name, count = count})
 end
 
+
+function request_depot:say(string)
+  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+end
+
 function request_depot:add_to_network()
+  self:say("Adding to network")
   self.network_id = road_network.add_request_depot(self, self.item)
 end
 
 function request_depot:remove_from_network()
 
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.requesters[self.index] = nil
-  
   local network = road_network.get_network_by_id(self.network_id)
-
+  if not network then return end
   local requesters = network.requesters
 
   requesters[self.item][self.index] = nil
@@ -120,12 +123,16 @@ function request_depot:remove_from_network()
 
 end
 
+function request_depot:remove_from_node()
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.requesters[self.index] = nil
+end
+
 
 function request_depot:on_removed()
   self:remove_from_network()
   self.corpse.destroy()
   script_data.request_depots[self.index] = nil
-  game.print("ded")
 end
 
 local on_created_entity = function(event)

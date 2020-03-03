@@ -86,10 +86,6 @@ end
 
 function supply_depot:remove_from_network()
 
-  
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.supply[self.index] = nil
-
   local network = road_network.get_network_by_id(self.network_id)
 
   local supply = network.supply
@@ -100,7 +96,13 @@ function supply_depot:remove_from_network()
 
 end
 
+function supply_depot:remove_from_node()
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.supply[self.index] = nil
+end
+
 function supply_depot:add_to_network()
+  self:say("Adding to network") 
   self.network_id = road_network.add_supply_depot(self)
 end
 
@@ -108,7 +110,6 @@ function supply_depot:on_removed()
   self:remove_from_network()
   self.corpse.destroy()
   script_data.supply_depots[self.index] = nil
-  game.print("ded")
 end
 
 local on_created_entity = function(event)
@@ -128,7 +129,6 @@ end
 
 local on_entity_removed = function(event)
   local entity = event.entity
-  game.print("heya")
 
   if not (entity and entity.valid) then return end
 
