@@ -117,7 +117,7 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
   }
 
   entity.ai_settings.path_resolution_modifier = 0
-  entity.speed = (entity.speed + (math.random() * 0.01)) * 0.5
+  --entity.speed = (entity.speed + (math.random() * 0.01)) * 0.5
   
   setmetatable(drone, transport_drone.metatable)
 
@@ -135,108 +135,6 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
   return drone
 end
 
-function transport_drone:spill(stack)
-  self.entity.surface.spill_item_stack(self.entity.position, stack, false, nil, false)
-end
-
-local max = math.max
-local random = math.random
-function transport_drone:process_mining()
-
-  local target = self.mining_target
-  if not (target and target.valid) then
-    --cancel command or something.
-    return self:return_to_depot()
-  end
-
-
-  local item = self.depot.item
-  if not item then
-    --self:say("I don't know what I want")
-    self:return_to_depot()
-    return
-  end
-
-  local item_flow = self.entity.force.item_production_statistics.on_flow
-
-  if target.type == "item-entity" then
-
-    local stack = target.stack
-    if stack.name == item then
-      self.stack = {name = stack.name, count = stack.count}
-      item_flow(item, stack.count)
-    else
-      self:spill{name = stack.name, count = stack.count}
-    end
-
-  else
-
-    local pollute = self.entity.surface.pollute
-    local pollution_flow = game.pollution_statistics.on_flow
-
-    local productivity_bonus_chance = self:get_productivity_probability()
-    local bonus_amount = 0
-    if productivity_bonus_chance > 0 then
-      for k = 1, self.mining_count do
-        local chance = productivity_bonus_chance
-        while chance > 0 do
-          if random() < productivity_bonus_chance then
-            bonus_amount = bonus_amount + 1
-          end
-          chance = chance - 1
-        end
-      end
-    end
-
-    for k, product in pairs (get_products(target)) do
-      local count = product_amount(product) * self.mining_count
-      if count > 0 then
-        pollute(target.position, pollution_per_ore * count)
-        pollution_flow(default_bot_name, pollution_per_ore * count)
-
-        local count = count + bonus_amount
-
-        if product.name == item then
-          self.stack = {name = product.name, count = count}
-          item_flow(item, count)
-        else
-          self:spill{name = product.name, count = count}
-        end
-
-      end
-    end
-
-  end
-
-  if target.type == "resource" then
-    local resource_amount = target.amount
-    if target.initial_amount then
-      --It is infinite
-      target.amount = max(resource_amount - self.mining_count, target.prototype.minimum_resource_amount)
-    elseif resource_amount > self.mining_count then
-        target.amount = resource_amount - self.mining_count
-    else
-      self:clear_mining_target()
-      script.raise_event(defines.events.on_resource_depleted, {entity = target})
-      target.destroy()
-    end
-  else
-    self:clear_mining_target()
-    target.destroy()
-  end
-
-  self.mining_count = nil
-  self:return_to_depot()
-
-
-
-end
-
-function transport_drone:request_order()
-  self.depot:handle_order_request(self)
-end
-
-local distance = util.distance
 function transport_drone:process_return_to_depot()
 
   local depot = self.depot
@@ -268,44 +166,24 @@ function transport_drone:oof()
 end
 
 function transport_drone:process_failed_command()
-  --self:oof()
-  self.fail_count = (self.fail_count or 0) + 1
 
-  if self.fail_count == 2 then self.entity.ai_settings.path_resolution_modifier = 2 end
-  if self.fail_count == 4 then self.entity.ai_settings.path_resolution_modifier = 3 end
+  self:say("F")
 
-  if self.state == states.mining_entity then
-
-    self:clear_attack_proxy()
-
-    if self.mining_target.valid and self.fail_count <= 5 then
-      return self:mine_entity(self.mining_target, self.mining_count)
-    end
-
-    --self:say("I can't mine that entity!")
-    self:clear_mining_target()
-    self:return_to_depot()
+  if self.state == states.going_to_supply then
+    self:return_to_requester()
     return
   end
 
-  if self.state == states.return_to_depot then
-    if self.fail_count <= 5 then
-      return self:wait(math.random(25, 45))
-    end
-    --self:say("I can't return to my depot!")
-    self:cancel_command()
+  if self.state == states.return_to_requester then
+    self.entity.die()
     return
   end
 
 end
 
-function transport_drone:wait(ticks)
-  self.entity.set_command
-  {
-    type = defines.command.wander,
-    ticks_to_wait = ticks,
-    distraction = defines.distraction.none
-  }
+local distance = util.distance
+function transport_drone:distance(position)
+  return distance(self.entity.position, position)
 end
 
 function transport_drone:process_pickup()
@@ -315,12 +193,23 @@ function transport_drone:process_pickup()
   self.request_depot.on_the_way = self.request_depot.on_the_way - self.requested_count
   self.request_depot.on_the_way = self.request_depot.on_the_way + given_count
 
-  self.held_count = given_count
+  self.requested_count = nil
+
+  if given_count > 0 then
+    self.held_count = given_count
+  end
+
+  self:update_sticker()
   self:return_to_requester()
 end
 
 function transport_drone:return_to_requester()
   self.state = states.return_to_requester
+
+  if not self.request_depot.entity.valid then
+    self.entity.die()
+    return
+  end
 
   self.entity.set_command
   {
@@ -333,15 +222,67 @@ function transport_drone:return_to_requester()
 
 end
 
+function transport_drone:update_sticker()
+
+
+  if self.background_rendering then
+    rendering.destroy(self.background_rendering)
+    self.background_rendering = nil
+  end
+  if self.item_rendering then
+    rendering.destroy(self.item_rendering)
+    self.item_rendering = nil
+  end
+
+  if not self.held_count then
+    return
+  end
+
+  self.background_rendering = rendering.draw_sprite 
+  {
+    sprite = "utility/entity_info_dark_background",
+    target = self.entity,
+    surface = self.entity.surface,
+    forces = {self.entity.force},
+    only_in_alt_mode = true,
+    --target_offset = {0, -0.5},
+    x_scale = 0.6,
+    y_scale = 0.6,
+  }
+
+  self.item_rendering = rendering.draw_sprite
+  {
+    sprite = "item/"..self.requested_name,
+    target = self.entity,
+    surface = self.entity.surface,
+    forces = {self.entity.force},
+    only_in_alt_mode = true,
+    --target_offset = {0, -0.5},
+    x_scale = 0.6,
+    y_scale = 0.6,
+  }
+
+
+end
+
 function transport_drone:process_return_to_requester()
-  self.request_depot:take_item(self.requested_name, self.held_count)
-  remove_drone(self)
+
+  if not self.request_depot.entity.valid then
+    self.entity.die()
+    return
+  end
+
+  if self.held_count then
+    self.request_depot:take_item(self.requested_name, self.held_count)
+  end
+  self.request_depot:remove_drone(self)
   self.entity.destroy()
+  remove_drone(self)
 end
 
 function transport_drone:update(event)
   if not self.entity.valid then return end
-
+  
   if event.result ~= defines.behavior_result.success then
     self:process_failed_command()
     return
@@ -360,77 +301,6 @@ end
 
 function transport_drone:say(text)
   self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = text}
-end
-
-function transport_drone:mine_entity(entity, count)
-  self.mining_count = count or 1
-  self.mining_target = entity
-  self.state = states.mining_entity
-  local attack_proxy = self:make_attack_proxy(entity, self.mining_count)
-  self.attack_proxy = attack_proxy
-  local command = {}
-
-  local commands =
-  {
-    {
-      type = defines.command.go_to_location,
-      destination_entity = attack_proxy,
-      distraction = defines.distraction.none,
-      --radius = entity.get_radius() + self.entity.get_radius(),
-      pathfind_flags = {prefer_straight_paths = false, use_cache = false}
-    },
-    {
-      type = defines.command.attack,
-      target = attack_proxy,
-      distraction = defines.distraction.none
-    }
-  }
-  self.entity.set_command
-  {
-    type = defines.command.compound,
-    structure_type = defines.compound_command.return_last,
-    commands = commands,
-    distraction = defines.distraction.none
-  }
-end
-
-function transport_drone:clear_things(unit_number)
-  self:clear_mining_target()
-  self:clear_attack_proxy()
-  self:clear_depot(unit_number)
-  self:remove_from_list(unit_number)
-end
-
-function transport_drone:cancel_command()
-
-  self:clear_things()
-  self.entity.force = "neutral"
-  self.entity.die()
-
-end
-
-function transport_drone:return_to_depot()
-  self.state = states.return_to_depot
-  self:clear_attack_proxy()
-
-  local depot = self.depot
-
-  if not (depot and depot.entity.valid) then
-    self:cancel_command()
-    return
-  end
-
-  local corpse = depot.corpse
-  if corpse and corpse.valid then
-    self:go_to_entity(corpse, 0.75)
-    return
-  end
-
-  local position = depot:get_spawn_position()
-  if position then
-    self:go_to_position(position, 0.75)
-    return
-  end
 end
 
 function transport_drone:go_to_position(position, radius)
@@ -455,39 +325,24 @@ function transport_drone:go_to_entity(entity, radius)
   }
 end
 
-function transport_drone:clear_attack_proxy()
-  local destroyed = self.attack_proxy and self.attack_proxy.valid and self.attack_proxy.destroy()
-  self.attack_proxy = nil
-end
-
-function transport_drone:clear_mining_target()
-  if self.mining_target and self.mining_target.valid then
-    if self.depot then
-      self.depot:add_mining_target(self.mining_target)
-    end
-  end
-  self.mining_target = nil
-end
-
-function transport_drone:clear_depot(unit_number)
-  if not self.depot then return end
-  self.depot.drones[unit_number or self.entity.unit_number] = nil
-  self.depot = nil
-end
-
 function transport_drone:handle_drone_deletion()
-  if not self.entity.valid then error("Hi, i am not handled.") end
+  self:say("D")
 
-  if self.depot then
-    self.depot:remove_drone(self, true)
+  if self.requested_count then
+    self.supply_depot.to_be_taken[self.requested_name] = self.supply_depot.to_be_taken[self.requested_name] - self.requested_count
+    self.request_depot.on_the_way = self.request_depot.on_the_way - self.requested_count
   end
 
-  self:clear_things()
+  if self.held_count then
+    self.request_depot.on_the_way = self.request_depot.on_the_way - self.held_count
+  end
 
-end
+  if self.request_depot.entity.valid then
+    self.request_depot:remove_drone(self, true)
+  end
 
-function transport_drone:is_returning_to_depot()
-  return self.state == states.return_to_depot
+  remove_drone(self)
+  
 end
 
 local on_ai_command_completed = function(event)
@@ -503,84 +358,18 @@ local on_entity_removed = function(event)
   local unit_number = entity.unit_number
   if not unit_number then return end
 
-  local drone = get_drone(unit_number)
+  local drone = get_drone(tostring(unit_number))
   if not drone then return end
-
-  if event.force and event.force.valid then
-    event.force.kill_count_statistics.on_flow(default_bot_name, 1)
-  end
-
-  entity.force.kill_count_statistics.on_flow(default_bot_name, -1)
 
   drone:handle_drone_deletion()
 
 end
 
-function transport_drone:remove_from_list(unit_number)
-  if unit_number then
-    script_data.drones[unit_number] = nil
-  else
-    remove_drone(self)
-  end
-end
-
 local make_unselectable = function()
   if remote.interfaces["unit_control"] then
-    for k = 1, shared.variation_count do
-      remote.call("unit_control", "register_unit_unselectable", shared.drone_name.."-"..k)
-    end
+    remote.call("unit_control", "register_unit_unselectable", "transport-drone")
   end
 end
-
-local validate_proxy_orders = function()
-  --local count = 0
-  for unit_number, drone in pairs (script_data.drones) do
-    if drone.entity.valid then
-      if drone.state == states.mining_entity then
-        if not drone.attack_proxy.valid then
-          drone:return_to_depot()
-          ---count = count + 1
-        end
-      end
-    else
-      drone:clear_things(unit_number)
-    end
-  end
-  --game.print(count)
-end
-
-local fix_chests = function()
-  local used_chests = {}
-
-  for unit_number, drone in pairs (script_data.drones) do
-    if drone.inventory and drone.inventory.valid then
-      used_chests[drone.inventory.entity_owner.unit_number] = true
-    end
-  end
-
-  local count = 0
-  for k, chest in pairs (game.surfaces[1].find_entities_filtered{name = shared.proxy_chest_name}) do
-    if not used_chests[chest.unit_number] then
-      chest.destroy()
-      count = count + 1
-    end
-  end
-  game.print("Mining drone migration: fixed chest count "..count)
-end
-
-local migrate_chests = function()
-  game.print("Mining drone removing proxy inventories.")
-  for unit_number, drone in pairs (script_data.drones) do
-    if drone.inventory and drone.inventory.valid then
-      local contents = drone.inventory.get_contents()
-      local name, count = next(contents)
-      drone.stack = {name = name, count = count}
-      drone.inventory.entity_owner.destroy()
-      drone.inventory = nil
-    end
-  end
-end
-
 
 
 transport_drone.events =
@@ -614,17 +403,6 @@ end
 
 transport_drone.on_configuration_changed = function()
   make_unselectable()
-  validate_proxy_orders()
-  
-  if not script_data.fix_chests then
-    script_data.fix_chests = true
-    fix_chests()
-  end
-
-  if not script_data.migrate_chests then
-    script_data.migrate_chests = true
-    migrate_chests()
-  end
 end
 
 transport_drone.get_drone = get_drone

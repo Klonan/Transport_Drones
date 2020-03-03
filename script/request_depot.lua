@@ -1,6 +1,8 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
+local request_spawn_timeout = 61
+
 local script_data = 
 {
   request_depots = {}
@@ -40,7 +42,9 @@ function request_depot.new(entity)
     index = tostring(machine.unit_number),
     on_the_way = 0,
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
-    item = false
+    item = false,
+    drones = {},
+    last_spawn_tick = 0
   }
   setmetatable(depot, depot_metatable)
 
@@ -55,7 +59,6 @@ function request_depot:check_request_change()
 
   if self.item then
     self:remove_from_network()
-    --cancel shit?
   end
 
   self.item = requested_item
@@ -76,22 +79,49 @@ function request_depot:get_stack_size()
   return game.item_prototypes[self.item].stack_size
 end
 
+function request_depot:get_output_inventory()
+  return self.entity.get_output_inventory()
+end
+
 function request_depot:get_needed_item_count()
   local stack_size = self:get_stack_size()
   local needed = 100 * stack_size
   needed = needed - self.on_the_way
-  return needed
+  return needed - self:get_output_inventory().get_item_count(self.item)
+end
+
+function request_depot:get_drone_inventory()
+  return self.entity.get_inventory(defines.inventory.assembling_machine_input)
+end
+
+function request_depot:get_active_drone_count()
+  return table_size(self.drones)
+end
+
+function request_depot:can_spawn_drone()
+  if game.tick - self.last_spawn_tick <= request_spawn_timeout then return end
+  return self:get_drone_item_count() > self:get_active_drone_count()
+end
+
+function request_depot:get_drone_item_count()
+  return self.entity.get_item_count("transport-drone")
 end
 
 function request_depot:handle_offer(supply_depot, name, count)
+
+  if not self:can_spawn_drone() then return 0 end
+
   local needed_count = self:get_needed_item_count()
   needed_count = math.min(needed_count, self:get_stack_size(), count)
 
-  if math.random() < 0.5 then return 0 end
+  if needed_count <= 0 then return 0 end
 
   self.on_the_way = self.on_the_way + needed_count
 
   local drone = transport_drone.new(self, supply_depot, name, needed_count)
+  self.drones[drone.index] = drone
+  self.last_spawn_tick = game.tick
+  self:update_sticker()
 
   return needed_count
 end
@@ -99,6 +129,37 @@ end
 function request_depot:take_item(name, count)
   self.on_the_way = self.on_the_way - count
   self.entity.get_output_inventory().insert({name = name, count = count})
+end
+
+function request_depot:remove_drone(drone, remove_item)
+  self.drones[drone.index] = nil
+  if remove_item then
+    self:get_drone_inventory().remove{name = "transport-drone", count = 1}
+  end
+  self:update_sticker()
+end
+
+function request_depot:update_sticker()
+
+  if self.rendering and rendering.is_valid(self.rendering) then
+    rendering.set_text(self.rendering, self:get_active_drone_count().."/"..self:get_drone_item_count())
+    return
+  end
+
+  if not self.item then return end
+
+  self.rendering = rendering.draw_text
+  {
+    surface = self.entity.surface.index,
+    target = self.entity,
+    text = self:get_active_drone_count().."/"..self:get_drone_item_count(),
+    only_in_alt_mode = true,
+    forces = {self.entity.force},
+    color = {r = 1, g = 1, b = 1},
+    alignment = "center",
+    scale = 1.5
+  }
+
 end
 
 

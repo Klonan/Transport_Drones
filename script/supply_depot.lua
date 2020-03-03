@@ -107,6 +107,7 @@ function supply_depot:add_to_network()
 end
 
 function supply_depot:on_removed()
+  self:remove_from_node()
   self:remove_from_network()
   self.corpse.destroy()
   script_data.supply_depots[self.index] = nil
@@ -160,7 +161,7 @@ lib.events =
 
 lib.on_nth_tick =
 {
-  [60] = update_depots
+  [1] = update_depots
 }
 
 lib.on_init = function()

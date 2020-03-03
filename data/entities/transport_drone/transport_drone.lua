@@ -3,7 +3,7 @@ local name = "transport-drone"
 local sprite_base = util.copy(data.raw.car.tank)
 
 util.recursive_hack_make_hr(sprite_base)
-util.recursive_hack_scale(sprite_base, 0.33)
+util.recursive_hack_scale(sprite_base, 0.4)
 --[[
 
   for k, layer in pairs (sprite_base.animation.layers) do
@@ -148,7 +148,7 @@ local unit =
   },
   vision_distance = 40,
   has_belt_immunity = true,
-  movement_speed = 0.10,
+  movement_speed = 0.05,
   distance_per_frame = 0.15,
   pollution_to_join_attack = 1000,
   rotation_speed = 1 / (60 * 1),
@@ -174,10 +174,11 @@ local item =
   subgroup = "transport",
   order = "e-"..name,
   stack_size = 10,
-  place_result = name
+  --place_result = name
 }
 
-local recipe = {
+local recipe =
+{
   type = "recipe",
   name = name,
   localised_name = {name},
