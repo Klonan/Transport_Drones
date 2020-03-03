@@ -79,25 +79,23 @@ local get_neighbor_count = function(surface, x, y)
 end
 
 local recursive_connection_check
-recursive_connection_check = function(surface, x, y, tx, ty, checked, n)
+recursive_connection_check = function(surface, x, y, target_node, checked)
 
   local node = get_node(surface, x, y)
   if not node then return end
 
   if checked[node] then return end
-
   checked[node] = true
 
-  n = n + 1 
-  
-  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = n}
-
-  if x == tx and y == ty then return true end
+  if node == target_node then
+    return true
+  end
 
   for k, offset in pairs (neighbor_offsets) do
     local nx, ny = x + offset[1], y + offset[2]
-    local result = recursive_connection_check(surface, nx, ny, tx, ty, checked, n)
-    if result then return true end
+    if recursive_connection_check(surface, nx, ny, target_node, checked) then
+      return true
+    end
   end
 end
 
@@ -214,7 +212,7 @@ road_network.remove_node = function(surface, x, y)
       if not fx then
         fx, fy = nx, ny 
       else
-        if not (recursive_connection_check(surface, fx, fy, nx, ny, {}, 0)) then              
+        if not (recursive_connection_check(surface, fx, fy, neighbor, {})) then              
           recursive_set_id(surface, nx, ny, new_id()) 
         end
       end
