@@ -128,6 +128,15 @@ recursive_set_id = function(surface, x, y, id)
 
 end
 
+local rebuild_network_from_node = function(surface, x, y)
+  local node = get_node(surface, x, y)
+
+  local old_network = get_network_by_id(node.id)
+  if not old_network then
+    game.print("HUH? no old network when trying to rebuild network")
+  end
+end
+
 local road_network = {}
 
 road_network.add_node = function(surface, x, y)
@@ -191,7 +200,11 @@ road_network.remove_node = function(surface, x, y)
   local node = get_node(surface, x, y)
   if not node then return end
 
+  if node.supply and next(node.supply) then return true end
+  if node.requesters and next(node.requesters) then return true end
+
   script_data.node_map[surface][x][y] = nil
+
 
   local count = get_neighbor_count(surface, x, y)
   if count == 1 then
@@ -210,6 +223,9 @@ road_network.remove_node = function(surface, x, y)
       else
         if not (recursive_connection_check(surface, fx, fy, nx, ny, {}, 0)) then
           game.print("Gonna split the networks bois.")
+          if neighbor.id ~= node.id then
+            rebuild_network_from_node(surface, nx, ny)
+          end
         end
       end
     end
@@ -223,6 +239,7 @@ road_network.get_network = function(surface, x, y)
 
   return get_network_by_id(node.id)
 end
+
 
 road_network.add_supply_depot = function(depot)
   local x, y = depot.node_position[1], depot.node_position[2]
@@ -270,11 +287,8 @@ road_network.add_request_depot = function(depot, item_name)
   item_map[depot.index] = depot
 
   game.print("Added requester to network "..network.id)
+
   return network.id
-end
-
-road_network.remove_request_depot = function(depot, item_name)
-
 end
 
 road_network.get_request_depots = function(id, name)
@@ -289,5 +303,8 @@ end
 road_network.on_load = function()
   script_data = global.road_network or script_data
 end
+
+road_network.get_network_by_id = get_network_by_id
+road_network.get_node = get_node
 
 return road_network

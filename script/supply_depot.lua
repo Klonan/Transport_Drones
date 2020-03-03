@@ -41,8 +41,7 @@ function supply_depot.new(entity)
 
   
   script_data.supply_depots[depot.index] = depot
-
-  depot.network_id = road_network.add_supply_depot(depot)
+  depot:add_to_network()
 
 end
 
@@ -66,6 +65,7 @@ function supply_depot:check_requests_for_item(name, count)
 end
 
 function supply_depot:update()
+  if not self.network_id then return end
   local items = self.entity.get_output_inventory().get_contents()
   for name, count in pairs(items) do
     self:check_requests_for_item(name, count)
@@ -84,6 +84,33 @@ function supply_depot:give_item(requested_name, requested_count)
   return removed_count
 end
 
+function supply_depot:remove_from_network()
+
+  
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.supply[self.index] = nil
+
+  local network = road_network.get_network_by_id(self.network_id)
+
+  local supply = network.supply
+
+  supply[self.index] = nil
+
+  self.network_id = nil
+
+end
+
+function supply_depot:add_to_network()
+  self.network_id = road_network.add_supply_depot(self)
+end
+
+function supply_depot:on_removed()
+  self:remove_from_network()
+  self.corpse.destroy()
+  script_data.supply_depots[self.index] = nil
+  game.print("ded")
+end
+
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
@@ -99,11 +126,36 @@ local update_depots = function(event)
   end
 end
 
+local on_entity_removed = function(event)
+  local entity = event.entity
+  game.print("heya")
+
+  if not (entity and entity.valid) then return end
+
+  if entity.name ~= "supply-depot-chest" then return end
+
+  local index = tostring(entity.unit_number)
+  local depot = script_data.supply_depots[index]
+  if depot then
+    depot:on_removed()
+  end
+
+end
+
 local lib = {}
 
 lib.events =
 {
-  [defines.events.on_built_entity] = on_created_entity
+  [defines.events.on_built_entity] = on_created_entity,
+  [defines.events.on_robot_built_entity] = on_created_entity,
+  [defines.events.script_raised_built] = on_created_entity,
+  [defines.events.script_raised_revive] = on_created_entity,
+
+  [defines.events.on_entity_died] = on_entity_removed,
+  [defines.events.on_robot_mined_entity] = on_entity_removed,
+  [defines.events.script_raised_destroy] = on_entity_removed,
+  [defines.events.on_player_mined_entity] = on_entity_removed
+
 }
 
 lib.on_nth_tick =

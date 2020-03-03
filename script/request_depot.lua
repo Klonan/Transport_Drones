@@ -3,8 +3,7 @@ local road_network = require("script/road_network")
 
 local script_data = 
 {
-  request_depots = {},
-  item_map = {}
+  request_depots = {}
 }
 
 local request_depot = {}
@@ -41,6 +40,7 @@ function request_depot.new(entity)
     index = tostring(machine.unit_number),
     on_the_way = 0,
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
+    item = false
   }
   setmetatable(depot, depot_metatable)
 
@@ -54,21 +54,15 @@ function request_depot:check_request_change()
   if self.item == requested_item then return end
 
   if self.item then
-    road_network.remove_request_depot(depot, self.item)
-    --cancel shit...
+    self:remove_from_network()
+    --cancel shit?
   end
 
   self.item = requested_item
 
   if not self.item then return end
 
-  road_network.add_request_depot(self, self.item)
-
-  if not script_data.item_map[self.item] then
-    script_data.item_map[self.item] = {}
-  end
-
-  --script_data.item_map[self.item][self.index] = self
+  self:add_to_network()
 
 end
 
@@ -107,6 +101,33 @@ function request_depot:take_item(name, count)
   self.entity.get_output_inventory().insert({name = name, count = count})
 end
 
+function request_depot:add_to_network()
+  self.network_id = road_network.add_request_depot(self, self.item)
+end
+
+function request_depot:remove_from_network()
+
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.requesters[self.index] = nil
+  
+  local network = road_network.get_network_by_id(self.network_id)
+
+  local requesters = network.requesters
+
+  requesters[self.item][self.index] = nil
+
+  self.network_id = nil
+
+end
+
+
+function request_depot:on_removed()
+  self:remove_from_network()
+  self.corpse.destroy()
+  script_data.request_depots[self.index] = nil
+  game.print("ded")
+end
+
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
@@ -123,11 +144,34 @@ local check_request_change = function(event)
   end
 end
 
+local on_entity_removed = function(event)
+  local entity = event.entity
+
+  if not (entity and entity.valid) then return end
+
+  if entity.name ~= "request-depot-machine" then return end
+
+  local index = tostring(entity.unit_number)
+  local depot = script_data.request_depots[index]
+  if depot then
+    depot:on_removed()
+  end
+
+end
+
 local lib = {}
 
 lib.events =
 {
-  [defines.events.on_built_entity] = on_created_entity
+  [defines.events.on_built_entity] = on_created_entity,
+  [defines.events.on_robot_built_entity] = on_created_entity,
+  [defines.events.script_raised_built] = on_created_entity,
+  [defines.events.script_raised_revive] = on_created_entity,
+
+  [defines.events.on_entity_died] = on_entity_removed,
+  [defines.events.on_robot_mined_entity] = on_entity_removed,
+  [defines.events.script_raised_destroy] = on_entity_removed,
+  [defines.events.on_player_mined_entity] = on_entity_removed
 }
 
 lib.on_nth_tick =

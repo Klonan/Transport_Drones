@@ -3,6 +3,8 @@ local tile = util.copy(data.raw.tile["stone-path"])
 tile.name = "transport-drone-road"
 tile.tint = {0.5, 0.5, 0.5}
 tile.collision_mask = shared.tile_collision_mask
+tile.minable.result = "road"
+tile.layer = 150
 
 local proxy_tile = util.copy(data.raw.tile["stone-path"])
 
