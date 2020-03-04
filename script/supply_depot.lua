@@ -143,6 +143,18 @@ local on_entity_removed = function(event)
 
 end
 
+local on_player_setup_blueprint = function(event)
+  local player = game.get_player(event.player_index)
+  if player then
+    
+  end
+  for k, entity in pairs (event.mapping.get()) do
+    if entity.name == "supply-depot-chest" then
+      game.print("hi")
+    end
+  end
+end
+
 local lib = {}
 
 lib.events =
@@ -155,7 +167,10 @@ lib.events =
   [defines.events.on_entity_died] = on_entity_removed,
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
-  [defines.events.on_player_mined_entity] = on_entity_removed
+  [defines.events.on_player_mined_entity] = on_entity_removed,
+  
+  [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
+
 
 }
 
