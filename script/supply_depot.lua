@@ -145,14 +145,27 @@ end
 
 local on_player_setup_blueprint = function(event)
   local player = game.get_player(event.player_index)
-  if player then
-    
-  end
+  if not player then return end
+  
   for k, entity in pairs (event.mapping.get()) do
     if entity.name == "supply-depot-chest" then
       game.print("hi")
     end
   end
+
+  local stack = player.cursor_stack
+  if stack.valid_for_read then
+    --He has a blueprint! Set the entities here.
+    return
+  end
+
+  --Oh no, he doesn't have a blueprint, he will confirm it later. save the data to global.
+  
+  
+end
+
+local on_player_configured_blueprint = function(event)
+  game.print("configured")
 end
 
 local lib = {}
@@ -170,6 +183,7 @@ lib.events =
   [defines.events.on_player_mined_entity] = on_entity_removed,
   
   [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
+  [defines.events.on_player_configured_blueprint] = on_player_configured_blueprint,
 
 
 }
