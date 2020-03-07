@@ -85,7 +85,7 @@ end
 
 function request_depot:get_needed_item_count()
   local stack_size = self:get_stack_size()
-  local needed = 100 * stack_size
+  local needed = self:get_drone_item_count() * stack_size
   needed = needed - self.on_the_way
   return needed - self:get_output_inventory().get_item_count(self.item)
 end
