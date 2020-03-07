@@ -103,7 +103,7 @@ end
 
 transport_drone.new = function(request_depot, supply_depot, requested_name, requested_count)
 
-  local entity = request_depot.corpse.surface.create_entity{name = "transport-drone", position = request_depot.corpse.position, force = request_depot.entity.force}
+  local entity = request_depot.entity.surface.create_entity{name = "transport-drone", position = request_depot.corpse.position, force = request_depot.entity.force}
   
   local drone =
   {
@@ -115,6 +115,8 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
     index = tostring(entity.unit_number),
     state = states.going_to_supply
   }
+
+  entity.surface.create_entity{name = "drone-slowdown-sticker", position = entity.position, target = entity, force = "neutral"}
 
   entity.ai_settings.path_resolution_modifier = 0
   --entity.speed = (entity.speed + (math.random() * 0.01)) * 0.5
@@ -200,7 +202,9 @@ function transport_drone:process_pickup()
   end
 
   self:update_sticker()
+  self.entity.surface.create_entity{name = "drone-slowdown-sticker", position = self.entity.position, target = self.entity, force = "neutral"}
   self:return_to_requester()
+  
 end
 
 function transport_drone:return_to_requester()

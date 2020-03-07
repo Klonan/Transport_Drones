@@ -183,7 +183,7 @@ local recipe =
   name = name,
   localised_name = {name},
   --category = "transport",
-  enabled = false,
+  enabled = true,
   ingredients =
   {
     {"engine-unit", 10},
@@ -195,5 +195,30 @@ local recipe =
   result = name
 }
 
+local slow_sticker =
+{
+  type = "sticker",
+  name = "drone-slowdown-sticker",
+  --icon = "__base__/graphics/icons/slowdown-sticker.png",
+  flags = {},
+  animation =
+  {
+    filename = "__base__/graphics/entity/slowdown-sticker/slowdown-sticker.png",
+    priority = "extra-high",
+    width = 1,
+    height = 1,
+    frame_count = 1,
+    animation_speed = 1
+  },
+  duration_in_ticks = 30,
+  target_movement_modifier = 0
+}
 
-data:extend{unit, item, recipe, stream, explosion}
+
+data:extend
+{
+  unit,
+  item,
+  recipe,
+  slow_sticker
+}

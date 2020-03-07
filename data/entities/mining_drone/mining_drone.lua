@@ -37,6 +37,11 @@ local recipe = {
   result = name
 }
 
+local slow_sticker = 
+{
+  
+}
+
 data:extend
 {
   item,
