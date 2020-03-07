@@ -1,7 +1,7 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
-local request_spawn_timeout = 61
+local request_spawn_timeout = 37
 
 local script_data = 
 {
@@ -111,10 +111,14 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   if not self:can_spawn_drone() then return 0 end
 
-  local needed_count = self:get_needed_item_count()
-  needed_count = math.min(needed_count, self:get_stack_size(), count)
+  local stack_size = self:get_stack_size()
+  local current_count = self:get_output_inventory().get_item_count(self.item)
+  local max_count = self:get_drone_item_count()
+  local drone_spawn_count = max_count - math.floor(current_count / stack_size)
+  if (drone_spawn_count - self:get_active_drone_count()) <= 0 then return 0 end
 
-  if needed_count <= 0 then return 0 end
+  --Just assume we will always try to take a whole stack.
+  local needed_count = self:get_stack_size()
 
   self.on_the_way = self.on_the_way + needed_count
 
@@ -192,6 +196,7 @@ end
 
 function request_depot:on_removed()
   self:remove_from_network()
+  self:remove_from_node()
   self.corpse.destroy()
   script_data.request_depots[self.index] = nil
 end

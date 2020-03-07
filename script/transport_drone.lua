@@ -190,7 +190,7 @@ end
 
 function transport_drone:process_pickup()
   local supply_depot = self.supply_depot
-  local given_count = supply_depot:give_item(self.requested_name, self.requested_count)
+  local given_count = supply_depot:give_item(self.requested_name, self.request_depot:get_stack_size())
 
   self.request_depot.on_the_way = self.request_depot.on_the_way - self.requested_count
   self.request_depot.on_the_way = self.request_depot.on_the_way + given_count

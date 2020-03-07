@@ -101,7 +101,7 @@ local unit =
   order="i-d",
   subgroup = "transport",
   healing_per_tick = 0,
-  minable = {result = name, mining_time = 2},
+  --minable = {result = name, mining_time = 2},
   collision_box = {{-0.19, -0.19}, {0.19, 0.19}},
   selection_box = {{-0.3, -0.3}, {0.3, 0.3}},
   collision_mask = shared.drone_collision_mask,
