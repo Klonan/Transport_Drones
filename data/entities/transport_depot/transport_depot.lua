@@ -216,7 +216,7 @@ local supply_depot_chest =
   collision_box = {{-1.4, -1.4}, {1.4, 1.4}},
   fast_replaceable_group = "container",
   selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
-  inventory_size = 39,
+  inventory_size = 100,
   open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.5 },
   close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.5 },
   picture =
