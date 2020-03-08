@@ -78,10 +78,14 @@ function supply_depot:say(string)
 end
 
 function supply_depot:give_item(requested_name, requested_count)
-  self.to_be_taken[requested_name] = self.to_be_taken[requested_name] - requested_count
   local inventory = self.entity.get_output_inventory()
   local removed_count = inventory.remove({name = requested_name, count = requested_count})
   return removed_count
+end
+
+function supply_depot:remove_to_be_taken(name, count)
+  if not name and count then return end
+  self.to_be_taken[name] = self.to_be_taken[name] - count
 end
 
 function supply_depot:remove_from_network()

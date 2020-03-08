@@ -101,7 +101,7 @@ local product_amount = function(product)
 end
 
 
-transport_drone.new = function(request_depot, supply_depot, requested_name, requested_count)
+transport_drone.new = function(request_depot, supply_depot, requested_name)
 
   local entity = request_depot.entity.surface.create_entity{name = "transport-drone", position = request_depot.corpse.position, force = request_depot.entity.force}
   
@@ -191,6 +191,9 @@ function transport_drone:process_pickup()
     self:return_to_requester()
     return
   end
+
+  self.supply_depot:remove_to_be_taken(self.request_depot.item, self.request_depot:get_stack_size())
+
   local given_count = self.supply_depot:give_item(self.request_depot.item, self.request_depot:get_stack_size())
 
   if given_count > 0 then
@@ -269,15 +272,12 @@ end
 function transport_drone:suicide()
   self:say("S")
 
-  if self.requested_count then
-    self.supply_depot.to_be_taken[self.requested_name] = self.supply_depot.to_be_taken[self.requested_name] - self.requested_count
-  end
+  self:clear_drone_data()
 
   if self.request_depot.entity.valid then
     self.request_depot:remove_drone(self)
   end
 
-  remove_drone(self)
   self.entity.die()
 end
 
@@ -342,18 +342,23 @@ function transport_drone:go_to_entity(entity, radius)
   }
 end
 
-function transport_drone:handle_drone_deletion()
-  self:say("D")
-
-  if self.requested_count then
-    self.supply_depot.to_be_taken[self.requested_name] = self.supply_depot.to_be_taken[self.requested_name] - self.requested_count
+function transport_drone:clear_drone_data()
+  if self.state == states.going_to_supply then
+    self.supply_depot:remove_to_be_taken(self.request_depot.item, self.request_depot:get_stack_size())
   end
+  remove_drone(self)
+end
+
+function transport_drone:handle_drone_deletion()
+  if self.entity.valid then
+    self:say("D")
+  end
+
+  self:clear_drone_data()
 
   if self.request_depot.entity.valid then
     self.request_depot:remove_drone(self, true)
   end
-
-  remove_drone(self)
   
 end
 

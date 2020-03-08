@@ -58,7 +58,8 @@ function request_depot:check_drone_validity()
   if not index then return end
 
   if not drone.entity.valid then
-    self.drones[index] = nil
+    drone:clear_drone_data()
+    self:remove_drone(drone)
     self:update_sticker()
   end
 end
