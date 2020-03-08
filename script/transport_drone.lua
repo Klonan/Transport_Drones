@@ -110,8 +110,6 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
     entity = entity,
     request_depot = request_depot,
     supply_depot = supply_depot,
-    requested_name = requested_name,
-    requested_count = requested_count,
     index = tostring(entity.unit_number),
     state = states.going_to_supply
   }
@@ -119,7 +117,7 @@ transport_drone.new = function(request_depot, supply_depot, requested_name, requ
   entity.surface.create_entity{name = "drone-slowdown-sticker", position = entity.position, target = entity, force = "neutral"}
 
   entity.ai_settings.path_resolution_modifier = 0
-  --entity.speed = (entity.speed + (math.random() * 0.01)) * 0.5
+  entity.speed = entity.speed * 2
   
   setmetatable(drone, transport_drone.metatable)
 
@@ -177,7 +175,7 @@ function transport_drone:process_failed_command()
   end
 
   if self.state == states.return_to_requester then
-    self.entity.die()
+    self:suicide()
     return
   end
 
@@ -189,19 +187,18 @@ function transport_drone:distance(position)
 end
 
 function transport_drone:process_pickup()
-  local supply_depot = self.supply_depot
-  local given_count = supply_depot:give_item(self.requested_name, self.request_depot:get_stack_size())
-
-  self.request_depot.on_the_way = self.request_depot.on_the_way - self.requested_count
-  self.request_depot.on_the_way = self.request_depot.on_the_way + given_count
-
-  self.requested_count = nil
+  if not self.request_depot.item then
+    self:return_to_requester()
+    return
+  end
+  local given_count = self.supply_depot:give_item(self.request_depot.item, self.request_depot:get_stack_size())
 
   if given_count > 0 then
+    self.held_item = self.request_depot.item
     self.held_count = given_count
+    self:update_sticker()
   end
 
-  self:update_sticker()
   self.entity.surface.create_entity{name = "drone-slowdown-sticker", position = self.entity.position, target = self.entity, force = "neutral"}
   self:return_to_requester()
   
@@ -238,7 +235,7 @@ function transport_drone:update_sticker()
     self.item_rendering = nil
   end
 
-  if not self.held_count then
+  if not self.held_item then
     return
   end
 
@@ -256,7 +253,7 @@ function transport_drone:update_sticker()
 
   self.item_rendering = rendering.draw_sprite
   {
-    sprite = "item/"..self.requested_name,
+    sprite = "item/"..self.held_item,
     target = self.entity,
     surface = self.entity.surface,
     forces = {self.entity.force},
@@ -269,16 +266,32 @@ function transport_drone:update_sticker()
 
 end
 
+function transport_drone:suicide()
+  self:say("S")
+
+  if self.requested_count then
+    self.supply_depot.to_be_taken[self.requested_name] = self.supply_depot.to_be_taken[self.requested_name] - self.requested_count
+  end
+
+  if self.request_depot.entity.valid then
+    self.request_depot:remove_drone(self)
+  end
+
+  remove_drone(self)
+  self.entity.die()
+end
+
 function transport_drone:process_return_to_requester()
 
   if not self.request_depot.entity.valid then
-    self.entity.die()
+    self:suicide()
     return
   end
 
-  if self.held_count then
-    self.request_depot:take_item(self.requested_name, self.held_count)
+  if self.held_item then
+    self.request_depot:take_item(self.held_item, self.held_count)
   end
+
   self.request_depot:remove_drone(self)
   self.entity.destroy()
   remove_drone(self)
@@ -334,11 +347,6 @@ function transport_drone:handle_drone_deletion()
 
   if self.requested_count then
     self.supply_depot.to_be_taken[self.requested_name] = self.supply_depot.to_be_taken[self.requested_name] - self.requested_count
-    self.request_depot.on_the_way = self.request_depot.on_the_way - self.requested_count
-  end
-
-  if self.held_count then
-    self.request_depot.on_the_way = self.request_depot.on_the_way - self.held_count
   end
 
   if self.request_depot.entity.valid then

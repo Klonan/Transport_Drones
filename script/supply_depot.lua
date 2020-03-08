@@ -164,6 +164,28 @@ local on_player_setup_blueprint = function(event)
   
 end
 
+local update_next_depot = function()
+  local index = script_data.last_update_index
+  local depots = script_data.supply_depots
+  if index and not depots[index] then
+    index = nil
+  end
+  local update_depot
+  index, update_depot = next(depots, index)
+  script_data.last_update_index = index
+  if not index then
+    return
+  end
+  update_depot:update()
+  --update_depot:say("U")
+end
+
+local on_tick = function(event)
+  --for k = 1, 20 do
+    update_next_depot()
+  --end
+end
+
 local on_player_configured_blueprint = function(event)
   game.print("configured")
 end
@@ -184,13 +206,14 @@ lib.events =
   
   [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
   [defines.events.on_player_configured_blueprint] = on_player_configured_blueprint,
-
-
+  
+  [defines.events.on_tick] = on_tick,
+  
 }
 
 lib.on_nth_tick =
 {
-  [1] = update_depots
+  --[1] = update_depots
 }
 
 lib.on_init = function()

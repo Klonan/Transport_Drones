@@ -1,7 +1,7 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
-local request_spawn_timeout = 37
+local request_spawn_timeout = 10
 
 local script_data = 
 {
@@ -53,12 +53,29 @@ function request_depot.new(entity)
 
 end
 
+function request_depot:update()
+  self:check_request_change()
+  local index, drone = next(self.drones)
+  if not index then return end
+  if not drone.entity.valid then
+    self.drones[index] = nil
+    self:update_sticker()
+  end
+end
+
+function request_depot:suicide_all_drones()
+  for k, drone in pairs (self.drones) do
+    drone:suicide()
+  end
+end
+
 function request_depot:check_request_change()
   local requested_item = self:get_requested_item()
   if self.item == requested_item then return end
 
   if self.item then
     self:remove_from_network()
+    self:suicide_all_drones()
   end
 
   self.item = requested_item
@@ -197,6 +214,7 @@ end
 function request_depot:on_removed()
   self:remove_from_network()
   self:remove_from_node()
+  self:suicide_all_drones()
   self.corpse.destroy()
   script_data.request_depots[self.index] = nil
 end
@@ -209,12 +227,6 @@ local on_created_entity = function(event)
 
   request_depot.new(entity)
 
-end
-
-local check_request_change = function(event)
-  for k, request_depot in pairs (script_data.request_depots) do
-    request_depot:check_request_change()
-  end
 end
 
 local on_entity_removed = function(event)
@@ -232,6 +244,27 @@ local on_entity_removed = function(event)
 
 end
 
+
+local update_next_depot = function()
+  local index = script_data.last_update_index
+  local depots = script_data.request_depots
+  if index and not depots[index] then
+    index = nil
+  end
+  local update_depot
+  index, update_depot = next(depots, index)
+  script_data.last_update_index = index
+  if not index then
+    return
+  end
+  update_depot:update()
+  --update_depot:say("U")
+end
+
+local on_tick = function(event)
+  update_next_depot()
+end
+
 local lib = {}
 
 lib.events =
@@ -244,12 +277,15 @@ lib.events =
   [defines.events.on_entity_died] = on_entity_removed,
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
-  [defines.events.on_player_mined_entity] = on_entity_removed
+  [defines.events.on_player_mined_entity] = on_entity_removed,
+  
+  [defines.events.on_tick] = on_tick
+
 }
 
 lib.on_nth_tick =
 {
-  [237] = check_request_change
+  --[237] = check_request_change
 }
 
 
