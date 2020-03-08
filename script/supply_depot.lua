@@ -84,8 +84,9 @@ function supply_depot:give_item(requested_name, requested_count)
 end
 
 function supply_depot:remove_to_be_taken(name, count)
-  if not name and count then return end
+  if not (name and count) then return end
   self.to_be_taken[name] = self.to_be_taken[name] - count
+  --self:say(self.to_be_taken[name])
 end
 
 function supply_depot:remove_from_network()
