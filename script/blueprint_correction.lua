@@ -30,6 +30,7 @@ local determine_direction = function(depot)
 end
 
 local correct_blueprint = function(stack, correction_data)
+  if not correction_data then return end
   game.print("correcting blueprint")
   local entities = stack.get_blueprint_entities()
   if not entities then return end
@@ -39,6 +40,24 @@ local correct_blueprint = function(stack, correction_data)
     entity.direction = correction.direction
   end
   stack.set_blueprint_entities(entities)
+end
+
+local tile_correction = 
+{
+  ["transport-drone-road"] = "transport-drone-proxy-tile"
+}
+
+local correct_tiles = function(stack)
+  game.print("correcting tiles")
+  local tiles = stack.get_blueprint_tiles()
+  if not tiles then return end
+
+  for k, tile in pairs (tiles) do
+    tile.name = tile_correction[tile.name] or tile.name
+  end
+
+  stack.set_blueprint_tiles(tiles)
+
 end
 
 local name_correction = 
@@ -51,6 +70,8 @@ local on_player_setup_blueprint = function(event)
   local player = game.get_player(event.player_index)
   if not player then return end
   
+  script_data.blueprint_correction_data[event.player_index] = nil
+
   local depots = script_data.supply_depots
   local blueprint_correction_data = {}
   for k, entity in pairs (event.mapping.get()) do
@@ -64,13 +85,13 @@ local on_player_setup_blueprint = function(event)
   end
 
   if not next(blueprint_correction_data) then
-    script_data.blueprint_correction_data[player.index] = nil
-    return
+    blueprint_correction_data = nil
   end
 
   local stack = player.cursor_stack
   if stack.valid_for_read then
     correct_blueprint(stack, blueprint_correction_data)
+    correct_tiles(stack)
     --He has a blueprint! Set the entities here.
     return
   end
@@ -81,13 +102,11 @@ local on_player_setup_blueprint = function(event)
 end
 
 local on_player_configured_blueprint = function(event)
-  local correction_data = script_data.blueprint_correction_data[event.player_index]
-  if not correction_data then return end
-
   local player = game.get_player(event.player_index)
   local stack = player.cursor_stack
   if stack.valid_for_read and stack.is_blueprint then
-    correct_blueprint(stack, correction_data)
+    correct_blueprint(stack, script_data.blueprint_correction_data[event.player_index])
+    correct_tiles(stack)
   end
 
 end

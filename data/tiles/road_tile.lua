@@ -5,6 +5,7 @@ tile.tint = {0.5, 0.5, 0.5}
 tile.collision_mask = shared.tile_collision_mask
 tile.minable.result = "road"
 tile.layer = 150
+tile.placeable_by = {{item   = "road", count = 60000}}
 
 local proxy_tile = util.copy(data.raw.tile["stone-path"])
 
