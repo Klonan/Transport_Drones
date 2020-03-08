@@ -50,6 +50,7 @@ function request_depot.new(entity)
 
   script_data.request_depots[depot.index] = depot
 
+  depot:add_to_node()
 
 end
 
@@ -60,20 +61,19 @@ function request_depot:check_drone_validity()
   if not drone.entity.valid then
     drone:clear_drone_data()
     self:remove_drone(drone)
-    self:update_sticker()
   end
 end
 
 function request_depot:update()
   self:check_request_change()
   self:check_drone_validity()
+  self:update_sticker()
 end
 
 function request_depot:suicide_all_drones()
   for k, drone in pairs (self.drones) do
     drone:suicide()
   end
-  self:update_sticker()
 end
 
 function request_depot:check_request_change()
@@ -86,9 +86,9 @@ function request_depot:check_request_change()
   end
 
   self.item = requested_item
-
+  
   if not self.item then return end
-
+  
   self:add_to_network()
 
 end
@@ -195,6 +195,17 @@ function request_depot:say(string)
   self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
 end
 
+function request_depot:add_to_node()
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.depots = node.depots or {}
+  node.depots[self.index] = self
+end
+
+function request_depot:remove_from_node()
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.depots[self.index] = nil
+end
+
 function request_depot:add_to_network()
   self:say("Adding to network")
   self.network_id = road_network.add_request_depot(self, self.item)
@@ -211,12 +222,6 @@ function request_depot:remove_from_network()
   self.network_id = nil
 
 end
-
-function request_depot:remove_from_node()
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.requesters[self.index] = nil
-end
-
 
 function request_depot:on_removed()
   self:remove_from_network()
@@ -309,6 +314,10 @@ end
 
 lib.get_depots_for_item = function(item)
   return script_data.item_map[item]
+end
+
+lib.get_depot = function(entity)
+  return script_data.request_depots[tostring(entity.unit_number)]
 end
 
 return lib

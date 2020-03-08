@@ -110,20 +110,13 @@ recursive_set_id = function(surface, x, y, id)
 
   node.id = id
 
-  if node.supply then
-    for k, depot in pairs (node.supply) do
+  if node.depots then
+    for k, depot in pairs (node.depots) do
       depot:remove_from_network()
       depot:add_to_network()
     end
   end
 
-  if node.requesters then
-    for k, depot in pairs (node.requesters) do
-      depot:remove_from_network()
-      depot:add_to_network()
-    end
-  end
-  
   for k, offset in pairs (neighbor_offsets) do
     recursive_set_id(surface, x + offset[1], y + offset[2], id)
   end
@@ -191,11 +184,9 @@ road_network.remove_node = function(surface, x, y)
   local node = get_node(surface, x, y)
   if not node then return end
 
-  if node.supply and next(node.supply) then return true end
-  if node.requesters and next(node.requesters) then return true end
+  if node.depots and next(node.depots) then return true end
 
   script_data.node_map[surface][x][y] = nil
-
 
   local count = get_neighbor_count(surface, x, y)
   if count == 1 then
@@ -233,21 +224,9 @@ road_network.add_supply_depot = function(depot)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
   local node = get_node(surface, x, y)
-  if not node then
-    game.print("Oh no node for add supply??")
-    return
-  end
-
-  
-  
-  node.supply = node.supply or {}
-  node.supply[depot.index] = depot
 
   local network = get_network_by_id(node.id)
   network.supply[depot.index] = depot
-
-  
-  --game.print("Added supply to network "..network.id)
 
   return network.id
 end
@@ -256,13 +235,6 @@ road_network.add_request_depot = function(depot, item_name)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
   local node = get_node(surface, x, y)
-  if not node then
-    game.print("Oh no node for add requester??")
-    return
-  end
-
-  node.requesters = node.requesters or {}
-  node.requesters[depot.index] = depot
 
   local network = get_network_by_id(node.id)
 
@@ -273,8 +245,6 @@ road_network.add_request_depot = function(depot, item_name)
   end
 
   item_map[depot.index] = depot
-
-  --game.print("Added requester to network "..network.id)
 
   return network.id
 end

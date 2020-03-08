@@ -3,7 +3,8 @@ local road_network = require("script/road_network")
 
 local script_data = 
 {
-  supply_depots = {}
+  supply_depots = {},
+  blueprint_correction_data = {}
 }
 
 local corpse_offsets = 
@@ -42,6 +43,7 @@ function supply_depot.new(entity)
   
   script_data.supply_depots[depot.index] = depot
   depot:add_to_network()
+  depot:add_to_node()
 
 end
 
@@ -101,9 +103,15 @@ function supply_depot:remove_from_network()
 
 end
 
+function supply_depot:add_to_node()
+  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  node.depots = node.depots or {}
+  node.depots[self.index] = self
+end
+
 function supply_depot:remove_from_node()
   local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.supply[self.index] = nil
+  node.depots[self.index] = nil
 end
 
 function supply_depot:add_to_network()
@@ -148,26 +156,6 @@ local on_entity_removed = function(event)
 
 end
 
-local on_player_setup_blueprint = function(event)
-  local player = game.get_player(event.player_index)
-  if not player then return end
-  
-  for k, entity in pairs (event.mapping.get()) do
-    if entity.name == "supply-depot-chest" then
-      game.print("hi")
-    end
-  end
-
-  local stack = player.cursor_stack
-  if stack.valid_for_read then
-    --He has a blueprint! Set the entities here.
-    return
-  end
-
-  --Oh no, he doesn't have a blueprint, he will confirm it later. save the data to global.
-  
-  
-end
 
 local update_next_depot = function()
   local index = script_data.last_update_index
@@ -191,10 +179,6 @@ local on_tick = function(event)
   --end
 end
 
-local on_player_configured_blueprint = function(event)
-  game.print("configured")
-end
-
 local lib = {}
 
 lib.events =
@@ -209,8 +193,6 @@ lib.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
   
-  [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
-  [defines.events.on_player_configured_blueprint] = on_player_configured_blueprint,
   
   [defines.events.on_tick] = on_tick,
   
@@ -230,6 +212,10 @@ lib.on_load = function()
   for k, depot in pairs (script_data.supply_depots) do
     setmetatable(depot, depot_metatable)
   end
+end
+
+lib.get_depot = function(entity)
+  return script_data.supply_depots[tostring(entity.unit_number)]
 end
 
 return lib
