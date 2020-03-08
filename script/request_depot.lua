@@ -53,20 +53,26 @@ function request_depot.new(entity)
 
 end
 
-function request_depot:update()
-  self:check_request_change()
+function request_depot:check_drone_validity()
   local index, drone = next(self.drones)
   if not index then return end
+
   if not drone.entity.valid then
     self.drones[index] = nil
     self:update_sticker()
   end
 end
 
+function request_depot:update()
+  self:check_request_change()
+  self:check_drone_validity()
+end
+
 function request_depot:suicide_all_drones()
   for k, drone in pairs (self.drones) do
     drone:suicide()
   end
+  self:update_sticker()
 end
 
 function request_depot:check_request_change()
