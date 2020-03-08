@@ -2,7 +2,7 @@
 
 local data = {}
 
-data.tile_collision_mask = {"object-layer"}
+data.tile_collision_mask = {"object-layer", "layer-14"}
 data.drone_collision_mask = {"ground-tile", "not-colliding-with-itself"}
 
 data.drone_name = "mining-drone"

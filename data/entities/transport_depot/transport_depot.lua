@@ -33,10 +33,10 @@ depot.localised_name = {"request-depot"}
 depot.icon = util.path("data/entities/transport_depot/request-depot-icon.png")
 depot.icon_size = 216
 
-depot.collision_mask = { "object-layer", "resource-layer"}
-depot.fluid_box_tile_collision_test = {"object-layer"}
+depot.collision_mask = { "object-layer", "player-layer"}
+depot.fluid_box_tile_collision_test = {"layer-14"}
 depot.center_collision_mask = { "object-layer", "resource-layer"}
-depot.adjacent_tile_collision_test = { "object-layer" }
+depot.adjacent_tile_collision_test = shared.tile_collision_mask
 depot.adjacent_tile_collision_mask = { "ground-tile" }
 depot.adjacent_tile_collision_box = { { -0.4, -2 }, { 0.4, -2.5 } }
 depot.corpse = nil
@@ -174,8 +174,8 @@ supply_depot.fluid_box =
 {
   base_area = 1,
   base_level = 1,
-  pipe_covers = pipecoverspictures(),
-  production_type = "input-output",
+  --pipe_covers = pipecoverspictures(),
+  --production_type = "input-output",
   --filter = "water",
   pipe_connections =
   {
