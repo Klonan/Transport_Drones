@@ -210,8 +210,10 @@ local slow_sticker =
     frame_count = 1,
     animation_speed = 1
   },
-  duration_in_ticks = 30,
-  target_movement_modifier = 0
+  duration_in_ticks = 1 * 60,
+  target_movement_modifier = 1,
+  target_movement_modifier_from = -0.1,
+  target_movement_modifier_to = 1
 }
 
 
