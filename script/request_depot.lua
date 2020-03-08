@@ -100,7 +100,7 @@ function request_depot:get_requested_item()
 end
 
 function request_depot:get_stack_size()
-  return game.item_prototypes[self.item].stack_size
+  return game.item_prototypes[self.item].stack_size * 5
 end
 
 function request_depot:get_output_inventory()

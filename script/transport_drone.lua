@@ -117,7 +117,7 @@ transport_drone.new = function(request_depot, supply_depot, requested_name)
   entity.surface.create_entity{name = "drone-slowdown-sticker", position = entity.position, target = entity, force = "neutral"}
 
   entity.ai_settings.path_resolution_modifier = 0
-  entity.speed = entity.speed * 2
+  entity.speed = entity.speed * 6 + (math.random() / 20)
   
   setmetatable(drone, transport_drone.metatable)
 
