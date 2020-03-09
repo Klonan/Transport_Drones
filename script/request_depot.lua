@@ -1,7 +1,7 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
-local request_spawn_timeout = 10
+local request_spawn_timeout = 60
 
 local script_data = 
 {
@@ -103,6 +103,10 @@ function request_depot:get_stack_size()
   return game.item_prototypes[self.item].stack_size * 5
 end
 
+function request_depot:get_request_size()
+  return self:get_stack_size() * 4
+end
+
 function request_depot:get_output_inventory()
   return self.entity.get_output_inventory()
 end
@@ -141,12 +145,11 @@ function request_depot:handle_offer(supply_depot, name, count)
   local drone_spawn_count = max_count - math.floor(current_count / stack_size)
   if (drone_spawn_count - self:get_active_drone_count()) <= 0 then return 0 end
 
-  --Just assume we will always try to take a whole stack.
-  local needed_count = self:get_stack_size()
+  local needed_count = math.min(self:get_request_size(), count)
 
   self.on_the_way = self.on_the_way + needed_count
 
-  local drone = transport_drone.new(self, supply_depot, name, needed_count)
+  local drone = transport_drone.new(self, supply_depot, self:get_request_size())
   self.drones[drone.index] = drone
   self.last_spawn_tick = game.tick
   self:update_sticker()

@@ -101,7 +101,7 @@ local product_amount = function(product)
 end
 
 
-transport_drone.new = function(request_depot, supply_depot, requested_name)
+transport_drone.new = function(request_depot, supply_depot, requested_count)
 
   local entity = request_depot.entity.surface.create_entity{name = "transport-drone", position = request_depot.corpse.position, force = request_depot.entity.force}
   
@@ -111,13 +111,14 @@ transport_drone.new = function(request_depot, supply_depot, requested_name)
     request_depot = request_depot,
     supply_depot = supply_depot,
     index = tostring(entity.unit_number),
-    state = states.going_to_supply
+    state = states.going_to_supply,
+    requested_count = requested_count
   }
 
   entity.surface.create_entity{name = "drone-slowdown-sticker", position = entity.position, target = entity, force = "neutral"}
 
   entity.ai_settings.path_resolution_modifier = 0
-  entity.speed = entity.speed * 4 + (math.random() / 20)
+  entity.speed = entity.speed + (math.random() / 20)
   
   setmetatable(drone, transport_drone.metatable)
 
@@ -192,9 +193,9 @@ function transport_drone:process_pickup()
     return
   end
 
-  self.supply_depot:remove_to_be_taken(self.request_depot.item, self.request_depot:get_stack_size())
+  self.supply_depot:remove_to_be_taken(self.request_depot.item, self.requested_count)
 
-  local given_count = self.supply_depot:give_item(self.request_depot.item, self.request_depot:get_stack_size())
+  local given_count = self.supply_depot:give_item(self.request_depot.item, self.requested_count)
 
   if given_count > 0 then
     self.held_item = self.request_depot.item
@@ -344,7 +345,7 @@ end
 
 function transport_drone:clear_drone_data()
   if self.state == states.going_to_supply then
-    self.supply_depot:remove_to_be_taken(self.request_depot.item, self.request_depot:get_stack_size())
+    self.supply_depot:remove_to_be_taken(self.request_depot.item, self.requested_count)
   end
   remove_drone(self)
 end

@@ -148,7 +148,7 @@ local unit =
   },
   vision_distance = 40,
   has_belt_immunity = true,
-  movement_speed = 0.05,
+  movement_speed = 0.15,
   distance_per_frame = 0.15,
   pollution_to_join_attack = 1000,
   rotation_speed = 1 / (60 * 1),

@@ -23,7 +23,7 @@ local proxy_entity =
   subgroup = "wrecks",
   order = "d[remnants]-d[ship-wreck]-c[small]-a",
   max_health = 1,
-  collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
+  collision_box = {{-0.5, -0.5}, {0.5, 0.5}},
   pictures = util.empty_sprite(),
   render_layer = "object",
   collision_mask = shared.tile_collision_mask
@@ -35,7 +35,7 @@ local item =
   name = "road",
   icon = "__base__/graphics/icons/concrete.png",
   icon_size = 64, icon_mipmaps = 4,
-  subgroup = "terrain",
+  subgroup = "transport",
   order = "b[concrete]-a[plain]",
   stack_size = 100,
   place_as_tile =
@@ -46,10 +46,30 @@ local item =
   }
 }
 
+local recipe = 
+{
+  type = "recipe",
+  name = "road",
+  localised_name = {"road"},
+  icon = item.icon,
+  icon_size = item.icon_size,
+  --category = "transport",
+  enabled = true,
+  ingredients =
+  {
+    {"stone-brick", 10},
+    {"coal", 10},
+  },
+  energy_required = 1,
+  result = "supply-depot",
+  result_count = 10
+}
+
 data:extend
 {
   tile,
   proxy_tile,
   proxy_entity,
   item,
+  recipe
 }

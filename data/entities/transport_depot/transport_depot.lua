@@ -316,6 +316,21 @@ local items =
     place_result = supply_depot.name
   },
   {
+    type = "recipe",
+    name = "supply-depot",
+    localised_name = {"supply-depot"},
+    icon = supply_depot_chest.icon,
+    icon_size = supply_depot_chest.icon_size,
+    --category = "transport",
+    enabled = true,
+    ingredients =
+    {
+      {"iron-plate", 10},
+    },
+    energy_required = 1,
+    result = "supply-depot"
+  },
+  {
     type = "item",
     name = "request-depot",
     localised_name = {"request-depot"},
@@ -326,10 +341,26 @@ local items =
     order = "e-b",
     stack_size = 10,
     place_result = depot.name
+  },
+  {
+    type = "recipe",
+    name = "request-depot",
+    localised_name = {"request-depot"},
+    icon = machine.icon,
+    icon_size = machine.icon_size,
+    --category = "transport",
+    enabled = true,
+    ingredients =
+    {
+      {"iron-plate", 10},
+    },
+    energy_required = 1,
+    result = "request-depot"
   }
 }
 
 data:extend(items)
+
 
 
 data:extend
