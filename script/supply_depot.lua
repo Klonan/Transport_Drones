@@ -47,7 +47,7 @@ function supply_depot.new(entity)
 
 end
 
-function supply_depot:get_to_be_taken(item)
+function supply_depot:get_to_be_taken(name)
   return self.to_be_taken[name] or 0
 end
 
@@ -60,8 +60,9 @@ function supply_depot:check_requests_for_item(name, count)
   if not next(request_depots) then return end
 
   for k, depot in pairs (request_depots) do
-    depot:handle_offer(self, name, count)
-    if count - self:get_to_be_taken(name) <= 0 then return end
+    local available = count - self:get_to_be_taken(name)
+    if available <= 0 then return end
+    depot:handle_offer(self, name, available)
   end
 
 end
@@ -86,7 +87,7 @@ function supply_depot:give_item(requested_name, requested_count)
 end
 
 function supply_depot:add_to_be_taken(name, count)
-  if not (name and count) then return end
+  --if not (name and count) then return end
   self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
   --self:say(self.to_be_taken[name])
 end

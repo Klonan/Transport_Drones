@@ -138,7 +138,7 @@ end
 function transport_drone:pickup_from_supply(count)
 
   self.requested_count = count
-  self.supply_depot:add_to_be_taken(count)
+  self.supply_depot:add_to_be_taken(self.request_depot.item, count)
 
   self:add_slow_sticker()
   self.state = states.going_to_supply
@@ -192,7 +192,7 @@ function transport_drone:process_pickup()
   self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
 
   local available_count = self.supply_depot:get_available_item_count(self.request_depot.item)
-
+  self:say(available_count)
   local to_take = math.min(available_count, self.request_depot:get_request_size())
 
   if to_take > 0 then
@@ -342,7 +342,7 @@ function transport_drone:process_reorder()
   end
 
   local item_count = self.supply_depot:get_available_item_count(self.request_depot.item)
-  if item_count <= 0 then 
+  if item_count <= self.request_depot:get_minimum_request_size() then 
     self:remove_from_depot()
     return
   end

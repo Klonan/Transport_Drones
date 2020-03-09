@@ -127,6 +127,10 @@ function request_depot:get_drone_item_count()
   return self.entity.get_item_count("transport-drone")
 end
 
+function request_depot:get_minimum_request_size()
+  return math.ceil(self:get_stack_size() / 1)
+end
+
 function request_depot:should_order(plus_one)
   local stack_size = self:get_request_size()
   local current_count = self:get_output_inventory().get_item_count(self.item)
@@ -140,9 +144,11 @@ function request_depot:handle_offer(supply_depot, name, count)
   if not self:can_spawn_drone() then return end
   if not self:should_order() then return end
 
+  if count < self:get_minimum_request_size() then return end
+
   local needed_count = math.min(self:get_request_size(), count)
 
-  local drone = transport_drone.new(self, supply_depot, self:get_request_size())
+  local drone = transport_drone.new(self, supply_depot, needed_count)
   self.drones[drone.index] = drone
   self.last_spawn_tick = game.tick
   self:update_sticker()
