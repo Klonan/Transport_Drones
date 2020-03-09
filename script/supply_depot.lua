@@ -47,21 +47,21 @@ function supply_depot.new(entity)
 
 end
 
+function supply_depot:get_to_be_taken(item)
+  return self.to_be_taken[name] or 0
+end
+
 function supply_depot:check_requests_for_item(name, count)
 
-  local to_be_taken_count = self.to_be_taken[name] or 0
-  local available = count - to_be_taken_count
-  if available <= 0 then return end
+  if count - self:get_to_be_taken(name) <= 0 then return end
 
   local request_depots = road_network.get_request_depots(self.network_id, name)
   if not request_depots then return end
   if not next(request_depots) then return end
 
   for k, depot in pairs (request_depots) do
-    local requested = depot:handle_offer(self, name, count)
-    self.to_be_taken[name] = (self.to_be_taken[name] or 0) + requested
-    count = count - requested
-    if count <= 0 then return end
+    depot:handle_offer(self, name, count)
+    if count - self:get_to_be_taken(name) <= 0 then return end
   end
 
 end
@@ -85,10 +85,14 @@ function supply_depot:give_item(requested_name, requested_count)
   return removed_count
 end
 
-function supply_depot:remove_to_be_taken(name, count)
+function supply_depot:add_to_be_taken(name, count)
   if not (name and count) then return end
-  self.to_be_taken[name] = self.to_be_taken[name] - count
+  self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
   --self:say(self.to_be_taken[name])
+end
+
+function supply_depot:get_available_item_count(name)
+  return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
 end
 
 function supply_depot:remove_from_network()
