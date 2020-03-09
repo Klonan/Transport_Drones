@@ -40,7 +40,6 @@ function request_depot.new(entity)
     entity = machine,
     corpse = corpse,
     index = tostring(machine.unit_number),
-    on_the_way = 0,
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
@@ -111,13 +110,6 @@ function request_depot:get_output_inventory()
   return self.entity.get_output_inventory()
 end
 
-function request_depot:get_needed_item_count()
-  local stack_size = self:get_stack_size()
-  local needed = self:get_drone_item_count() * stack_size
-  needed = needed - self.on_the_way
-  return needed - self:get_output_inventory().get_item_count(self.item)
-end
-
 function request_depot:get_drone_inventory()
   return self.entity.get_inventory(defines.inventory.assembling_machine_input)
 end
@@ -150,8 +142,6 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   local needed_count = math.min(self:get_request_size(), count)
 
-  self.on_the_way = self.on_the_way + needed_count
-
   local drone = transport_drone.new(self, supply_depot, self:get_request_size())
   self.drones[drone.index] = drone
   self.last_spawn_tick = game.tick
@@ -160,7 +150,6 @@ function request_depot:handle_offer(supply_depot, name, count)
 end
 
 function request_depot:take_item(name, count)
-  self.on_the_way = self.on_the_way - count
   self.entity.get_output_inventory().insert({name = name, count = count})
 end
 
