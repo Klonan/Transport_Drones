@@ -3,13 +3,6 @@ local selection_box = {{-1.5, -1.5}, {1.5, 1.5}}
 
 local depot = util.copy(data.raw["assembling-machine"]["assembling-machine-3"])
 
-local fluid = util.copy(data.raw.fluid.water)
-fluid.name = "transparent-fluid"
-fluid.icon_size = 1
-fluid.icon_mipmaps = nil
-
-data:extend{fluid}
-
 local caution_sprite =
 {
   type = "sprite",
@@ -44,6 +37,7 @@ depot.icon = util.path("data/entities/transport_depot/request-depot-icon.png")
 depot.icon_size = 216
 depot.collision_box = collision_box
 depot.selection_box = selection_box
+depot.max_health = 150
 depot.radius_visualisation_specification =
 {
   sprite = caution_sprite,
@@ -184,7 +178,6 @@ local supply_depot_chest =
   damaged_trigger_effect = depot.damaged_trigger_effect,
   corpse = depot.corpse,
   flags = {"placeable-neutral", "player-creation", "not-blueprintable"},
-  minable = {mining_time = 0.1, result = "wooden-chest"},
   max_health = 150,
   collision_box = collision_box,
   collision_mask = {},
