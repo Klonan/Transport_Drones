@@ -61,7 +61,7 @@ local recipe =
     {"coal", 10},
   },
   energy_required = 1,
-  result = "supply-depot",
+  result = "road",
   result_count = 10
 }
 

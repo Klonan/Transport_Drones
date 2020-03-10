@@ -19,27 +19,31 @@ local corpse_offsets =
   [6] = {-2, 0},
 }
 
-function request_depot.new(entity)
+local get_corpse_position = function(entity)
 
   local position = entity.position
   local direction = entity.direction
+  local offset = corpse_offsets[direction]
+  return {position.x + offset[1], position.y + offset[2]}
+
+end
+
+function request_depot.new(entity)
+
   local force = entity.force
   local surface = entity.surface
-  local offset = corpse_offsets[direction]
 
-  entity.destroy()
+  entity.active = false
 
-  local machine = surface.create_entity{name = "request-depot-machine", position = position, force = force}
-  machine.active = false
-  local corpse_position = {position.x + offset[1], position.y + offset[2]}
+  local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
   
   local depot =
   {
-    entity = machine,
+    entity = entity,
     corpse = corpse,
-    index = tostring(machine.unit_number),
+    index = tostring(entity.unit_number),
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
@@ -207,12 +211,13 @@ function request_depot:remove_from_node()
 end
 
 function request_depot:add_to_network()
+  if not self.item then return end
   self:say("Adding to network")
-  self.network_id = road_network.add_request_depot(self, self.item)
+    self.network_id = road_network.add_request_depot(self, self.item)
 end
 
 function request_depot:remove_from_network()
-
+  if not self.item then return end
   local network = road_network.get_network_by_id(self.network_id)
   if not network then return end
 
@@ -229,31 +234,6 @@ function request_depot:on_removed()
   self:suicide_all_drones()
   self.corpse.destroy()
   script_data.request_depots[self.index] = nil
-end
-
-local on_created_entity = function(event)
-  local entity = event.entity or event.created_entity
-  if not (entity and entity.valid) then return end
-
-  if entity.name ~= "request-transport-depot" then return end
-
-  request_depot.new(entity)
-
-end
-
-local on_entity_removed = function(event)
-  local entity = event.entity
-
-  if not (entity and entity.valid) then return end
-
-  if entity.name ~= "request-depot-machine" then return end
-
-  local index = tostring(entity.unit_number)
-  local depot = script_data.request_depots[index]
-  if depot then
-    depot:on_removed()
-  end
-
 end
 
 
@@ -281,18 +261,7 @@ local lib = {}
 
 lib.events =
 {
-  [defines.events.on_built_entity] = on_created_entity,
-  [defines.events.on_robot_built_entity] = on_created_entity,
-  [defines.events.script_raised_built] = on_created_entity,
-  [defines.events.script_raised_revive] = on_created_entity,
-
-  [defines.events.on_entity_died] = on_entity_removed,
-  [defines.events.on_robot_mined_entity] = on_entity_removed,
-  [defines.events.script_raised_destroy] = on_entity_removed,
-  [defines.events.on_player_mined_entity] = on_entity_removed,
-  
   [defines.events.on_tick] = on_tick
-
 }
 
 lib.on_nth_tick =
@@ -319,5 +288,7 @@ end
 lib.get_depot = function(entity)
   return script_data.request_depots[tostring(entity.unit_number)]
 end
+
+lib.new = request_depot.new
 
 return lib

@@ -135,7 +135,7 @@ local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
 
-  if entity.name ~= "supply-transport-depot" then return end
+  if entity.name ~= "supply-depot" then return end
 
   supply_depot.new(entity)
 end
@@ -187,17 +187,7 @@ end
 local lib = {}
 
 lib.events =
-{
-  [defines.events.on_built_entity] = on_created_entity,
-  [defines.events.on_robot_built_entity] = on_created_entity,
-  [defines.events.script_raised_built] = on_created_entity,
-  [defines.events.script_raised_revive] = on_created_entity,
-
-  [defines.events.on_entity_died] = on_entity_removed,
-  [defines.events.on_robot_mined_entity] = on_entity_removed,
-  [defines.events.script_raised_destroy] = on_entity_removed,
-  [defines.events.on_player_mined_entity] = on_entity_removed,
-  
+{ 
   
   [defines.events.on_tick] = on_tick,
   
@@ -222,5 +212,7 @@ end
 lib.get_depot = function(entity)
   return script_data.supply_depots[tostring(entity.unit_number)]
 end
+
+lib.new = request_depot.new
 
 return lib
