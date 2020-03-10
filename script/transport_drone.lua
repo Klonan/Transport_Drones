@@ -1,4 +1,5 @@
 local shared = require("shared")
+local transport_technologies = require("script/transport_technologies")
 
 local script_data =
 {
@@ -34,51 +35,6 @@ local get_drone = function(index)
 
 end
 
-local get_drone_mining_speed = function()
-  return 0.5
-end
-
-local mining_times = {}
-local get_mining_time = function(entity)
-
-  local name = entity.name
-  local time = mining_times[name]
-  if time then return time end
-
-  time = entity.prototype.mineable_properties.mining_time
-  mining_times[name] = time
-  return time
-
-end
-
-local interval = shared.mining_interval
-local damage = shared.mining_damage
-local ceil = math.ceil
-local max = math.max
-local min = math.min
-
-local proxy_names = {}
-local get_proxy_name = function(entity)
-
-  local entity_name = entity.name
-  local proxy_name = proxy_names[entity_name]
-  if proxy_name then
-    return proxy_name
-  end
-
-  if game.entity_prototypes[shared.attack_proxy_name..entity.name] then
-    proxy_name = shared.attack_proxy_name..entity.name
-  else
-    local size = min(ceil((max(entity.get_radius() - 0.1, 0.25)) * 2), 10)
-    proxy_name = shared.attack_proxy_name..size
-  end
-
-  proxy_names[entity_name] = proxy_name
-
-  return proxy_name
-
-end
-
 
 local states =
 {
@@ -87,23 +43,8 @@ local states =
   waiting_for_reorder = 3
 }
 
-local random = math.random
-local product_amount = function(product)
-
-  if product.probability < 1 and random() >= product.probability then
-    return 0
-  end
-
-  if product.amount then
-    return product.amount
-  end
-
-  return random(product.amount_min, product.amount_max)
-
-end
-
-local get_drone_speed = function()
-  return 0.15 + (math.random() / 32)
+local get_drone_speed = function(force_index)
+  return (0.15 * (1 + transport_technologies.get_transport_speed_bonus(force_index))) + (math.random() / 32)
 end
 
 local variation_count = shared.variation_count
@@ -136,7 +77,7 @@ transport_drone.new = function(request_depot, supply_depot, requested_count)
 end
 
 function transport_drone:update_speed()
-  self.entity.speed = get_drone_speed()
+  self.entity.speed = get_drone_speed(self.entity.force.index)
 end
 
 function transport_drone:add_slow_sticker()
@@ -149,6 +90,7 @@ function transport_drone:pickup_from_supply(count)
   self.supply_depot:add_to_be_taken(self.request_depot.item, count)
 
   self:add_slow_sticker()
+  self:update_speed()
   self.state = states.going_to_supply
 
   self.entity.set_command

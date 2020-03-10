@@ -1,4 +1,5 @@
-local name = shared.mining_speed_technology
+local shared = require("shared")
+local name = shared.transport_speed_technology
 
 local levels =
 {
@@ -48,16 +49,8 @@ for k, ingredients in pairs (levels) do
     {
       {
         type = "nothing",
-        effect_description = "Mining drone mining speed: +20%"--repair-turret-power-description"}
-      },
-      {
-        type = "nothing",
-        effect_description = "Mining drone walking speed: +20%"--repair-turret-power-description"}
-      },
-      {
-        type = "nothing",
-        effect_description = "Mining drone cargo bonus: +1"--repair-turret-power-description"}
-      },
+        effect_description = "Transport drone speed: +10%"
+      }
     },
     prerequisites = k > 1 and {name.."-"..k - 1} or {},
     unit =

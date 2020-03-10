@@ -1,5 +1,6 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
+local transport_technologies = require("script/transport_technologies")
 
 local request_spawn_timeout = 60
 
@@ -107,7 +108,7 @@ function request_depot:get_stack_size()
 end
 
 function request_depot:get_request_size()
-  return self:get_stack_size() * 4
+  return self:get_stack_size() * (4 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
 end
 
 function request_depot:get_output_inventory()

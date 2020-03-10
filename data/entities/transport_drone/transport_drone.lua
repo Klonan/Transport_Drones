@@ -11,7 +11,7 @@ local make_unit = function(k)
   local sprite_base = util.copy(sprite_base)
   util.recursive_hack_make_hr(sprite_base)
   util.recursive_hack_scale(sprite_base, 0.4 + (math.random()/ 20))
-  local shift = {(math.random() - 0.5) / 1, (math.random() - 0.5) / 1}
+  local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
   util.recursive_hack_shift(sprite_base, shift)
 
   local selection_box =
