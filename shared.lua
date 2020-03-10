@@ -4,7 +4,7 @@ local data = {}
 
 data.tile_collision_mask = {"object-layer", "layer-14"}
 data.drone_collision_mask = {"ground-tile", "not-colliding-with-itself"}
-data.variation_count = 100
+data.variation_count = 50
 
 data.drone_name = "mining-drone"
 data.proxy_chest_name = "mining-drone-proxy-chest"

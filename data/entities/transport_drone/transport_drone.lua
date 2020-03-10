@@ -92,7 +92,7 @@ local make_unit = function(k)
     movement_speed = 0.15,
     distance_per_frame = 0.15,
     pollution_to_join_attack = 1000,
-    rotation_speed = 1 / (60 * 1),
+    rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
     --corpse = name.." Corpse",
     dying_explosion = "explosion",
     vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
