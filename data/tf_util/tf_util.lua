@@ -33,6 +33,21 @@ recursive_hack_scale = function(array, scale)
 end
 util.recursive_hack_scale = recursive_hack_scale
 
+
+local recursive_hack_shift
+recursive_hack_shift = function(array, shift)
+  for k, v in pairs (array) do
+    if type(v) == "table" then
+      if is_sprite_def(v) then
+        v.shift = v.shift or {0,0}
+        v.shift[1], v.shift[2] = v.shift[1] + shift[1], v.shift[2] + shift[2]
+      end
+      recursive_hack_shift(v, shift)
+    end
+  end
+end
+util.recursive_hack_shift = recursive_hack_shift
+
 local recursive_hack_animation_speed
 recursive_hack_animation_speed = function(array, scale)
   for k, v in pairs (array) do

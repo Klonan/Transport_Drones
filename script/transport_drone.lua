@@ -1,3 +1,4 @@
+local shared = require("shared")
 
 local script_data =
 {
@@ -105,10 +106,17 @@ local get_drone_speed = function()
   return 0.15 + (math.random() / 32)
 end
 
+local variation_count = shared.variation_count
+
+local random = math.random
+local get_drone_name = function()
+  return "transport-drone-"..random(variation_count)
+end
+
 
 transport_drone.new = function(request_depot, supply_depot, requested_count)
 
-  local entity = request_depot.entity.surface.create_entity{name = "transport-drone", position = request_depot.corpse.position, force = request_depot.entity.force}
+  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(), position = request_depot.corpse.position, force = request_depot.entity.force}
   
   local drone =
   {
@@ -254,6 +262,7 @@ function transport_drone:update_sticker()
   {
     sprite = "utility/entity_info_dark_background",
     target = self.entity,
+    target_offset = self.entity.prototype.sticker_box.left_top,
     surface = self.entity.surface,
     forces = {self.entity.force},
     only_in_alt_mode = true,
@@ -266,6 +275,7 @@ function transport_drone:update_sticker()
   {
     sprite = "item/"..self.held_item,
     target = self.entity,
+    target_offset = self.entity.prototype.sticker_box.left_top,
     surface = self.entity.surface,
     forces = {self.entity.force},
     only_in_alt_mode = true,
