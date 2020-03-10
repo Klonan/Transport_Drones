@@ -213,6 +213,6 @@ lib.get_depot = function(entity)
   return script_data.supply_depots[tostring(entity.unit_number)]
 end
 
-lib.new = request_depot.new
+lib.new = supply_depot.new
 
 return lib
