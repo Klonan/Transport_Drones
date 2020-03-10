@@ -24,7 +24,7 @@ function supply_depot.new(entity)
   local force = entity.force
   local surface = entity.surface
   local offset = corpse_offsets[direction]
-  entity.destroy()
+  --entity.destroy()
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force}
   local corpse_position = {position.x + offset[1], position.y + offset[2]}
   local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
@@ -33,6 +33,7 @@ function supply_depot.new(entity)
   local depot =
   {
     entity = chest,
+    assembler = entity,
     corpse = corpse,
     to_be_taken = {},
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
@@ -128,6 +129,7 @@ function supply_depot:on_removed()
   self:remove_from_node()
   self:remove_from_network()
   self.corpse.destroy()
+  self.assembler.destroy()
   script_data.supply_depots[self.index] = nil
 end
 

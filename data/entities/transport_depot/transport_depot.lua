@@ -185,9 +185,10 @@ local supply_depot_chest =
   flags = {"placeable-neutral", "player-creation"},
   minable = {mining_time = 0.1, result = "wooden-chest"},
   max_health = 150,
-  collision_box = {{-1.4, -1.4}, {1.4, 1.4}},
+  collision_box = collision_box,
+  selection_priority = 100,
   fast_replaceable_group = "container",
-  selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
+  selection_box = selection_box,
   inventory_size = 100,
   open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.5 },
   close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.5 },
@@ -198,9 +199,9 @@ local supply_depot_chest =
       supply_base{0,0}
     }
   },
+  picture = util.empty_sprite(),
   order = "nil",
-  minable = {result = "supply-depot", mining_time = 1},
-  placeable_by = {item = "supply-depot", count = 1}
+  minable = {result = "supply-depot", mining_time = 1}
 }
 
 local category =
