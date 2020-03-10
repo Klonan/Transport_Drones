@@ -116,6 +116,7 @@ local supply_depot = util.copy(depot)
 supply_depot.name = "supply-depot"
 supply_depot.localised_name = {"supply-depot"}
 supply_depot.icon = util.path("data/entities/transport_depot/supply-depot-icon.png")
+table.insert(supply_depot.flags, "not-deconstructable")
 
 
 local supply_base = function(shift)
@@ -182,10 +183,11 @@ local supply_depot_chest =
   dying_explosion = depot.dying_explosion,
   damaged_trigger_effect = depot.damaged_trigger_effect,
   corpse = depot.corpse,
-  flags = {"placeable-neutral", "player-creation"},
+  flags = {"placeable-neutral", "player-creation", "not-blueprintable"},
   minable = {mining_time = 0.1, result = "wooden-chest"},
   max_health = 150,
   collision_box = collision_box,
+  collision_mask = {},
   selection_priority = 100,
   fast_replaceable_group = "container",
   selection_box = selection_box,
@@ -201,7 +203,9 @@ local supply_depot_chest =
   },
   picture = util.empty_sprite(),
   order = "nil",
-  minable = {result = "supply-depot", mining_time = 1}
+  minable = {result = "supply-depot", mining_time = 1},
+  placeable_by = {item = "supply-depot", count = 1},
+
 }
 
 local category =

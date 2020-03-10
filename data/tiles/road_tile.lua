@@ -1,16 +1,18 @@
 local tile = util.copy(data.raw.tile["stone-path"])
 
 tile.name = "transport-drone-road"
+tile.localised_name = {"road"}
 tile.tint = {0.5, 0.5, 0.5}
 tile.collision_mask = shared.tile_collision_mask
 tile.minable.result = "road"
 tile.layer = 150
-tile.placeable_by = {{item   = "road", count = 60000}}
+tile.placeable_by = {{item   = "road", count = 1}}
 
 local proxy_tile = util.copy(data.raw.tile["stone-path"])
 
 proxy_tile.name = "transport-drone-proxy-tile"
 proxy_tile.tint = {0.5, 0.5, 0.5}
+proxy_tile.localised_name = {"road"}
 
 local proxy_entity = 
 {
@@ -33,6 +35,7 @@ local item =
 {
   type = "item",
   name = "road",
+  localised_name = {"road"},
   icon = "__base__/graphics/icons/concrete.png",
   icon_size = 64, icon_mipmaps = 4,
   subgroup = "transport",

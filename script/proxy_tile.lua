@@ -4,6 +4,15 @@ local road_network = require("script/road_network")
 
 local real_name = "transport-drone-road"
 
+local raw_road_tile_built = function(event)
+
+  for k, tile in pairs (event.tiles) do
+    local position = tile.position
+    road_network.add_node(event.surface_index, position.x, position.y)
+  end
+
+end
+
 local road_tile_built = function(event)
 
   local tiles = event.tiles
@@ -88,15 +97,16 @@ end
 
 local on_built_tile = function(event)
 
+  if event.tile.name == "transport-drone-road" then
+    raw_road_tile_built(event)
+    return
+  end
   if event.tile.name == "transport-drone-proxy-tile" then
     road_tile_built(event)
     return
   end
 
   non_road_tile_built(event)
-
-
-
   
 end
 
