@@ -78,7 +78,7 @@ local make_unit = function(k)
               {
                 {
                   type = "damage",
-                  damage = {amount = shared.mining_damage , type = util.damage_type("physical")}
+                  damage = {amount = 5 , type = util.damage_type("physical")}
                 }
               }
             }
