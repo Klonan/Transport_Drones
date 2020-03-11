@@ -254,6 +254,29 @@ road_network.get_request_depots = function(id, name)
   return network.requesters[name]
 end
 
+road_network.check_clear_lonely_node = function(surface, x, y)
+  if next(get_neighbors(surface, x, y)) then
+    -- We have a neighbor, do nothing.
+    return
+  end
+
+  if road_network.remove_node(surface, x, y) then
+    --depot on it or something
+    return
+  end
+
+  local surface = game.surfaces[surface]
+  local position = {x, y}
+  surface.set_tiles
+  {
+    {
+      name = surface.get_hidden_tile(position),
+      position = position
+    }
+  }
+
+end
+
 road_network.on_init = function()
   global.road_network = global.road_network or script_data
 end

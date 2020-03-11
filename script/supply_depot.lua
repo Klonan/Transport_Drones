@@ -118,8 +118,10 @@ function supply_depot:add_to_node()
 end
 
 function supply_depot:remove_from_node()
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local surface = self.entity.surface.index
+  local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
+  road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function supply_depot:add_to_network()
