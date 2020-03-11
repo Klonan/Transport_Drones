@@ -118,7 +118,7 @@ local item =
   icon = sprite_base.icon,
   icon_size = sprite_base.icon_size,
   flags = {},
-  subgroup = "transport",
+  subgroup = "transport-drones",
   order = "e-"..name,
   stack_size = 10,
   --place_result = name
@@ -133,12 +133,9 @@ local recipe =
   enabled = true,
   ingredients =
   {
-    {"engine-unit", 10},
-    {"steel-plate", 20},
-    {"explosives", 20},
-    {"rocket-fuel", 5}
+    {"iron-plate", 10},
   },
-  energy_required = 45,
+  energy_required = 5,
   result = name
 }
 

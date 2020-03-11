@@ -36,9 +36,15 @@ local item =
   type = "item",
   name = "road",
   localised_name = {"road"},
-  icon = "__base__/graphics/icons/concrete.png",
-  icon_size = 64, icon_mipmaps = 4,
-  subgroup = "transport",
+  icons =
+  {
+    {
+      icon = "__base__/graphics/icons/concrete.png",
+      icon_size = 64,
+      tint = {0.5, 0.5, 0.5}
+    }
+  },
+  subgroup = "transport-drones",
   order = "b[concrete]-a[plain]",
   stack_size = 100,
   place_as_tile =

@@ -1,6 +1,16 @@
 local collision_box = {{-1.25, -1.25},{1.25, 1.25}}
 local selection_box = {{-1.5, -1.5}, {1.5, 1.5}}
 
+local category = 
+{
+  type = "item-subgroup",
+  name = "transport-drones",
+  group = "logistics",
+  order = "ez"
+}
+
+data:extend{category}
+
 local depot = util.copy(data.raw["assembling-machine"]["assembling-machine-3"])
 
 local caution_sprite =
@@ -217,7 +227,7 @@ local items =
     icon = supply_depot_chest.icon,
     icon_size = supply_depot_chest.icon_size,
     flags = {},
-    subgroup = "transport",
+    subgroup = "transport-drones",
     order = "e-a",
     stack_size = 10,
     place_result = "supply-depot"
@@ -244,7 +254,7 @@ local items =
     icon = depot.icon,
     icon_size = depot.icon_size,
     flags = {},
-    subgroup = "transport",
+    subgroup = "transport-drones",
     order = "e-b",
     stack_size = 10,
     place_result = "request-depot"
