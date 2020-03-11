@@ -213,8 +213,8 @@ end
 
 function request_depot:add_to_network()
   if not self.item then return end
-  self:say("Adding to network")
-    self.network_id = road_network.add_request_depot(self, self.item)
+  --self:say("Adding to network")
+  self.network_id = road_network.add_request_depot(self, self.item)
 end
 
 function request_depot:remove_from_network()

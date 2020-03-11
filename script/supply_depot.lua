@@ -123,7 +123,7 @@ function supply_depot:remove_from_node()
 end
 
 function supply_depot:add_to_network()
-  self:say("Adding to network") 
+  --self:say("Adding to network") 
   self.network_id = road_network.add_supply_depot(self)
 end
 
@@ -135,37 +135,6 @@ function supply_depot:on_removed()
   self.assembler.destroy()
   script_data.supply_depots[self.index] = nil
 end
-
-local on_created_entity = function(event)
-  local entity = event.entity or event.created_entity
-  if not (entity and entity.valid) then return end
-
-  if entity.name ~= "supply-depot" then return end
-
-  supply_depot.new(entity)
-end
-
-local update_depots = function(event)
-  for k, depot in pairs (script_data.supply_depots) do
-    depot:update()
-  end
-end
-
-local on_entity_removed = function(event)
-  local entity = event.entity
-
-  if not (entity and entity.valid) then return end
-
-  if entity.name ~= "supply-depot-chest" then return end
-
-  local index = tostring(entity.unit_number)
-  local depot = script_data.supply_depots[index]
-  if depot then
-    depot:on_removed()
-  end
-
-end
-
 
 local update_next_depot = function()
   local index = script_data.last_update_index
@@ -193,9 +162,7 @@ local lib = {}
 
 lib.events =
 { 
-  
-  [defines.events.on_tick] = on_tick,
-  
+  [defines.events.on_tick] = on_tick,  
 }
 
 lib.on_nth_tick =

@@ -142,7 +142,7 @@ function transport_drone:process_pickup()
   self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
 
   local available_count = self.supply_depot:get_available_item_count(self.request_depot.item)
-  self:say(available_count)
+  --self:say(available_count)
   local to_take = math.min(available_count, self.request_depot:get_request_size())
 
   if to_take > 0 then
