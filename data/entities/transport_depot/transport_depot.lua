@@ -1,4 +1,4 @@
-local collision_box = {{-1.25, -1.25},{1.25, 1.25}}
+local collision_box = {{-1.25, -1.25},{1.26, 1.26}}
 local selection_box = {{-1.5, -1.5}, {1.5, 1.5}}
 
 local category = 
