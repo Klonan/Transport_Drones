@@ -79,16 +79,8 @@ local infinite =
   {
     {
       type = "nothing",
-      effect_description = "Mining drone mining speed: +20%"
-    },
-    {
-      type = "nothing",
-      effect_description = "Mining drone walking speed: +20%"
-    },
-    {
-      type = "nothing",
-      effect_description = "Mining drone cargo bonus: +1"
-    },
+      effect_description = "Transport drone speed: +10%"
+    }
   },
   prerequisites = k > 1 and {name.."-"..k - 1} or {},
   unit =
