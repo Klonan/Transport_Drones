@@ -149,6 +149,7 @@ lib.events =
   [defines.events.on_robot_built_tile] = on_built_tile,
 
   [defines.events.on_player_mined_tile] = on_mined_tile,
+  [defines.events.on_robot_mined_tile] = on_mined_tile,
 }
 
 return lib

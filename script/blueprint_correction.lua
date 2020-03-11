@@ -22,7 +22,7 @@ local on_built_entity = function(event)
   
   entity.destroy()
 
-  surface.create_entity{name = "tile-ghost", inner_name = correct_name, position = position, force = force, surface = surface}
+  surface.create_entity{name = "tile-ghost", inner_name = correct_name, position = position, force = force, surface = surface, raise_built = true}
 
 end
 

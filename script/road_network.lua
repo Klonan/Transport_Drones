@@ -106,7 +106,7 @@ recursive_set_id = function(surface, x, y, id)
   if not node then return end
   if node.id == id then return end
 
-  game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = id}
+  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = id}
 
   node.id = id
 

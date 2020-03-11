@@ -170,7 +170,7 @@ supply_depot.animation =
 local caution_corpse =
 {
   type = "corpse",
-  name = "caution-corpse",
+  name = "-transport-caution-corpse",
   flags = {"placeable-off-grid"},
   animation = caution_sprite,
   remove_on_entity_placement = false,

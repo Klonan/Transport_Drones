@@ -37,7 +37,7 @@ function request_depot.new(entity)
   entity.active = false
 
   local corpse_position = get_corpse_position(entity)
-  local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
+  local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
   
   local depot =

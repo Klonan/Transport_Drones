@@ -29,7 +29,7 @@ function supply_depot.new(entity)
   entity.rotatable = false  
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force}
   local corpse_position = {position.x + offset[1], position.y + offset[2]}
-  local corpse = surface.create_entity{name = "caution-corpse", position = corpse_position}
+  local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
 
   local depot =
