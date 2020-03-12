@@ -261,6 +261,7 @@ end
 
 function transport_drone:wait_for_reorder()
   self.state = states.waiting_for_reorder
+  local ticks_to_wait = self.request_depot:get_wait_time()
   self.entity.set_command
   {
     type = defines.command.stop,

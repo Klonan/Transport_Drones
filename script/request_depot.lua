@@ -111,6 +111,10 @@ function request_depot:get_request_size()
   return self:get_stack_size() * (1 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
 end
 
+function request_depot:get_wait_time()
+  return math.max(1, ((self.last_spawn_tick + request_spawn_timeout) - 1) - game.tick)
+end
+
 function request_depot:get_output_inventory()
   return self.entity.get_output_inventory()
 end
