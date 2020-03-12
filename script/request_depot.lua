@@ -108,7 +108,7 @@ function request_depot:get_stack_size()
 end
 
 function request_depot:get_request_size()
-  return self:get_stack_size() * (4 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
+  return self:get_stack_size() * (1 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
 end
 
 function request_depot:get_output_inventory()
@@ -133,7 +133,7 @@ function request_depot:get_drone_item_count()
 end
 
 function request_depot:get_minimum_request_size()
-  return math.ceil(self:get_stack_size() / 1)
+  return math.ceil(self:get_stack_size() / 2)
 end
 
 function request_depot:should_order(plus_one)

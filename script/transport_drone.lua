@@ -44,7 +44,7 @@ local states =
 }
 
 local get_drone_speed = function(force_index)
-  return (0.15 * (1 + transport_technologies.get_transport_speed_bonus(force_index))) + (math.random() / 32)
+  return (0.10 * (1 + transport_technologies.get_transport_speed_bonus(force_index))) + (math.random() / 32)
 end
 
 local variation_count = shared.variation_count
@@ -99,7 +99,7 @@ function transport_drone:pickup_from_supply(count)
     destination_entity = self.supply_depot.corpse,
     distraction = defines.distraction.none,
     radius = 0.5,
-    pathfind_flags = {prefer_straight_paths = false, use_cache = false}
+    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
   }
 
 end
@@ -178,7 +178,7 @@ function transport_drone:return_to_requester()
     destination_entity = self.request_depot.corpse,
     distraction = defines.distraction.none,
     radius = 0.5,
-    pathfind_flags = {prefer_straight_paths = false, use_cache = false}
+    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
   }
 
 end
