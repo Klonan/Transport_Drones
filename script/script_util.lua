@@ -83,4 +83,15 @@ util.gaussian = function(mean, variance)
           math.cos(2 * math.pi * math.random()) + mean
 end
 
+local random = math.random
+util.shuffle_table = function(table)
+  --local profiler = game.create_profiler()
+  for k1, v1 in pairs (table) do
+    local k2 = random(#table)
+    table[k1], table[k2] = table[k2], table[k1]
+  end
+  --game.print({"", game.tick, " - ", profiler})
+end
+
+
 return util

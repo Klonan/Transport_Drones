@@ -249,9 +249,20 @@ road_network.add_request_depot = function(depot, item_name)
   return network.id
 end
 
+local shuffle = util.shuffle_table
 road_network.get_request_depots = function(id, name)
   local network = get_network_by_id(id)
-  return network.requesters[name]
+  local depots = network.requesters[name]
+  if not depots then return end
+  --if true then return depots end
+  local to_shuffle = {}
+  local i = 1
+  for k, v in pairs (depots) do
+    to_shuffle[i] = v
+    i = i + 1
+  end
+  shuffle(to_shuffle)
+  return to_shuffle
 end
 
 road_network.check_clear_lonely_node = function(surface, x, y)

@@ -4,7 +4,8 @@ local road_network = require("script/road_network")
 local script_data = 
 {
   supply_depots = {},
-  blueprint_correction_data = {}
+  blueprint_correction_data = {},
+  update_order = {}
 }
 
 local corpse_offsets = 
@@ -14,6 +15,8 @@ local corpse_offsets =
   [4] = {0, 2},
   [6] = {-2, 0},
 }
+
+local shuffle_table = util.shuffle_table
 
 local supply_depot = {}
 local depot_metatable = {__index = supply_depot}
@@ -45,6 +48,7 @@ function supply_depot.new(entity)
 
   
   script_data.supply_depots[depot.index] = depot
+  script_data.update_order[#script_data.update_order + 1] = depot.index
   depot:add_to_network()
   depot:add_to_node()
 
@@ -66,6 +70,7 @@ function supply_depot:check_requests_for_item(name, count)
     local available = count - self:get_to_be_taken(name)
     if available <= 0 then return end
     depot:handle_offer(self, name, available)
+    --depot:say(k)
   end
 
 end
@@ -76,7 +81,6 @@ function supply_depot:update()
   for name, count in pairs(items) do
     self:check_requests_for_item(name, count)
   end
-  --self:say("oh hi :)")
 end
 
 function supply_depot:say(string)
@@ -140,21 +144,40 @@ end
 
 local update_next_depot = function()
   local index = script_data.last_update_index
-  local depots = script_data.supply_depots
-  if index and not depots[index] then
-    index = nil
+  local depots = script_data.update_order
+  if index < 1 then
+    index = #depots
+    shuffle_table(depots)
   end
-  local update_depot
-  index, update_depot = next(depots, index)
-  script_data.last_update_index = index
-  if not index then
+  local depot = script_data.supply_depots[depots[index]]
+  if not depot then
+    depots[index] = depots[#depots]
+    depots[#depots] = nil
     return
   end
-  update_depot:update()
-  --update_depot:say("U")
+  
+  depot:update()
+  --depot:say(index)
+  script_data.last_update_index = index - 1
+end
+
+
+local setup_update_order = function()
+  local update_order = {}
+  local count = 1
+  for k, depot in pairs (script_data.supply_depots) do
+    update_order[count] = k
+    count = count + 1
+  end
+  shuffle_table(update_order)
+  script_data.update_order = update_order
+  script_data.last_update_index = 0
 end
 
 local on_tick = function(event)
+  if not script_data.update_order then
+    setup_update_order()
+  end
   --for k = 1, 20 do
     update_next_depot()
   --end
@@ -181,6 +204,10 @@ lib.on_load = function()
   for k, depot in pairs (script_data.supply_depots) do
     setmetatable(depot, depot_metatable)
   end
+end
+
+lib.on_configuration_changed = function()
+  setup_update_order()
 end
 
 lib.get_depot = function(entity)
