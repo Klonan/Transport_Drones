@@ -128,7 +128,7 @@ function request_depot:get_active_drone_count()
 end
 
 function request_depot:can_spawn_drone()
-  if game.tick - self.last_spawn_tick <= request_spawn_timeout then return end
+  if game.tick - self.last_spawn_tick < request_spawn_timeout then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -145,15 +145,17 @@ function request_depot:should_order(plus_one)
   local current_count = self:get_output_inventory().get_item_count(self.item)
   local max_count = self:get_drone_item_count()
   local drone_spawn_count = max_count - math.floor(current_count / stack_size)
-  return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
+  return drone_spawn_count + (plus_one and 2 or 0) > self:get_active_drone_count()
 end
 
 function request_depot:handle_offer(supply_depot, name, count)
 
+  if count < self:get_minimum_request_size() then return end
+
   if not self:can_spawn_drone() then return end
+
   if not self:should_order() then return end
 
-  if count < self:get_minimum_request_size() then return end
 
   local needed_count = math.min(self:get_request_size(), count)
 

@@ -62,7 +62,7 @@ local recipe =
   icon = item.icon,
   icon_size = item.icon_size,
   --category = "transport",
-  enabled = true,
+  enabled = false,
   ingredients =
   {
     {"stone-brick", 10},

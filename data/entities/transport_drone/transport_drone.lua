@@ -130,12 +130,14 @@ local recipe =
   name = name,
   localised_name = {name},
   --category = "transport",
-  enabled = true,
+  enabled = false,
   ingredients =
   {
-    {"iron-plate", 10},
+    {"engine-unit", 1},
+    {"steel-plate", 5},
+    {"iron-gear-wheel", 5},
   },
-  energy_required = 5,
+  energy_required = 2,
   result = name
 }
 

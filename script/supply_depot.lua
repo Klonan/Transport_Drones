@@ -5,7 +5,8 @@ local script_data =
 {
   supply_depots = {},
   blueprint_correction_data = {},
-  update_order = {}
+  update_order = {},
+  last_update_index = 0
 }
 
 local corpse_offsets = 
@@ -30,6 +31,7 @@ function supply_depot.new(entity)
   entity.destructible = false
   entity.minable = false
   entity.rotatable = false  
+  entity.active = false
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force}
   local corpse_position = {position.x + offset[1], position.y + offset[2]}
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
@@ -148,6 +150,8 @@ local update_next_depot = function()
   if index < 1 then
     index = #depots
     shuffle_table(depots)
+    --assert(#depots == table_size(depots))
+    --game.print("SHUFFLED")
   end
   local depot = script_data.supply_depots[depots[index]]
   if not depot then

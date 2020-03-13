@@ -240,12 +240,14 @@ local items =
     icon = supply_depot_chest.icon,
     icon_size = supply_depot_chest.icon_size,
     --category = "transport",
-    enabled = true,
+    enabled = false,
     ingredients =
     {
-      {"iron-plate", 10},
+      {"iron-plate", 50},
+      {"iron-gear-wheel", 10},
+      {"iron-stick", 20},
     },
-    energy_required = 1,
+    energy_required = 5,
     result = "supply-depot"
   },
   {
@@ -267,12 +269,14 @@ local items =
     icon = depot.icon,
     icon_size = depot.icon_size,
     --category = "transport",
-    enabled = true,
+    enabled = false,
     ingredients =
     {
-      {"iron-plate", 10},
+      {"iron-plate", 50},
+      {"iron-gear-wheel", 10},
+      {"iron-stick", 20},
     },
-    energy_required = 1,
+    energy_required = 5,
     result = "request-depot"
   }
 }
