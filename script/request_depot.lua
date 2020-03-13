@@ -112,7 +112,7 @@ function request_depot:get_request_size()
 end
 
 function request_depot:get_wait_time()
-  return math.max(1, ((self.last_spawn_tick + request_spawn_timeout) - 1) - game.tick)
+  return math.max(1, ((self.last_spawn_tick + request_spawn_timeout - 1)) - game.tick)
 end
 
 function request_depot:get_output_inventory()

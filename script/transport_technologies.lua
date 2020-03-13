@@ -8,7 +8,7 @@ local technology_effects =
 {
   [shared.transport_speed_technology] = function(technology)
     local force_index = technology.force.index
-    script_data.transport_speed[force_index] = technology.level * 0.1
+    script_data.transport_speed[force_index] = technology.level * 0.2
   end,
   [shared.transport_capacity_technology] = function(technology)
     local force_index = technology.force.index

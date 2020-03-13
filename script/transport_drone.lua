@@ -259,13 +259,13 @@ function transport_drone:process_return_to_requester()
 
 end
 
+local random = math.random
 function transport_drone:wait_for_reorder()
   self.state = states.waiting_for_reorder
-  local ticks_to_wait = self.request_depot:get_wait_time()
   self.entity.set_command
   {
     type = defines.command.stop,
-    ticks_to_wait = 20,
+    ticks_to_wait = random(20, 30),
     distraction = defines.distraction.none
   }
 end

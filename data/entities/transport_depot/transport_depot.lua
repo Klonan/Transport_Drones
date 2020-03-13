@@ -193,6 +193,7 @@ local supply_depot_chest =
   collision_mask = {},
   selection_priority = 100,
   fast_replaceable_group = "container",
+  scale_info_icons = false,
   selection_box = selection_box,
   inventory_size = 100,
   open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.5 },

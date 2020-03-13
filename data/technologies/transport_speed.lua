@@ -49,7 +49,7 @@ for k, ingredients in pairs (levels) do
     {
       {
         type = "nothing",
-        effect_description = "Transport drone speed: +10%"
+        effect_description = "Transport drone speed: +20%"
       }
     },
     prerequisites = k > 1 and {name.."-"..k - 1} or {},
@@ -79,7 +79,7 @@ local infinite =
   {
     {
       type = "nothing",
-      effect_description = "Transport drone speed: +10%"
+      effect_description = "Transport drone speed: +20%"
     }
   },
   prerequisites = k > 1 and {name.."-"..k - 1} or {},
