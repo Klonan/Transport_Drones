@@ -19,8 +19,9 @@ local make_recipe = function(item)
     },
     results =
     {
-      {type = "item", name = item.name, amount = math.min(item.stack_size * 100, (2 ^ 16) - 1), show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = (2 ^ 16) -1, show_details_in_recipe_tooltip = false} --overflow stack...
+      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
     },
     category = category,
     order = item.order,
