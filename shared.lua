@@ -7,5 +7,6 @@ data.drone_collision_mask = {"ground-tile", "not-colliding-with-itself", "collid
 data.variation_count = 50
 data.transport_speed_technology = "transport-drone-speed"
 data.transport_capacity_technology = "transport-drone-capacity"
+data.transport_system_technology = "transport-system"
 
 return data

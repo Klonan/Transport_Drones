@@ -6,26 +6,22 @@ local levels =
   [1] =
   {
     {"automation-science-pack", 1},
+    {"logistic-science-pack", 1},
   },
   [2] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
+    {"chemical-science-pack", 1},
   },
   [3] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
     {"chemical-science-pack", 1},
-  },
-  [4] =
-  {
-    {"automation-science-pack", 1},
-    {"logistic-science-pack", 1},
-    {"chemical-science-pack", 1},
     {"production-science-pack", 1},
   },
-  [5] =
+  [4] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
@@ -42,8 +38,8 @@ for k, ingredients in pairs (levels) do
     name = name.."-"..k,
     localised_name = {name},
     type = "technology",
-    icon = util.path("data/technologies/mining-speed-icon.png"),
-    icon_size = 216,
+    icon = util.path("data/technologies/transport-speed-icon.png"),
+    icon_size = 128,
     upgrade = true,
     effects =
     {
@@ -52,10 +48,10 @@ for k, ingredients in pairs (levels) do
         effect_description = "Transport drone speed: +20%"
       }
     },
-    prerequisites = k > 1 and {name.."-"..k - 1} or {},
+    prerequisites = k > 1 and {name.."-"..k - 1} or {"transport-system"},
     unit =
     {
-      count = k * 100,
+      count = k * 200,
       ingredients = ingredients,
       time = 30
     },
@@ -72,8 +68,8 @@ local infinite =
   name = name.."-"..k,
   localised_name = {name},
   type = "technology",
-  icon = util.path("data/technologies/mining-speed-icon.png"),
-  icon_size = 216,
+  icon = util.path("data/technologies/transport-speed-icon.png"),
+  icon_size = 128,
   upgrade = true,
   effects =
   {
@@ -85,7 +81,7 @@ local infinite =
   prerequisites = k > 1 and {name.."-"..k - 1} or {},
   unit =
   {
-    count_formula = "(2^(L-6))*500",
+    count_formula = "(2^(L-5))*500",
     ingredients =
     {
       {"automation-science-pack", 1},
