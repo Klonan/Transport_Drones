@@ -101,7 +101,8 @@ local make_unit = function(k)
         minimum_darkness = 0.3,
         intensity = 0.4,
         size = 10,
-        color = {r=1.0, g=1.0, b=1.0}
+        color = {r=1.0, g=1.0, b=1.0},
+        shift = shift
       },
       {
         type = "oriented",
@@ -115,7 +116,7 @@ local make_unit = function(k)
           width = 200,
           height = 200
         },
-        shift = {0, -3.5},
+        shift = {shift[1], shift[2] -3.5},
         size = 0.5,
         intensity = 0.6,
         color = {r=1.0, g=1.0, b=1.0}
