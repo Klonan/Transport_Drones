@@ -5,7 +5,7 @@
   "author": "Klonan",
   "contact": "",
   "homepage": "",
-  "description": "Adds transport drones and tranport depots",
+  "description": "Adds transport drones and transport depots",
   "dependencies": ["base >= 0.18.0"],
   "factorio_version": "0.18"
 }
