@@ -237,7 +237,7 @@ function transport_drone:suicide()
   if self.request_depot.entity.valid then
     self.request_depot:remove_drone(self)
   end
-
+  self.entity.force = "neutral"
   self.entity.die()
 end
 
