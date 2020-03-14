@@ -170,12 +170,16 @@ road_network.add_node = function(surface, x, y)
       local nx, ny = x + offset[1], y + offset[2]
       local node = get_node(surface, nx, ny)
       if node then
-        if node.id ~= prospective_id then
+        local old_id = node.id
+        if old_id ~= prospective_id then
           recursive_set_id(surface, nx, ny, prospective_id)
+          script_data.networks[old_id] = nil
         end
       end
     end
   end
+
+  --game.print(table_size(script_data.networks))
 
 end
 
@@ -189,6 +193,13 @@ road_network.remove_node = function(surface, x, y)
   script_data.node_map[surface][x][y] = nil
 
   local count = get_neighbor_count(surface, x, y)
+  
+  if count == 0 then
+    -- No neighbors, clear the network.    
+    script_data.networks[node.id] = nil
+    return
+  end
+
   if count == 1 then
     -- only 1 neighbor, no need to worry about anything.
     return

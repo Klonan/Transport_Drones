@@ -136,8 +136,8 @@ function supply_depot:add_to_network()
 end
 
 function supply_depot:on_removed()
-  self:remove_from_node()
   self:remove_from_network()
+  self:remove_from_node()
   self.corpse.destroy()
   self.assembler.destructible = true
   self.assembler.destroy()
