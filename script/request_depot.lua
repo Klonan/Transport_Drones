@@ -145,7 +145,7 @@ function request_depot:should_order(plus_one)
   local current_count = self:get_output_inventory().get_item_count(self.item)
   local max_count = self:get_drone_item_count()
   local drone_spawn_count = max_count - math.floor(current_count / stack_size)
-  return drone_spawn_count + (plus_one and 2 or 0) > self:get_active_drone_count()
+  return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
 end
 
 function request_depot:handle_offer(supply_depot, name, count)
