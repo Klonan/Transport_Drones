@@ -7,6 +7,7 @@ tile.collision_mask = shared.tile_collision_mask
 tile.minable.result = "road"
 tile.layer = 150
 tile.placeable_by = {{item   = "road", count = 1}}
+tile.map_color={r=86/2, g=82/2, b=74/2}
 
 local proxy_tile = util.copy(data.raw.tile["stone-path"])
 
