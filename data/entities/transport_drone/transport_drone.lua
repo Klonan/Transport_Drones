@@ -95,6 +95,32 @@ local make_unit = function(k)
     rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
     --corpse = name.." Corpse",
     dying_explosion = "explosion",
+    light =
+    {
+      {
+        minimum_darkness = 0.3,
+        intensity = 0.4,
+        size = 10,
+        color = {r=1.0, g=1.0, b=1.0}
+      },
+      {
+        type = "oriented",
+        minimum_darkness = 0.3,
+        picture =
+        {
+          filename = "__core__/graphics/light-cone.png",
+          priority = "extra-high",
+          flags = { "light" },
+          scale = 2,
+          width = 200,
+          height = 200
+        },
+        shift = {0, -3.5},
+        size = 0.5,
+        intensity = 0.6,
+        color = {r=1.0, g=1.0, b=1.0}
+      }
+    },
     vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
     working_sound =
     {
