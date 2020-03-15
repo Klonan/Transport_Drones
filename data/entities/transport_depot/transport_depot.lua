@@ -90,28 +90,28 @@ depot.animation =
   {
     layers =
     {
-      request_base{0, 0},
+      request_base{0, 0.4},
     }
   },
   south =
   {
     layers =
     {
-      request_base{0, 0},
+      request_base{0, 0.4},
     }
   },
   east =
   {
     layers =
     {
-      request_base{0, 0},
+      request_base{0, 0.4},
     }
   },
   west =
   {
     layers =
     {
-      request_base{0, 0},
+      request_base{0, 0.4},
     }
   },
 }
@@ -141,28 +141,28 @@ supply_depot.animation =
   {
     layers =
     {
-      supply_base{0, 0},
+      supply_base{0, 0.4},
     }
   },
   south =
   {
     layers =
     {
-      supply_base{0, 0},
+      supply_base{0, 0.4},
     }
   },
   east =
   {
     layers =
     {
-      supply_base{0, 0},
+      supply_base{0, 0.4},
     }
   },
   west =
   {
     layers =
     {
-      supply_base{0, 0},
+      supply_base{0, 0.4},
     }
   },
 }

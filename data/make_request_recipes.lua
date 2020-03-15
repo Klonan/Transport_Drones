@@ -9,7 +9,7 @@ local make_recipe = function(item)
   {
     type = "recipe",
     name = "request-"..item.name,
-    localised_name = {"", "Request ", item.localised_name or {"item-name."..item.name}},
+    localised_name = {"", "Request ", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
     icon = item.icon,
     icon_size = item.icon_size,
     icons = item.icons,
