@@ -1,6 +1,17 @@
 local category = "transport-drone-request"
 local util = require("tf_util/tf_util")
 
+local recipes = data.raw.recipe
+
+local get_subgroup = function(item)
+  if item.subgroup then return item.subgroup end
+  local recipe = recipes[item.name]
+  if recipe then
+    if recipe.subgroup then return recipe.subgroup end
+  end
+  return "other"
+end
+
 local make_recipe = function(item)
   if not item then return end
   if not item.name then return end
@@ -25,7 +36,7 @@ local make_recipe = function(item)
     },
     category = category,
     order = item.order,
-    subgroup = item.subgroup,
+    subgroup = get_subgroup(item),
     overload_multiplier = math.min(200, 60000 / (item.stack_size or 1)),
     hide_from_player_crafting = true,
     main_product = "",
@@ -33,6 +44,7 @@ local make_recipe = function(item)
     allow_as_intermediate = false,
     allow_intermediates = true
   }
+
   data:extend{recipe}
 end
 
