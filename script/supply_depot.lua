@@ -147,7 +147,7 @@ end
 local update_next_depot = function()
   local index = script_data.last_update_index
   local depots = script_data.update_order
-  
+
   if index < 1 then
     index = #depots
     shuffle_table(depots)
@@ -168,6 +168,7 @@ local update_next_depot = function()
 end
 
 local on_tick = function(event)
+  if event.tick % 2 == 0 then return end
   update_next_depot()
 end
 

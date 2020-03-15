@@ -3,6 +3,7 @@ local road_network = require("script/road_network")
 local transport_technologies = require("script/transport_technologies")
 
 local request_spawn_timeout = 60
+local tick = 0
 
 local script_data = 
 {
@@ -48,7 +49,7 @@ function request_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
-    last_spawn_tick = 0
+    next_spawn_tick = 0
   }
   setmetatable(depot, depot_metatable)
 
@@ -111,10 +112,6 @@ function request_depot:get_request_size()
   return self:get_stack_size() * (1 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
 end
 
-function request_depot:get_wait_time()
-  return math.max(1, ((self.last_spawn_tick + request_spawn_timeout - 1)) - game.tick)
-end
-
 function request_depot:get_output_inventory()
   return self.entity.get_output_inventory()
 end
@@ -128,7 +125,7 @@ function request_depot:get_active_drone_count()
 end
 
 function request_depot:can_spawn_drone()
-  if game.tick - self.last_spawn_tick < request_spawn_timeout then return end
+  if tick < (self.next_spawn_tick or 0) then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -161,7 +158,7 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   local drone = transport_drone.new(self, supply_depot, needed_count)
   self.drones[drone.index] = drone
-  self.last_spawn_tick = game.tick
+  self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 
 end
@@ -263,6 +260,8 @@ local update_next_depot = function()
 end
 
 local on_tick = function(event)
+  tick = event.tick
+  if tick % 2 == 1 then return end
   update_next_depot()
 end
 
