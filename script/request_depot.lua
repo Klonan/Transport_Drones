@@ -3,7 +3,6 @@ local road_network = require("script/road_network")
 local transport_technologies = require("script/transport_technologies")
 
 local request_spawn_timeout = 60
-local tick = 0
 
 local script_data = 
 {
@@ -125,7 +124,7 @@ function request_depot:get_active_drone_count()
 end
 
 function request_depot:can_spawn_drone()
-  if tick < (self.next_spawn_tick or 0) then return end
+  if game.tick < (self.next_spawn_tick or 0) then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -260,8 +259,7 @@ local update_next_depot = function()
 end
 
 local on_tick = function(event)
-  tick = event.tick
-  if tick % 2 == 1 then return end
+  if event.tick % 2 == 1 then return end
   update_next_depot()
 end
 
