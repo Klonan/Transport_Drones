@@ -3,7 +3,7 @@ local shared = require("shared")
 local name = "transport-drone"
 
 
-local transport_drone_flags = {"placeable-off-grid"}
+local transport_drone_flags = {"placeable-off-grid", "not-in-kill-statistics"}
 local sprite_base = util.copy(data.raw.car.tank)
 
 local make_unit = function(k)
