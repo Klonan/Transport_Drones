@@ -147,12 +147,14 @@ end
 local update_next_depot = function()
   local index = script_data.last_update_index
   local depots = script_data.update_order
+  
   if index < 1 then
     index = #depots
     shuffle_table(depots)
     --assert(#depots == table_size(depots))
     --game.print("SHUFFLED")
   end
+
   local depot = script_data.supply_depots[depots[index]]
   if not depot then
     depots[index] = depots[#depots]
@@ -165,26 +167,8 @@ local update_next_depot = function()
   script_data.last_update_index = index - 1
 end
 
-
-local setup_update_order = function()
-  local update_order = {}
-  local count = 1
-  for k, depot in pairs (script_data.supply_depots) do
-    update_order[count] = k
-    count = count + 1
-  end
-  shuffle_table(update_order)
-  script_data.update_order = update_order
-  script_data.last_update_index = 0
-end
-
 local on_tick = function(event)
-  if not script_data.update_order then
-    setup_update_order()
-  end
-  --for k = 1, 20 do
-    update_next_depot()
-  --end
+  update_next_depot()
 end
 
 local lib = {}
@@ -211,7 +195,6 @@ lib.on_load = function()
 end
 
 lib.on_configuration_changed = function()
-  setup_update_order()
 end
 
 lib.get_depot = function(entity)
