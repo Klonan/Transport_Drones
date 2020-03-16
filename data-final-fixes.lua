@@ -8,11 +8,13 @@ local gate_collision_mask = {"item-layer", "player-layer", "train-layer", "water
 for k, rail in pairs (data.raw["straight-rail"]) do
   rail.collision_mask = rail.collision_mask or rail_collision_mask
   table.insert(rail.collision_mask, "layer-14")
+  rail.selection_priority = 45
 end
 
 for k, rail in pairs (data.raw["curved-rail"]) do
   rail.collision_mask = rail.collision_mask or rail_collision_mask
   table.insert(rail.collision_mask, "layer-14")
+  rail.selection_priority = 45
 end
 
 for k, gate in pairs (data.raw.gate) do
