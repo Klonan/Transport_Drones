@@ -14,7 +14,9 @@ end
 
 local make_recipe = function(item)
   if not item then return end
-  if not item.name then return end
+  if not item.name then
+    return
+  end
   if util.has_flag(item, "not-stackable") or util.has_flag(item, "hidden")  then return end
   local recipe = 
   {
@@ -44,7 +46,6 @@ local make_recipe = function(item)
     allow_as_intermediate = false,
     allow_intermediates = true
   }
-
   data:extend{recipe}
 end
 

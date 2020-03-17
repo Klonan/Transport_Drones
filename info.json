@@ -6,6 +6,7 @@
   "contact": "",
   "homepage": "",
   "description": "Adds transport drones and transport depots",
-  "dependencies": ["base >= 0.18.0"],
+  "dependencies": ["base >= 0.18.0", 
+    "(?)deadlock_stacked_recipes"],
   "factorio_version": "0.18"
 }
