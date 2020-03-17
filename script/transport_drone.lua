@@ -400,13 +400,6 @@ local on_entity_removed = function(event)
 
 end
 
-local make_unselectable = function()
-  if remote.interfaces["unit_control"] then
-    remote.call("unit_control", "register_unit_unselectable", "transport-drone")
-  end
-end
-
-
 transport_drone.events =
 {
   --[defines.events.on_built_entity] = on_built_entity,
@@ -433,11 +426,9 @@ end
 transport_drone.on_init = function()
   global.transport_drone = global.transport_drone or script_data
   game.map_settings.path_finder.use_path_cache = false
-  make_unselectable()
 end
 
 transport_drone.on_configuration_changed = function()
-  make_unselectable()
 end
 
 transport_drone.get_drone = get_drone

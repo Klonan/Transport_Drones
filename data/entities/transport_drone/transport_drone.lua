@@ -89,6 +89,7 @@ local make_unit = function(k)
     },
     vision_distance = 40,
     has_belt_immunity = true,
+    not_controllable = true,
     movement_speed = 0.15,
     distance_per_frame = 0.15,
     pollution_to_join_attack = 1000,
