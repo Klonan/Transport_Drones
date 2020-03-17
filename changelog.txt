@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.6
+Date: 2020-03-17
+  Changes:
+    - Fixed some deadlock stacking item requests not showing.
+    - Fixed units being selectable in some circumstances with the unit control mod.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.5
 Date: 2020-03-16
   Changes:
