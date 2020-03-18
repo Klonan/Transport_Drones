@@ -35,6 +35,7 @@ function request_depot.new(entity)
   local surface = entity.surface
 
   entity.active = false
+  entity.rotatable = false
 
   local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
@@ -239,28 +240,6 @@ function request_depot:on_removed()
   self:suicide_all_drones()
   self.corpse.destroy()
   script_data.request_depots[self.index] = nil
-end
-
-
-local update_next_depot = function()
-  local index = script_data.last_update_index
-  local depots = script_data.request_depots
-  if index and not depots[index] then
-    index = nil
-  end
-  local update_depot
-  index, update_depot = next(depots, index)
-  script_data.last_update_index = index
-  if not index then
-    return
-  end
-  update_depot:update()
-  --update_depot:say("U")
-end
-
-local on_tick = function(event)
-  if event.tick % 2 == 1 then return end
-  update_next_depot()
 end
 
 local lib = {}

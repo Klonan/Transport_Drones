@@ -12,6 +12,7 @@ local new_id = function()
   {
     requesters = {},
     supply = {},
+    fuel = {},
     id = id
   }
   return id
@@ -242,6 +243,17 @@ road_network.add_supply_depot = function(depot)
   return network.id
 end
 
+road_network.add_fuel_depot = function(depot)
+  local x, y = depot.node_position[1], depot.node_position[2]
+  local surface = depot.entity.surface.index
+  local node = get_node(surface, x, y)
+
+  local network = get_network_by_id(node.id)
+  network.fuel[depot.index] = depot
+
+  return network.id
+end
+
 road_network.add_request_depot = function(depot, item_name)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
@@ -264,6 +276,21 @@ local shuffle = util.shuffle_table
 road_network.get_request_depots = function(id, name)
   local network = get_network_by_id(id)
   local depots = network.requesters[name]
+  if not depots then return end
+  --if true then return depots end
+  local to_shuffle = {}
+  local i = 1
+  for k, v in pairs (depots) do
+    to_shuffle[i] = v
+    i = i + 1
+  end
+  shuffle(to_shuffle)
+  return to_shuffle
+end
+
+road_network.get_fuel_depots = function(id)
+  local network = get_network_by_id(id)
+  local depots = network.fuel
   if not depots then return end
   --if true then return depots end
   local to_shuffle = {}
@@ -305,6 +332,13 @@ end
 
 road_network.on_load = function()
   script_data = global.road_network or script_data
+end
+
+road_network.on_configuration_changed = function()
+  --0.2.0 migration
+  for k, network in pairs (script_data.networks) do
+    network.fuel = network.fuel or {}
+  end
 end
 
 road_network.get_network_by_id = get_network_by_id

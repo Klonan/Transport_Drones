@@ -1,5 +1,6 @@
 local request_depot = require("script/depots/request_depot")
 local supply_depot = require("script/depots/supply_depot")
+local fuel_depot = require("script/depots/fuel_depot")
 local road_network = require("script/road_network")
 
 local depot_names = 
@@ -7,6 +8,7 @@ local depot_names =
   ["request-depot"] = request_depot,
   ["supply-depot"] = supply_depot,
   ["supply-depot-chest"] = supply_depot,
+  ["fuel-depot"] = fuel_depot,
 }
 
 local script_data = 

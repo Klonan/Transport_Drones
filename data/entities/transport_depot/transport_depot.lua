@@ -1,4 +1,4 @@
-local collision_box = {{-1.25, -1.25},{1.26, 1.26}}
+local collision_box = {{-1.25, -1.25},{1.25, 1.25}}
 local selection_box = {{-1.5, -1.5}, {1.5, 1.5}}
 
 local category = 
@@ -285,11 +285,139 @@ data:extend(items)
 
 
 
+
+local fuel_depot = util.copy(depot)
+fuel_depot.name = "fuel-depot"
+fuel_depot.localised_name = {"fuel-depot"}
+fuel_depot.icon = util.path("data/entities/transport_depot/fuel-depot-icon.png")
+
+fuel_depot.fluid_boxes =
+{
+  {
+    production_type = "output",
+    base_area = 10,
+    base_level = -1,
+    pipe_connections = {{ type="input-output", position = {0, -2} }},
+  },
+  {
+    production_type = "input",
+    base_area = 10,
+    base_level = -1,
+    pipe_connections = {{ type="input-output", position = {0, 2} }},
+  },
+  off_when_no_fluid_recipe = false
+}
+
+local fluid_base = function(shift)
+  return
+  {
+    filename = util.path("data/entities/transport_depot/fuel-depot-base.png"),
+    width = 474,
+    height = 335,
+    frame_count = 1,
+    scale = 0.45,
+    shift = shift
+  }
+end
+
+fuel_depot.animation =
+{
+  north =
+  {
+    layers =
+    {
+      fluid_base{0, 0.4},
+    }
+  },
+  south =
+  {
+    layers =
+    {
+      fluid_base{0, 0.4},
+    }
+  },
+  east =
+  {
+    layers =
+    {
+      fluid_base{0, 0.4},
+    }
+  },
+  west =
+  {
+    layers =
+    {
+      fluid_base{0, 0.4},
+    }
+  },
+}
+
+local fuel_depot_items = 
+{
+  {
+    type = "item",
+    name = "fuel-depot",
+    localised_name = {"fuel-depot"},
+    icon = fuel_depot.icon,
+    icon_size = fuel_depot.icon_size,
+    flags = {},
+    subgroup = "transport-drones",
+    order = "e-c",
+    stack_size = 10,
+    place_result = "fuel-depot"
+  },
+  {
+    type = "recipe",
+    name = "fuel-depot",
+    localised_name = {"fuel-depot"},
+    icon = fuel_depot.icon,
+    icon_size = fuel_depot.icon_size,
+    --category = "transport",
+    enabled = false,
+    ingredients =
+    {
+      {"iron-plate", 50},
+      {"iron-gear-wheel", 10},
+      {"iron-stick", 20},
+    },
+    energy_required = 5,
+    result = "fuel-depot"
+  }
+}
+
+local fuel_recipe = 
+{
+  type = "recipe",
+  name = "fuel-depots",
+  localised_name = {"fuel-depots"},
+  icon = fuel_depot.icon,
+  icon_size = 1,
+  --category = "transport",
+  enabled = true,
+  ingredients =
+  {
+    {type = "item", name = "transport-drone", amount = 1},
+    {type = "fluid", name = "petroleum-gas", amount = 10}
+  },
+  overload_multipler = 50,
+  energy_required = 5,
+  results = {},
+  subgroup = "other",
+  category = "crafting-with-fluid"
+}
+
+fuel_depot.fixed_recipe = fuel_recipe.name
+fuel_depot.crafting_categories = {fuel_recipe.category}
+
+data:extend(fuel_depot_items)
+data:extend{fuel_recipe}
+
 data:extend
 {
   depot,
   supply_depot,
   caution_corpse,
   supply_depot_chest,
-  category
+  category,
+  fuel_depot
 }
