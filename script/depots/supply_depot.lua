@@ -1,4 +1,4 @@
-local request_depot = require("script/request_depot")
+local request_depot = require("script/depots/request_depot")
 local road_network = require("script/road_network")
 
 local script_data = 

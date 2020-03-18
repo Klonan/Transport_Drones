@@ -1,5 +1,5 @@
-local request_depot = require("script/request_depot")
-local supply_depot = require("script/supply_depot")
+local request_depot = require("script/depots/request_depot")
+local supply_depot = require("script/depots/supply_depot")
 local road_network = require("script/road_network")
 
 local depot_names = 
@@ -167,7 +167,7 @@ local update_next_depot = function()
   end
   
   depot:update()
-  depot:say(index)
+  --depot:say(index)
   script_data.last_update_index = index + 1
 end
 
