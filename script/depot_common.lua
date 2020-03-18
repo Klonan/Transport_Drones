@@ -6,10 +6,18 @@ local depot_names =
 {
   ["request-depot"] = request_depot,
   ["supply-depot"] = supply_depot,
+  ["supply-depot-chest"] = supply_depot,
+}
+
+local script_data = 
+{
+  depots = {},
+  update_order = {},
+  last_update_index = 0
 }
 
 local get_depot = function(entity)
-  return supply_depot.get_depot(entity) or request_depot.get_depot(entity)
+  return script_data.depots[tostring(entity.unit_number)]
 end
 
 local corpse_offsets = 
@@ -81,7 +89,9 @@ local on_created_entity = function(event)
     return
   end
   
-  depot_lib.new(entity)
+  local depot = depot_lib.new(entity)
+  script_data.depots[depot.index] = depot
+  script_data.update_order[#script_data.update_order + 1] = depot.index
 end
 
 local on_entity_removed = function(event)
@@ -94,6 +104,75 @@ local on_entity_removed = function(event)
     depot:on_removed()
   end
 
+end
+
+local load_depot = function(depot)
+  local name = depot.entity.name
+  local depot_lib = depot_names[name]
+  if not depot_lib then
+    return
+  end
+  depot_lib.load(depot)
+end
+
+local migrate_depots = function()
+
+  local depots = {}
+  local update_order = {}
+
+  local count = 1
+
+  local request_depots = global.request_depots.request_depots
+  for k, v in pairs (request_depots) do
+    depots[k] = v
+    update_order[count] = k
+    count = count + 1
+  end
+  global.request_depots = nil
+  
+  local supply_depots = global.supply_depots.supply_depots
+  for k, v in pairs (supply_depots) do
+    depots[k] = v
+    update_order[count] = k
+    count = count + 1
+  end
+  global.supply_depots = nil
+  
+  script_data.depots = depots
+  script_data.update_order = update_order
+
+  
+  for k, depot in pairs (script_data.depots) do
+    load_depot(depot)
+  end
+
+end
+
+local shuffle_table = util.shuffle_table
+local update_next_depot = function()
+  local index = script_data.last_update_index
+  local depots = script_data.update_order
+  
+  local depot_index = depots[index]
+  if not depot_index then
+    shuffle_table(depots)
+    script_data.last_update_index = 1
+    return
+  end
+
+  local depot = script_data.depots[depot_index]
+  if not depot then
+    depots[index], depots[#depots] = depots[#depots], nil
+    return
+  end
+  
+  depot:update()
+  depot:say(index)
+  script_data.last_update_index = index + 1
+end
+
+local on_tick = function(event)
+  update_next_depot()
 end
 
 local lib = {}
@@ -109,6 +188,30 @@ lib.events =
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
+
+  [defines.events.on_tick] = on_tick
 }
+
+lib.on_init = function()
+  global.transport_depots = global.transport_depots or script_data
+end
+
+lib.on_load = function()
+  script_data = global.transport_depots or script_data
+  for k, depot in pairs (script_data.depots) do
+    load_depot(depot)
+  end
+end
+
+
+lib.on_configuration_changed = function()
+  if global.request_depots then
+    migrate_depots()
+  end
+end
+
+lib.get_depot = function(entity)
+  return script_data.depots[tostring(entity.unit_number)]
+end
 
 return lib

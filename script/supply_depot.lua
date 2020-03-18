@@ -4,7 +4,6 @@ local road_network = require("script/road_network")
 local script_data = 
 {
   supply_depots = {},
-  blueprint_correction_data = {},
   update_order = {},
   last_update_index = 0
 }
@@ -17,7 +16,6 @@ local corpse_offsets =
   [6] = {-2, 0},
 }
 
-local shuffle_table = util.shuffle_table
 
 local supply_depot = {}
 local depot_metatable = {__index = supply_depot}
@@ -48,12 +46,11 @@ function supply_depot.new(entity)
   }
   setmetatable(depot, depot_metatable)
 
-  
-  script_data.supply_depots[depot.index] = depot
-  script_data.update_order[#script_data.update_order + 1] = depot.index
   depot:add_to_network()
   depot:add_to_node()
 
+  return depot
+  
 end
 
 function supply_depot:get_to_be_taken(name)
@@ -174,32 +171,8 @@ end
 
 local lib = {}
 
-lib.events =
-{ 
-  [defines.events.on_tick] = on_tick,  
-}
-
-lib.on_nth_tick =
-{
-  --[1] = update_depots
-}
-
-lib.on_init = function()
-  global.supply_depots = global.supply_depots or script_data
-end
-
-lib.on_load = function()
-  script_data = global.supply_depots or script_data
-  for k, depot in pairs (script_data.supply_depots) do
-    setmetatable(depot, depot_metatable)
-  end
-end
-
-lib.on_configuration_changed = function()
-end
-
-lib.get_depot = function(entity)
-  return script_data.supply_depots[tostring(entity.unit_number)]
+lib.load = function(depot)
+  setmetatable(depot, depot_metatable)
 end
 
 lib.new = supply_depot.new

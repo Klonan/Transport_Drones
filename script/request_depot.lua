@@ -52,9 +52,9 @@ function request_depot.new(entity)
   }
   setmetatable(depot, depot_metatable)
 
-  script_data.request_depots[depot.index] = depot
-
   depot:add_to_node()
+
+  return depot
 
 end
 
@@ -265,34 +265,8 @@ end
 
 local lib = {}
 
-lib.events =
-{
-  [defines.events.on_tick] = on_tick
-}
-
-lib.on_nth_tick =
-{
-  --[237] = check_request_change
-}
-
-
-lib.on_init = function()
-  global.request_depots = global.request_depots or script_data
-end
-
-lib.on_load = function()
-  script_data = global.request_depots or script_data
-  for k, depot in pairs (script_data.request_depots) do
-    setmetatable(depot, depot_metatable)
-  end
-end
-
-lib.get_depots_for_item = function(item)
-  return script_data.item_map[item]
-end
-
-lib.get_depot = function(entity)
-  return script_data.request_depots[tostring(entity.unit_number)]
+lib.load = function(depot)
+  setmetatable(depot, depot_metatable)
 end
 
 lib.new = request_depot.new
