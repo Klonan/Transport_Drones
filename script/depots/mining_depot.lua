@@ -6,10 +6,10 @@ local depot_metatable = {__index = fuel_depot}
 
 local corpse_offsets = 
 {
-  [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
+  [0] = {0, 3},
+  [2] = {-3, 0},
+  [4] = {0, -3},
+  [6] = {3, 0},
 }
 
 local get_corpse_position = function(entity)

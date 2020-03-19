@@ -1,6 +1,7 @@
 local request_depot = require("script/depots/request_depot")
 local supply_depot = require("script/depots/supply_depot")
 local fuel_depot = require("script/depots/fuel_depot")
+local mining_depot = require("script/depots/mining_depot")
 local road_network = require("script/road_network")
 
 local depot_names = 
@@ -9,6 +10,7 @@ local depot_names =
   ["supply-depot"] = supply_depot,
   ["supply-depot-chest"] = supply_depot,
   ["fuel-depot"] = fuel_depot,
+  ["mining-depot"] = mining_depot,
 }
 
 local script_data = 
@@ -30,7 +32,7 @@ local corpse_offsets =
   [6] = {-2, 0},
 }
 
-local get_corpse_position = function(entity)
+local get_corpse_position = function(entity, corpse_offsets)
 
   local position = entity.position
   local direction = entity.direction
@@ -39,8 +41,8 @@ local get_corpse_position = function(entity)
 
 end
 
-local attempt_to_place_node = function(entity)
-  local corpse_position = get_corpse_position(entity)
+local attempt_to_place_node = function(entity, depot_lib)
+  local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
 
   if not surface.can_place_entity(
@@ -84,7 +86,7 @@ local on_created_entity = function(event)
     return
   end
 
-  if not attempt_to_place_node(entity) then
+  if not attempt_to_place_node(entity, depot_lib) then
     --refund
     refund_build(event, entity.name)
     entity.destroy()

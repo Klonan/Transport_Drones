@@ -248,6 +248,8 @@ lib.load = function(depot)
   setmetatable(depot, depot_metatable)
 end
 
+lib.corpse_offsets = corpse_offsets
+
 lib.new = request_depot.new
 
 return lib

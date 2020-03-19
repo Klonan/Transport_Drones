@@ -149,4 +149,6 @@ end
 
 lib.new = supply_depot.new
 
+lib.corpse_offsets = corpse_offsets
+
 return lib
