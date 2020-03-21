@@ -1,6 +1,10 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
+
+local fuel_amount_per_drone = shared.fuel_amount_per_drone
+local drone_fluid_capacity = shared.drone_fluid_capacity
+
 local fuel_depot = {}
 local depot_metatable = {__index = fuel_depot}
 
@@ -46,6 +50,7 @@ function fuel_depot.new(entity)
   setmetatable(depot, depot_metatable)
 
   depot:add_to_node()
+  depot:add_to_network()
 
   return depot
 
@@ -84,6 +89,102 @@ end
 function fuel_depot:add_to_network()
   --self:say("Adding to network") 
   self.network_id = road_network.add_fuel_depot(self)
+end
+
+function fuel_depot:get_fuel_amount()
+  local box = self.entity.fluidbox[1]
+  return (box and box.amount) or 0
+end
+
+function fuel_depot:minimum_request_size()
+  return (fuel_amount_per_drone * 5)
+end
+
+function fuel_depot:remove_drone(drone, remove_item)
+  self.drones[drone.index] = nil
+  if remove_item then
+    self:get_drone_inventory().remove{name = "transport-drone", count = 1}
+  end
+  self:update_sticker()
+end
+
+function fuel_depot:can_spawn_drone()
+  if game.tick < (self.next_spawn_tick or 0) then return end
+  return self:get_drone_item_count() > self:get_active_drone_count()
+end
+
+function fuel_depot:handle_fuel_request(depot, requested_amount)
+  if not self:can_spawn_drone() then return end
+  local amount = self:get_fuel_amount()
+  if amount < self:minimum_request_size() then return end
+
+  amount = math.min((amount - fuel_amount_per_drone), drone_fluid_capacity, requested_amount)
+  
+  local drone = transport_drone.new(self)
+
+  self:remove_fuel(amount)
+  self:remove_fuel(fuel_amount_per_drone)
+
+  drone:deliver_fuel(depot, amount)
+
+  self.drones[drone.index] = drone
+  
+  --self.next_spawn_tick = game.tick + request_spawn_timeout
+  self:update_sticker()
+
+end
+
+function fuel_depot:say(string)
+  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+end
+
+
+function fuel_depot:get_drone_item_count()
+  return self.entity.get_item_count("transport-drone")
+end
+
+function fuel_depot:get_active_drone_count()
+  return table_size(self.drones)
+end
+
+function fuel_depot:update_sticker()
+
+  if self.rendering and rendering.is_valid(self.rendering) then
+    rendering.set_text(self.rendering, self:get_active_drone_count().."/"..self:get_drone_item_count())
+    return
+  end
+
+  self.rendering = rendering.draw_text
+  {
+    surface = self.entity.surface.index,
+    target = self.entity,
+    text = self:get_active_drone_count().."/"..self:get_drone_item_count(),
+    only_in_alt_mode = true,
+    forces = {self.entity.force},
+    color = {r = 1, g = 1, b = 1},
+    alignment = "center",
+    scale = 1.5
+  }
+
+end
+
+
+function fuel_depot:remove_fuel(amount)
+  local box = self.entity.fluidbox[1]
+  if not box then return end
+  box.amount = box.amount - amount
+  if amount <= 0 then
+    self.entity.fluidbox[1] = nil
+  else
+    self.entity.fluidbox[1] = box
+  end
+end
+
+function fuel_depot:on_removed()
+  self:remove_from_network()
+  self:remove_from_node()
+  --self:suicide_all_drones()
+  self.corpse.destroy()
 end
 
 

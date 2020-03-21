@@ -40,7 +40,8 @@ local states =
 {
   going_to_supply = 1,
   return_to_requester = 2,
-  waiting_for_reorder = 3
+  waiting_for_reorder = 3,
+  delivering_fuel = 4
 }
 
 local get_drone_speed = function(force_index)
@@ -55,7 +56,7 @@ local get_drone_name = function()
 end
 
 
-transport_drone.new = function(request_depot, supply_depot, requested_count)
+transport_drone.new = function(request_depot)
 
   local entity = request_depot.entity.surface.create_entity{name = get_drone_name(), position = request_depot.corpse.position, force = request_depot.entity.force}
   
@@ -63,16 +64,13 @@ transport_drone.new = function(request_depot, supply_depot, requested_count)
   {
     entity = entity,
     request_depot = request_depot,
-    supply_depot = supply_depot,
     index = tostring(entity.unit_number),
     state = 0,
-    requested_count = 0
+    requested_count = 0,
   }
   setmetatable(drone, transport_drone.metatable)
   add_drone(drone)
   
-  drone:pickup_from_supply(requested_count)
-
   return drone
 end
 
@@ -84,8 +82,8 @@ function transport_drone:add_slow_sticker()
   self.entity.surface.create_entity{name = "drone-slowdown-sticker", position = self.entity.position, target = self.entity, force = "neutral"}
 end
 
-function transport_drone:pickup_from_supply(count)
-
+function transport_drone:pickup_from_supply(supply, count)
+  self.supply_depot = supply
   self.requested_count = count
   self.supply_depot:add_to_be_taken(self.request_depot.item, count)
 
@@ -104,11 +102,38 @@ function transport_drone:pickup_from_supply(count)
 
 end
 
+function transport_drone:deliver_fuel(depot, amount)
+
+  self.target_depot = depot
+  self.fuel_amount = amount
+  self.state = states.delivering_fuel
+  self.target_depot.fuel_on_the_way = (self.target_depot.fuel_on_the_way or 0) + amount
+
+  self:add_slow_sticker()
+  self:update_speed()
+  self:update_sticker()
+
+  self.entity.set_command
+  {
+    type = defines.command.go_to_location,
+    destination_entity = self.target_depot.corpse,
+    distraction = defines.distraction.none,
+    radius = 0.5,
+    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
+  }
+
+end
+
 function transport_drone:process_failed_command()
 
   self:say("F")
 
   if self.state == states.going_to_supply then
+    self:return_to_requester()
+    return
+  end
+
+  if self.state == states.delivering_fuel then
     self:return_to_requester()
     return
   end
@@ -163,6 +188,28 @@ function transport_drone:process_pickup()
   
 end
 
+function transport_drone:process_deliver_fuel()
+
+  self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
+
+  local box = self.target_depot.entity.fluidbox[1]
+  if not box then
+    box = {name = "petroleum-gas", amount = self.fuel_amount}
+  else
+    box.amount = box.amount + self.fuel_amount
+  end
+
+  self.target_depot.entity.fluidbox[1] = box
+
+  self.fuel_amount = nil
+
+  self:add_slow_sticker()
+  self:update_speed()
+  self:update_sticker()
+  self:return_to_requester()
+  
+end
+
 function transport_drone:return_to_requester()
   
   if not self.request_depot.entity.valid then
@@ -196,36 +243,65 @@ function transport_drone:update_sticker()
     self.item_rendering = nil
   end
 
-  if not self.held_item then
-    return
+  if self.held_item then
+    
+    self.background_rendering = rendering.draw_sprite 
+    {
+      sprite = "utility/entity_info_dark_background",
+      target = self.entity,
+      target_offset = self.entity.prototype.sticker_box.left_top,
+      surface = self.entity.surface,
+      forces = {self.entity.force},
+      only_in_alt_mode = true,
+      --target_offset = {0, -0.5},
+      x_scale = 0.6,
+      y_scale = 0.6,
+    }
+    
+    self.item_rendering = rendering.draw_sprite
+    {
+      sprite = "item/"..self.held_item,
+      target = self.entity,
+      target_offset = self.entity.prototype.sticker_box.left_top,
+      surface = self.entity.surface,
+      forces = {self.entity.force},
+      only_in_alt_mode = true,
+      --target_offset = {0, -0.5},
+      x_scale = 0.6,
+      y_scale = 0.6,
+    }
+  
   end
 
-  self.background_rendering = rendering.draw_sprite 
-  {
-    sprite = "utility/entity_info_dark_background",
-    target = self.entity,
-    target_offset = self.entity.prototype.sticker_box.left_top,
-    surface = self.entity.surface,
-    forces = {self.entity.force},
-    only_in_alt_mode = true,
-    --target_offset = {0, -0.5},
-    x_scale = 0.6,
-    y_scale = 0.6,
-  }
+  if self.fuel_amount then
 
-  self.item_rendering = rendering.draw_sprite
-  {
-    sprite = "item/"..self.held_item,
-    target = self.entity,
-    target_offset = self.entity.prototype.sticker_box.left_top,
-    surface = self.entity.surface,
-    forces = {self.entity.force},
-    only_in_alt_mode = true,
-    --target_offset = {0, -0.5},
-    x_scale = 0.6,
-    y_scale = 0.6,
-  }
-
+    self.background_rendering = rendering.draw_sprite 
+    {
+      sprite = "utility/entity_info_dark_background",
+      target = self.entity,
+      target_offset = self.entity.prototype.sticker_box.left_top,
+      surface = self.entity.surface,
+      forces = {self.entity.force},
+      only_in_alt_mode = true,
+      --target_offset = {0, -0.5},
+      x_scale = 0.6,
+      y_scale = 0.6,
+    }
+    
+    self.item_rendering = rendering.draw_sprite
+    {
+      sprite = "fluid/petroleum-gas",
+      target = self.entity,
+      target_offset = self.entity.prototype.sticker_box.left_top,
+      surface = self.entity.surface,
+      forces = {self.entity.force},
+      only_in_alt_mode = true,
+      --target_offset = {0, -0.5},
+      x_scale = 0.6,
+      y_scale = 0.6,
+    }
+    
+  end
 
 end
 
@@ -255,7 +331,11 @@ function transport_drone:process_return_to_requester()
 
   self:update_sticker()
 
-  self:wait_for_reorder()
+  if self.supply_depot then
+    self:wait_for_reorder()
+    return
+  end
+  self:remove_from_depot()
 
 end
 
@@ -279,6 +359,7 @@ function transport_drone:remove_from_depot()
 end
 
 function transport_drone:process_reorder()
+
   if not self.supply_depot.entity.valid then
     self:remove_from_depot()
     return
@@ -314,6 +395,11 @@ function transport_drone:update(event)
 
   if self.state == states.going_to_supply then
     self:process_pickup()
+    return
+  end
+
+  if self.state == states.delivering_fuel then
+    self:process_deliver_fuel()
     return
   end
 

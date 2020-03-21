@@ -2,6 +2,8 @@ local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 local transport_technologies = require("script/transport_technologies")
 
+local fuel_amount_per_drone = shared.fuel_amount_per_drone
+
 local request_spawn_timeout = 60
 
 local script_data = 
@@ -69,7 +71,35 @@ function request_depot:check_drone_validity()
   end
 end
 
+function request_depot:minimum_fuel_amount()
+  return (self:get_drone_item_count() * fuel_amount_per_drone) / 4
+end
+
+function request_depot:max_fuel_amount()
+  return (self:get_drone_item_count() * fuel_amount_per_drone)
+end
+
+function request_depot:check_fuel_amount()
+  if self:get_fuel_amount() >= self:minimum_fuel_amount() then return end
+  self.fuel_on_the_way = self.fuel_on_the_way or 0
+  local fuel_request_amount = (self:max_fuel_amount() - self:get_fuel_amount())
+  if fuel_request_amount <= self.fuel_on_the_way then return end
+  local fuel_depots = road_network.get_fuel_depots(self.network_id)
+  if not fuel_depots then
+    -- maybe show an alert?
+    --self:say("hi")
+    return
+  end
+  for k, depot in pairs (fuel_depots) do
+    depot:handle_fuel_request(self, fuel_request_amount - self.fuel_on_the_way)
+    if fuel_request_amount <= self.fuel_on_the_way then
+      return
+    end
+  end
+end
+
 function request_depot:update()
+  self:check_fuel_amount()
   self:check_request_change()
   self:check_drone_validity()
   self:update_sticker()
@@ -124,8 +154,14 @@ function request_depot:get_active_drone_count()
   return table_size(self.drones)
 end
 
+function request_depot:get_fuel_amount()
+  local box = self.entity.fluidbox[1]
+  return (box and box.amount) or 0
+end
+
 function request_depot:can_spawn_drone()
   if game.tick < (self.next_spawn_tick or 0) then return end
+  if self:get_fuel_amount() < fuel_amount_per_drone then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -156,8 +192,11 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   local needed_count = math.min(self:get_request_size(), count)
 
-  local drone = transport_drone.new(self, supply_depot, needed_count)
+  local drone = transport_drone.new(self)
+  drone:pickup_from_supply(supply_depot, needed_count)
+
   self.drones[drone.index] = drone
+
   self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 

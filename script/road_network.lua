@@ -294,7 +294,7 @@ end
 road_network.get_fuel_depots = function(id)
   local network = get_network_by_id(id)
   local depots = network.fuel
-  if not depots then return end
+  if not depots then game.print("NO FUEL DEPOTS") return end
   --if true then return depots end
   local to_shuffle = {}
   local i = 1

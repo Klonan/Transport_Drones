@@ -29,7 +29,7 @@ local make_recipe = function(item)
     ingredients =
     {
       {type = "item", name = "transport-drone", amount = 1},
-      {type = "fluid", name = "petroleum-gas", amount = 10}
+      {type = "fluid", name = "petroleum-gas", amount = 5000}
     },
     results =
     {
