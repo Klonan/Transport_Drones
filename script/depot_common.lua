@@ -215,8 +215,8 @@ lib.on_load = function()
   end
 end
 
-
 lib.on_configuration_changed = function()
+  global.transport_depots = global.transport_depots or script_data
   if global.request_depots then
     migrate_depots()
   end

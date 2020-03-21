@@ -4,6 +4,7 @@ local road_network = require("script/road_network")
 
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local drone_fluid_capacity = shared.drone_fluid_capacity
+local request_spawn_timeout = 60
 
 local fuel_depot = {}
 local depot_metatable = {__index = fuel_depot}
@@ -57,6 +58,7 @@ function fuel_depot.new(entity)
 end
 
 function fuel_depot:update()
+  self:update_sticker()
   --game.print("AHOY!")
 end
 
@@ -65,9 +67,9 @@ function fuel_depot:remove_from_network()
 
   local network = road_network.get_network_by_id(self.network_id)
 
-  local supply = network.supply
+  local fuel = network.fuel
 
-  supply[self.index] = nil
+  fuel[self.index] = nil
 
   self.network_id = nil
 
@@ -97,7 +99,7 @@ function fuel_depot:get_fuel_amount()
 end
 
 function fuel_depot:minimum_request_size()
-  return (fuel_amount_per_drone * 5)
+  return (fuel_amount_per_drone * 2)
 end
 
 function fuel_depot:remove_drone(drone, remove_item)
@@ -113,12 +115,12 @@ function fuel_depot:can_spawn_drone()
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
-function fuel_depot:handle_fuel_request(depot, requested_amount)
+function fuel_depot:handle_fuel_request(depot)
   if not self:can_spawn_drone() then return end
   local amount = self:get_fuel_amount()
   if amount < self:minimum_request_size() then return end
 
-  amount = math.min((amount - fuel_amount_per_drone), drone_fluid_capacity, requested_amount)
+  amount = math.min((amount - fuel_amount_per_drone), drone_fluid_capacity)
   
   local drone = transport_drone.new(self)
 
@@ -129,7 +131,7 @@ function fuel_depot:handle_fuel_request(depot, requested_amount)
 
   self.drones[drone.index] = drone
   
-  --self.next_spawn_tick = game.tick + request_spawn_timeout
+  self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 
 end
@@ -173,7 +175,7 @@ function fuel_depot:remove_fuel(amount)
   local box = self.entity.fluidbox[1]
   if not box then return end
   box.amount = box.amount - amount
-  if amount <= 0 then
+  if box.amount <= 0 then
     self.entity.fluidbox[1] = nil
   else
     self.entity.fluidbox[1] = box

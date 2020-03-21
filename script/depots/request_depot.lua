@@ -92,18 +92,23 @@ function request_depot:max_fuel_amount()
 end
 
 function request_depot:check_fuel_amount()
-  if self:get_fuel_amount() >= self:minimum_fuel_amount() then return end
+
   self.fuel_on_the_way = self.fuel_on_the_way or 0
-  local fuel_request_amount = (self:max_fuel_amount() - self:get_fuel_amount())
+  local current_amount = self:get_fuel_amount()
+  if current_amount >= self:minimum_fuel_amount() then return end
+
+  local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
+
   local fuel_depots = road_network.get_fuel_depots(self.network_id)
   if not fuel_depots then
     -- maybe show an alert?
     --self:say("hi")
     return
   end
+
   for k, depot in pairs (fuel_depots) do
-    depot:handle_fuel_request(self, fuel_request_amount - self.fuel_on_the_way)
+    depot:handle_fuel_request(self)
     if fuel_request_amount <= self.fuel_on_the_way then
       return
     end
@@ -228,13 +233,19 @@ function request_depot:remove_drone(drone, remove_item)
 end
 
 function request_depot:update_sticker()
+  
+  if not self.item then
+    if self.rendering and rendering.is_valid(self.rendering) then
+      rendering.destroy(self.rendering)
+      self.rendering = nil
+    end
+    return
+  end
 
   if self.rendering and rendering.is_valid(self.rendering) then
     rendering.set_text(self.rendering, self:get_active_drone_count().."/"..self:get_drone_item_count())
     return
   end
-
-  if not self.item then return end
 
   self.rendering = rendering.draw_text
   {

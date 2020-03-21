@@ -408,11 +408,13 @@ local fuel_recipe =
     {type = "fluid", name = "petroleum-gas", amount = 10}
   },
   subgroup = "other",
-  category = "crafting-with-fluid"
+  category = "crafting-with-fluid",
+  hidden = true
 }
 
 fuel_depot.fixed_recipe = fuel_recipe.name
 fuel_depot.crafting_categories = {fuel_recipe.category}
+fuel_depot.minable.result = "fuel-depot"
 
 data:extend(fuel_depot_items)
 data:extend{fuel_recipe}
