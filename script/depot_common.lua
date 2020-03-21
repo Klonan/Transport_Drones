@@ -24,14 +24,6 @@ local get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
 end
 
-local corpse_offsets = 
-{
-  [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
-}
-
 local get_corpse_position = function(entity, corpse_offsets)
 
   local position = entity.position
@@ -41,7 +33,20 @@ local get_corpse_position = function(entity, corpse_offsets)
 
 end
 
-local attempt_to_place_node = function(entity, depot_lib)
+local refund_tile_placement = function(surface, event, position)
+  local insert = event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).insert or event.player_index and game.get_player(event.player_index).insert
+  if not insert then return end
+  local tile = surface.get_tile(position)
+  local mineable_properties = tile.prototype.mineable_properties
+  if not mineable_properties.minable then return end
+  for k, product in pairs (mineable_properties.products) do
+    if product.amount >= 1 then
+      insert{name = product.name, count = product.amount}
+    end
+  end
+end
+
+local attempt_to_place_node = function(entity, depot_lib, event)
   local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
 
@@ -55,7 +60,9 @@ local attempt_to_place_node = function(entity, depot_lib)
     return
   end
 
+  
   local node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
+  refund_tile_placement(surface, event, node_position)
   surface.set_tiles
   {
     {name = "transport-drone-road", position = node_position}
@@ -86,7 +93,7 @@ local on_created_entity = function(event)
     return
   end
 
-  if not attempt_to_place_node(entity, depot_lib) then
+  if not attempt_to_place_node(entity, depot_lib, event) then
     --refund
     refund_build(event, entity.name)
     entity.destroy()
