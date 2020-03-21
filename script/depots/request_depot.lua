@@ -61,6 +61,18 @@ function request_depot.new(entity)
 
 end
 
+
+function request_depot:remove_fuel(amount)
+  local box = self.entity.fluidbox[1]
+  if not box then return end
+  box.amount = box.amount - amount
+  if amount <= 0 then
+    self.entity.fluidbox[1] = nil
+  else
+    self.entity.fluidbox[1] = box
+  end
+end
+
 function request_depot:check_drone_validity()
   local index, drone = next(self.drones)
   if not index then return end
@@ -161,7 +173,6 @@ end
 
 function request_depot:can_spawn_drone()
   if game.tick < (self.next_spawn_tick or 0) then return end
-  if self:get_fuel_amount() < fuel_amount_per_drone then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -174,6 +185,7 @@ function request_depot:get_minimum_request_size()
 end
 
 function request_depot:should_order(plus_one)
+  if self:get_fuel_amount() < fuel_amount_per_drone then return end
   local stack_size = self:get_request_size()
   local current_count = self:get_output_inventory().get_item_count(self.item)
   local max_count = self:get_drone_item_count()
@@ -194,6 +206,7 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   local drone = transport_drone.new(self)
   drone:pickup_from_supply(supply_depot, needed_count)
+  self:remove_fuel(fuel_amount_per_drone)
 
   self.drones[drone.index] = drone
 

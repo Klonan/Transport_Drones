@@ -1,6 +1,9 @@
 local shared = require("shared")
 local transport_technologies = require("script/transport_technologies")
 
+local fuel_amount_per_drone = shared.fuel_amount_per_drone
+local fuel_consumption_per_meter = shared.fuel_consumption_per_meter
+
 local script_data =
 {
   drones = {}
@@ -67,6 +70,7 @@ transport_drone.new = function(request_depot)
     index = tostring(entity.unit_number),
     state = 0,
     requested_count = 0,
+    tick_created = game.tick
   }
   setmetatable(drone, transport_drone.metatable)
   add_drone(drone)
@@ -198,7 +202,6 @@ function transport_drone:process_deliver_fuel()
   else
     box.amount = box.amount + self.fuel_amount
   end
-
   self.target_depot.entity.fluidbox[1] = box
 
   self.fuel_amount = nil
@@ -330,11 +333,13 @@ function transport_drone:process_return_to_requester()
   end
 
   self:update_sticker()
+  self:refund_fuel()
 
   if self.supply_depot then
     self:wait_for_reorder()
     return
   end
+
   self:remove_from_depot()
 
 end
@@ -348,6 +353,23 @@ function transport_drone:wait_for_reorder()
     ticks_to_wait = random(20, 30),
     distraction = defines.distraction.none
   }
+end
+
+function transport_drone:refund_fuel()
+  local box = self.request_depot.entity.fluidbox[1]
+  local fuel_refund = fuel_amount_per_drone - ((game.tick - self.tick_created) * self.entity.speed * fuel_consumption_per_meter)
+  self:say(fuel_refund)
+  if not box then
+    box = {name = "petroleum-gas", amount = 0}
+  end
+  
+  box.amount = box.amount + fuel_refund
+
+  if box.amount > 0 then
+    self.request_depot.entity.fluidbox[1] = box
+  else
+    self.request_depot.entity.fluidbox[1] = nil
+  end
 end
 
 function transport_drone:remove_from_depot()
@@ -380,8 +402,9 @@ function transport_drone:process_reorder()
     self:remove_from_depot()
     return
   end
-
-  self:pickup_from_supply(item_count)
+  
+  self.request_depot:remove_fuel(fuel_amount_per_drone)
+  self:pickup_from_supply(self.supply_depot, item_count)
 
 end
 

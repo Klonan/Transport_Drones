@@ -303,6 +303,7 @@ fuel_depot.fluid_boxes =
     production_type = "input",
     base_area = 10,
     base_level = -1,
+    height = 4,
     pipe_connections = {{ type="input-output", position = {0, 2} }},
   },
   off_when_no_fluid_recipe = false
@@ -398,7 +399,7 @@ local fuel_recipe =
   ingredients =
   {
     {type = "item", name = "transport-drone", amount = 1},
-    {type = "fluid", name = "petroleum-gas", amount = 5000}
+    {type = "fluid", name = "petroleum-gas", amount = 10000}
   },
   overload_multipler = 50,
   energy_required = 5,
