@@ -57,10 +57,10 @@ depot.radius_visualisation_specification =
 depot.fluid_boxes =
 {
   {
-    production_type = "output",
-    base_area = 10,
+    production_type = "input",
+    base_area = 50,
     base_level = -1,
-    pipe_connections = {{ type="input-output", position = {0, -2} }},
+    pipe_connections = {{ type="input", position = {0, -2} }},
   },
   off_when_no_fluid_recipe = false
 }
@@ -390,8 +390,9 @@ local fuel_recipe =
   type = "recipe",
   name = "fuel-depots",
   localised_name = {"fuel-depots"},
-  icon = fuel_depot.icon,
-  icon_size = 1,
+  flags = {"hidden"},
+  icon = util.path("data/entities/transport_depot/fuel-recipe-icon.png"),
+  icon_size = 64,
   --category = "transport",
   enabled = true,
   ingredients =
@@ -401,7 +402,10 @@ local fuel_recipe =
   },
   overload_multipler = 50,
   energy_required = 5,
-  results = {},
+  results =
+  {
+    {type = "fluid", name = "petroleum-gas", amount = 10}
+  },
   subgroup = "other",
   category = "crafting-with-fluid"
 }

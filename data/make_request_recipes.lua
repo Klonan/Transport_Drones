@@ -23,12 +23,13 @@ local make_recipe = function(item)
     type = "recipe",
     name = "request-"..item.name,
     localised_name = {"", "Request ", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
-    icon = item.icon,
+    icon = item.dark_background_icon or item.icon,
     icon_size = item.icon_size,
     icons = item.icons,
     ingredients =
     {
-      {type = "item", name = "transport-drone", amount = 1}
+      {type = "item", name = "transport-drone", amount = 1},
+      {type = "fluid", name = "petroleum-gas", amount = 10}
     },
     results =
     {
