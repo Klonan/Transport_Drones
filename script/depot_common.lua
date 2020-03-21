@@ -105,6 +105,7 @@ local on_entity_removed = function(event)
 
   local depot = get_depot(entity)
   if depot then
+    script_data.depots[depot.index] = nil
     depot:on_removed()
   end
 

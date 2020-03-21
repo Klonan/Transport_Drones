@@ -87,7 +87,6 @@ function fuel_depot:add_to_network()
 end
 
 
-
 local lib = {}
 
 lib.load = function(depot)

@@ -10,25 +10,9 @@ local new_id = function()
   local id = script_data.id_number
   script_data.networks[id] =
   {
-    requesters = {},
-    supply = {},
-    fuel = {},
     id = id
   }
   return id
-end
-
-local merge_network = function(source, target)
-  for k, requester in pairs (target.requesters) do
-    source.requesters[k] = requester
-  end
-  target.requesters = nil
-  for k, supplier in pairs (target.supply) do
-    source.supply[k] = supplier
-  end
-  target.supply = nil
-
-  script_data.networks[target.id] = nil
 end
 
 local get_network_by_id = function(id)
@@ -231,13 +215,14 @@ road_network.get_network = function(surface, x, y)
   return get_network_by_id(node.id)
 end
 
-
 road_network.add_supply_depot = function(depot)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
   local node = get_node(surface, x, y)
 
   local network = get_network_by_id(node.id)
+
+  if not network.supply then network.supply = {} end
   network.supply[depot.index] = depot
 
   return network.id
@@ -249,7 +234,22 @@ road_network.add_fuel_depot = function(depot)
   local node = get_node(surface, x, y)
 
   local network = get_network_by_id(node.id)
+  
+  if not network.fuel then network.fuel = {} end
   network.fuel[depot.index] = depot
+
+  return network.id
+end
+
+road_network.add_mining_depot = function(depot)
+  local x, y = depot.node_position[1], depot.node_position[2]
+  local surface = depot.entity.surface.index
+  local node = get_node(surface, x, y)
+
+  local network = get_network_by_id(node.id)
+
+  if not network.mining then network.mining = {} end
+  network.mining[depot.index] = depot
 
   return network.id
 end
@@ -260,6 +260,8 @@ road_network.add_request_depot = function(depot, item_name)
   local node = get_node(surface, x, y)
 
   local network = get_network_by_id(node.id)
+
+  if not network.requesters then network.requesters = {} end
 
   local item_map = network.requesters[item_name]
   if not item_map then
@@ -275,6 +277,7 @@ end
 local shuffle = util.shuffle_table
 road_network.get_request_depots = function(id, name)
   local network = get_network_by_id(id)
+  if not network.requesters then return end
   local depots = network.requesters[name]
   if not depots then return end
   --if true then return depots end
@@ -335,10 +338,7 @@ road_network.on_load = function()
 end
 
 road_network.on_configuration_changed = function()
-  --0.2.0 migration
-  for k, network in pairs (script_data.networks) do
-    network.fuel = network.fuel or {}
-  end
+
 end
 
 road_network.get_network_by_id = get_network_by_id

@@ -1,15 +1,15 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
 
-local fuel_depot = {}
-local depot_metatable = {__index = fuel_depot}
+local mining_depot = {}
+local depot_metatable = {__index = mining_depot}
 
 local corpse_offsets = 
 {
-  [0] = {0, 3},
-  [2] = {-3, 0},
-  [4] = {0, -3},
-  [6] = {3, 0},
+  [0] = {0, -2.9},
+  [2] = {2.9, 0},
+  [4] = {0, 2.9},
+  [6] = {-2.9, 0},
 }
 
 local get_corpse_position = function(entity)
@@ -21,7 +21,7 @@ local get_corpse_position = function(entity)
 
 end
 
-function fuel_depot.new(entity)
+function mining_depot.new(entity)
 
   local force = entity.force
   local surface = entity.surface
@@ -39,51 +39,100 @@ function fuel_depot.new(entity)
     corpse = corpse,
     index = tostring(entity.unit_number),
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
-    item = false,
-    drones = {},
-    next_spawn_tick = 0
+    to_be_taken = {},
   }
   setmetatable(depot, depot_metatable)
 
   depot:add_to_node()
+  depot:add_to_network()
 
   return depot
 
 end
 
-function fuel_depot:update()
-  --game.print("AHOY!")
+function mining_depot:get_to_be_taken(name)
+  return self.to_be_taken[name] or 0
 end
 
+function mining_depot:check_requests_for_item(name, count)
 
-function fuel_depot:remove_from_network()
+  if count - self:get_to_be_taken(name) <= 0 then return end
+
+  local request_depots = road_network.get_request_depots(self.network_id, name)
+  if not request_depots then return end
+  if not next(request_depots) then return end
+
+  for k, depot in pairs (request_depots) do
+    local available = count - self:get_to_be_taken(name)
+    if available <= 0 then return end
+    depot:handle_offer(self, name, available)
+    --depot:say(k)
+  end
+
+end
+
+function mining_depot:update()
+  if not self.network_id then return end
+  local items = self.entity.get_output_inventory().get_contents()
+  for name, count in pairs(items) do
+    self:check_requests_for_item(name, count)
+  end
+  --self:say("U")
+end
+
+function mining_depot:say(string)
+  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+end
+
+function mining_depot:give_item(requested_name, requested_count)
+  local inventory = self.entity.get_output_inventory()
+  local removed_count = inventory.remove({name = requested_name, count = requested_count})
+  return removed_count
+end
+
+function mining_depot:add_to_be_taken(name, count)
+  --if not (name and count) then return end
+  self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
+  --self:say(self.to_be_taken[name])
+end
+
+function mining_depot:get_available_item_count(name)
+  return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
+end
+
+function mining_depot:remove_from_network()
 
   local network = road_network.get_network_by_id(self.network_id)
 
-  local supply = network.supply
+  local mining = network.mining
 
-  supply[self.index] = nil
-
+  mining[self.index] = nil
   self.network_id = nil
 
 end
 
-function fuel_depot:add_to_node()
+function mining_depot:add_to_node()
   local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
-function fuel_depot:remove_from_node()
+function mining_depot:remove_from_node()
   local surface = self.entity.surface.index
   local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
   road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
-function fuel_depot:add_to_network()
-  --self:say("Adding to network") 
-  self.network_id = road_network.add_fuel_depot(self)
+function mining_depot:add_to_network()
+  --self:say("Adding to network")
+  self.network_id = road_network.add_mining_depot(self)
+end
+
+function mining_depot:on_removed()
+  self:remove_from_network()
+  self:remove_from_node()
+  self.corpse.destroy()
 end
 
 
@@ -94,7 +143,7 @@ lib.load = function(depot)
   setmetatable(depot, depot_metatable)
 end
 
-lib.new = fuel_depot.new
+lib.new = mining_depot.new
 
 lib.corpse_offsets = corpse_offsets
 

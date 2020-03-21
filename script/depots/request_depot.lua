@@ -239,7 +239,6 @@ function request_depot:on_removed()
   self:remove_from_node()
   self:suicide_all_drones()
   self.corpse.destroy()
-  script_data.request_depots[self.index] = nil
 end
 
 local lib = {}

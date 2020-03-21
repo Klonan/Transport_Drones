@@ -137,7 +137,6 @@ function supply_depot:on_removed()
   self.corpse.destroy()
   self.assembler.destructible = true
   self.assembler.destroy()
-  script_data.supply_depots[self.index] = nil
 end
 
 
