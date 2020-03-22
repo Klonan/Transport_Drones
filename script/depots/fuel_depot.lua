@@ -1,5 +1,6 @@
 local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
+local transport_technologies = require("script/transport_technologies")
 
 
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
@@ -115,12 +116,16 @@ function fuel_depot:can_spawn_drone()
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
+function fuel_depot:get_drone_fluid_capacity()
+  return drone_fluid_capacity * (1 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
+end
+
 function fuel_depot:handle_fuel_request(depot)
   if not self:can_spawn_drone() then return end
   local amount = self:get_fuel_amount()
   if amount < self:minimum_request_size() then return end
 
-  amount = math.min((amount - fuel_amount_per_drone), drone_fluid_capacity)
+  amount = math.min((amount - fuel_amount_per_drone), self:get_drone_fluid_capacity())
   
   local drone = transport_drone.new(self)
 

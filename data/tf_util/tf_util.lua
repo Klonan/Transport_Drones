@@ -170,7 +170,8 @@ util.empty_sprite = function()
     filename = util.path("data/tf_util/empty-sprite.png"),
     height = 1,
     width = 1,
-    frame_count = 1
+    frame_count = 1,
+    direction_count = 1
   }
 end
 

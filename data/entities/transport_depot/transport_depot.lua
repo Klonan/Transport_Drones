@@ -422,11 +422,22 @@ fuel_depot.minable.result = "fuel-depot"
 data:extend(fuel_depot_items)
 data:extend{fuel_recipe}
 
+local invisble_corpse =
+{
+  type = "corpse",
+  name = "invisible-transport-caution-corpse",
+  flags = {"placeable-off-grid"},
+  animation = util.empty_sprite(),
+  remove_on_entity_placement = false,
+  remove_on_tile_placement = false
+}
+
 data:extend
 {
   depot,
   supply_depot,
   caution_corpse,
+  invisble_corpse,
   supply_depot_chest,
   category,
   fuel_depot

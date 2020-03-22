@@ -6,10 +6,10 @@ local depot_metatable = {__index = mining_depot}
 
 local corpse_offsets = 
 {
-  [0] = {0, -2.9},
-  [2] = {2.9, 0},
-  [4] = {0, 2.9},
-  [6] = {-2.9, 0},
+  [0] = {0, -3},
+  [2] = {3, 0},
+  [4] = {0, 3},
+  [6] = {-3, 0},
 }
 
 local get_corpse_position = function(entity)
@@ -30,7 +30,7 @@ function mining_depot.new(entity)
   entity.rotatable = false
 
   local corpse_position = get_corpse_position(entity)
-  local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
+  local corpse = surface.create_entity{name = "invisible-transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
   
   local depot =
