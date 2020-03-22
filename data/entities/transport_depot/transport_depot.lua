@@ -62,6 +62,12 @@ depot.fluid_boxes =
     base_level = -1,
     pipe_connections = {{ type="input", position = {0, -2} }},
   },
+  {
+    production_type = "output",
+    base_area = 100000,
+    base_level = 1,
+    pipe_connections = {{ type="output", position = {0, 2} }},
+  },
   off_when_no_fluid_recipe = false
 }
 depot.crafting_categories = {"transport-drone-request"}

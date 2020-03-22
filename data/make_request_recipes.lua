@@ -90,6 +90,39 @@ local make_fluid_depot_recipe = function(fluid)
   }
 end
 
+local make_fluid_request_recipe = function(fluid)
+
+  local recipe = 
+  {
+    type = "recipe",
+    name = "request-"..fluid.name,
+    localised_name = {"", "Request ", fluid.localised_name or {"fluid-name."..fluid.name}},
+    icon = fluid.icon,
+    icon_size = fluid.icon_size,
+    icons = fluid.icons,
+    ingredients =
+    {
+      {type = "item", name = "transport-drone", amount = 1},
+      {type = "fluid", name = "petroleum-gas", amount = 5000}
+    },
+    results =
+    {
+      {type = "fluid", name = fluid.name, amount = 1000000, show_details_in_recipe_tooltip = false}
+    },
+    category = category,
+    order = fluid.order,
+    subgroup = fluid.subgroup or "fluid",
+    overload_multiplier = 200,
+    hide_from_player_crafting = true,
+    main_product = "",
+    allow_decomposition = false,
+    allow_as_intermediate = false,
+    allow_intermediates = true
+  }
+  data:extend{recipe}
+end
+
 for k, fluid in pairs (data.raw.fluid) do
   make_fluid_depot_recipe(fluid)
+  make_fluid_request_recipe(fluid)
 end
