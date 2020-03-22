@@ -29,6 +29,10 @@ local transport_system =
     },
     {
       type = "unlock-recipe",
+      recipe = "fluid-depot"
+    },
+    {
+      type = "unlock-recipe",
       recipe = "road"
     }
   },

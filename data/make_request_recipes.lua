@@ -58,3 +58,38 @@ for k, item_type in pairs(util.item_types()) do
     end
   end
 end
+
+local make_fluid_depot_recipe = function(fluid)
+  data:extend
+  {
+    {
+      type = "recipe",
+      name = "fluid-depot-"..fluid.name,
+      --localised_name = {"", "Request ", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
+      icon = fluid.icon,
+      icon_size = fluid.icon_size,
+      icons = fluid.icons,
+      ingredients =
+      {
+        {type = "fluid", name = fluid.name, amount = 1}
+      },
+      results =
+      {
+      },
+      category = "transport-fluid-request",
+      order = fluid.order,
+      subgroup = fluid.subgroup or "fluid", --get_subgroup(item),
+      overload_multiplier = 1,
+      hide_from_player_crafting = true,
+      main_product = "",
+      allow_decomposition = false,
+      allow_as_intermediate = false,
+      allow_intermediates = true,
+      enabled = true
+    }
+  }
+end
+
+for k, fluid in pairs (data.raw.fluid) do
+  make_fluid_depot_recipe(fluid)
+end

@@ -418,6 +418,7 @@ local fuel_recipe =
 fuel_depot.fixed_recipe = fuel_recipe.name
 fuel_depot.crafting_categories = {fuel_recipe.category}
 fuel_depot.minable.result = "fuel-depot"
+fuel_depot.placeable_by = {item = "fuel-depot", count = 1},
 
 data:extend(fuel_depot_items)
 data:extend{fuel_recipe}
@@ -431,6 +432,61 @@ local invisble_corpse =
   remove_on_entity_placement = false,
   remove_on_tile_placement = false
 }
+
+local fluid_request_category = 
+{
+  type = "recipe-category",
+  name = "transport-fluid-request"
+}
+
+local fluid_supply_depot = util.copy(fuel_depot)
+fluid_supply_depot.name = "fluid-depot"
+fluid_supply_depot.type = "furnace"
+fluid_supply_depot.crafting_categories = {"transport-fluid-request"}
+fluid_supply_depot.source_inventory_size = 0
+fluid_supply_depot.result_inventory_size = 0
+fluid_supply_depot.fixed_recipe = nil
+
+data:extend
+{
+  fluid_supply_depot,
+  fluid_request_category
+}
+
+local fuel_depot_items = 
+{
+  {
+    type = "item",
+    name = "fluid-depot",
+    localised_name = {"fluid-depot"},
+    icon = fluid_supply_depot.icon,
+    icon_size = fluid_supply_depot.icon_size,
+    flags = {},
+    subgroup = "transport-drones",
+    order = "e-c",
+    stack_size = 10,
+    place_result = "fluid-depot"
+  },
+  {
+    type = "recipe",
+    name = "fluid-depot",
+    localised_name = {"fluid-depot"},
+    icon = fluid_supply_depot.icon,
+    icon_size = fluid_supply_depot.icon_size,
+    --category = "transport",
+    enabled = false,
+    ingredients =
+    {
+      {"iron-plate", 50},
+      {"iron-gear-wheel", 10},
+      {"iron-stick", 20},
+    },
+    energy_required = 5,
+    result = "fluid-depot"
+  }
+}
+
+data:extend(fuel_depot_items)
 
 data:extend
 {
