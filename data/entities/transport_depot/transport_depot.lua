@@ -209,6 +209,9 @@ local supply_depot_chest =
   order = "nil",
   minable = {result = "supply-depot", mining_time = 1},
   placeable_by = {item = "supply-depot", count = 1},
+  circuit_wire_max_distance = 10,
+  circuit_wire_connection_point = circuit_connector_definitions["roboport"].points,
+  circuit_connector_sprites = circuit_connector_definitions["roboport"].sprites,
 
 }
 
