@@ -1,16 +1,12 @@
-local request_depot = require("script/depots/request_depot")
-local supply_depot = require("script/depots/supply_depot")
-local fuel_depot = require("script/depots/fuel_depot")
-local mining_depot = require("script/depots/mining_depot")
 local road_network = require("script/road_network")
 
-local depot_names = 
+local depot_names =
 {
-  ["request-depot"] = request_depot,
-  ["supply-depot"] = supply_depot,
-  ["supply-depot-chest"] = supply_depot,
-  ["fuel-depot"] = fuel_depot,
-  ["mining-depot"] = mining_depot,
+  ["request-depot"] = require("script/depots/request_depot"),
+  ["supply-depot"] = require("script/depots/supply_depot"),
+  ["fuel-depot"] = require("script/depots/fuel_depot"),
+  ["mining-depot"] = require("script/depots/mining_depot"),
+  ["fluid-depot"] = require("script/depots/fluid_depot")
 }
 
 local script_data = 

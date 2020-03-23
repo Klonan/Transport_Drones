@@ -71,7 +71,7 @@ local make_fluid_depot_recipe = function(fluid)
       icons = fluid.icons,
       ingredients =
       {
-        {type = "fluid", name = fluid.name, amount = 1}
+        {type = "fluid", name = fluid.name, amount = 0}
       },
       results =
       {
@@ -85,7 +85,8 @@ local make_fluid_depot_recipe = function(fluid)
       allow_decomposition = false,
       allow_as_intermediate = false,
       allow_intermediates = true,
-      enabled = true
+      enabled = true,
+      energy_required = 2 ^ 50
     }
   }
 end

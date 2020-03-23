@@ -452,6 +452,7 @@ fluid_supply_depot.crafting_categories = {"transport-fluid-request"}
 fluid_supply_depot.source_inventory_size = 0
 fluid_supply_depot.result_inventory_size = 0
 fluid_supply_depot.fixed_recipe = nil
+fluid_supply_depot.placeable_by = {item = "fluid-depot", count = 1}
 
 data:extend
 {

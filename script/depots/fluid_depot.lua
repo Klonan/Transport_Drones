@@ -9,47 +9,53 @@ local corpse_offsets =
   [6] = {-2, 0},
 }
 
-local supply_depot = {}
-local depot_metatable = {__index = supply_depot}
+local get_corpse_position = function(entity)
 
-function supply_depot.new(entity)
   local position = entity.position
   local direction = entity.direction
+  local offset = corpse_offsets[direction]
+  return {position.x + offset[1], position.y + offset[2]}
+
+end
+
+
+local fluid_depot = {}
+local depot_metatable = {__index = fluid_depot}
+
+function fluid_depot.new(entity)
+  
   local force = entity.force
   local surface = entity.surface
-  local offset = corpse_offsets[direction]
-  entity.destructible = false
-  entity.minable = false
-  entity.rotatable = false  
-  entity.active = false
-  local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force, player = entity.last_user}
-  local corpse_position = {position.x + offset[1], position.y + offset[2]}
+
+  --entity.active = false
+  entity.rotatable = false
+
+  local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
-
+  
   local depot =
   {
-    entity = chest,
-    assembler = entity,
+    entity = entity,
     corpse = corpse,
     to_be_taken = {},
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
-    index = tostring(chest.unit_number)
+    index = tostring(entity.unit_number)
   }
   setmetatable(depot, depot_metatable)
 
-  depot:add_to_network()
+  --depot:add_to_network()
   depot:add_to_node()
 
   return depot
   
 end
 
-function supply_depot:get_to_be_taken(name)
+function fluid_depot:get_to_be_taken(name)
   return self.to_be_taken[name] or 0
 end
 
-function supply_depot:check_requests_for_item(name, count)
+function fluid_depot:check_requests_for_item(name, count)
 
   if count - self:get_to_be_taken(name) <= 0 then return end
 
@@ -66,7 +72,7 @@ function supply_depot:check_requests_for_item(name, count)
 
 end
 
-function supply_depot:update()
+function fluid_depot:update()
   if not self.network_id then return end
   local items = self.entity.get_output_inventory().get_contents()
   for name, count in pairs(items) do
@@ -74,27 +80,27 @@ function supply_depot:update()
   end
 end
 
-function supply_depot:say(string)
+function fluid_depot:say(string)
   self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
 end
 
-function supply_depot:give_item(requested_name, requested_count)
+function fluid_depot:give_item(requested_name, requested_count)
   local inventory = self.entity.get_output_inventory()
   local removed_count = inventory.remove({name = requested_name, count = requested_count})
   return removed_count
 end
 
-function supply_depot:add_to_be_taken(name, count)
+function fluid_depot:add_to_be_taken(name, count)
   --if not (name and count) then return end
   self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
   --self:say(self.to_be_taken[name])
 end
 
-function supply_depot:get_available_item_count(name)
+function fluid_depot:get_available_item_count(name)
   return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
 end
 
-function supply_depot:remove_from_network()
+function fluid_depot:remove_from_network()
 
   local network = road_network.get_network_by_id(self.network_id)
 
@@ -106,25 +112,25 @@ function supply_depot:remove_from_network()
 
 end
 
-function supply_depot:add_to_node()
+function fluid_depot:add_to_node()
   local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
-function supply_depot:remove_from_node()
+function fluid_depot:remove_from_node()
   local surface = self.entity.surface.index
   local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
   road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
-function supply_depot:add_to_network()
+function fluid_depot:add_to_network()
   --self:say("Adding to network") 
-  self.network_id = road_network.add_supply_depot(self)
+  self.network_id = road_network.add_fluid_depot(self)
 end
 
-function supply_depot:on_removed()
+function fluid_depot:on_removed()
   self:remove_from_network()
   self:remove_from_node()
   self.corpse.destroy()
@@ -139,7 +145,7 @@ lib.load = function(depot)
   setmetatable(depot, depot_metatable)
 end
 
-lib.new = supply_depot.new
+lib.new = fluid_depot.new
 
 lib.corpse_offsets = corpse_offsets
 
