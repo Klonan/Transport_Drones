@@ -76,6 +76,10 @@ function fluid_depot:get_output_fluidbox()
   return self.entity.fluidbox[1]
 end
 
+function fluid_depot:set_output_fluidbox(box)
+  self.entity.fluidbox[1] = box
+end
+
 function fluid_depot:update()
   if not self.network_id then return end
 
@@ -101,9 +105,20 @@ function fluid_depot:say(string)
 end
 
 function fluid_depot:give_item(requested_name, requested_count)
-  local inventory = self.entity.get_output_inventory()
-  local removed_count = inventory.remove({name = requested_name, count = requested_count})
-  return removed_count
+  local box = self:get_output_fluidbox()
+  
+  if not box then return 0 end
+  if box.name ~= requested_name then return 0 end
+
+  if box.amount <= requested_count then
+    self:set_output_fluidbox(nil)
+    return box.amount
+  end
+
+  box.amount = box.amount - requested_count
+  self:set_output_fluidbox(box)
+
+  return requested_count
 end
 
 function fluid_depot:add_to_be_taken(name, count)
@@ -113,7 +128,9 @@ function fluid_depot:add_to_be_taken(name, count)
 end
 
 function fluid_depot:get_available_item_count(name)
-  return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
+  local box = self:get_output_fluidbox()
+  local amount = (box and box.name and box.name == name and box.amount) or 0
+  return amount - self:get_to_be_taken(name)
 end
 
 function fluid_depot:remove_from_network()

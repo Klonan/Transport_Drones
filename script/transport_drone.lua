@@ -247,6 +247,13 @@ function transport_drone:update_sticker()
   end
 
   if self.held_item then
+
+    local sprite
+    if game.item_prototypes[self.held_item] then
+      sprite = "item/"..self.held_item
+    elseif game.fluid_prototypes[self.held_item] then
+      sprite = "fluid/"..self.held_item
+    end
     
     self.background_rendering = rendering.draw_sprite 
     {
@@ -263,7 +270,7 @@ function transport_drone:update_sticker()
     
     self.item_rendering = rendering.draw_sprite
     {
-      sprite = "item/"..self.held_item,
+      sprite = sprite,
       target = self.entity,
       target_offset = self.entity.prototype.sticker_box.left_top,
       surface = self.entity.surface,

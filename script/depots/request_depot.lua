@@ -231,6 +231,10 @@ function request_depot:get_output_fluidbox()
   return self.entity.fluidbox[2]
 end
 
+function request_depot:set_output_fluidbox(box)
+  self.entity.fluidbox[2] = box
+end
+
 function request_depot:get_current_amount()
 
   if self.mode == request_mode.item then
@@ -275,7 +279,23 @@ function request_depot:handle_offer(supply_depot, name, count)
 end
 
 function request_depot:take_item(name, count)
-  self.entity.get_output_inventory().insert({name = name, count = count})
+  if game.item_prototypes[name] then
+    self.entity.get_output_inventory().insert({name = name, count = count})
+    return
+  end
+
+  if game.fluid_prototypes[name] then
+    local box = self:get_output_fluidbox()
+    if not box then
+      box = {name = name, amount = 0}
+    end
+    box.amount = box.amount + count
+    self:set_output_fluidbox(box)
+    return
+  end
+
+  
+
 end
 
 function request_depot:remove_drone(drone, remove_item)
