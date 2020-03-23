@@ -67,6 +67,9 @@ depot.fluid_boxes =
     base_area = 100000,
     base_level = 1,
     pipe_connections = {{ type="output", position = {0, 2} }},
+    pipe_covers = pipecoverspictures(),
+    pipe_picture = assembler3pipepictures(),
+    secondary_draw_orders = { north = -1, east = -1, west = -1}
   },
   off_when_no_fluid_recipe = false
 }
@@ -299,34 +302,40 @@ local fuel_depot = util.copy(depot)
 fuel_depot.name = "fuel-depot"
 fuel_depot.localised_name = {"fuel-depot"}
 fuel_depot.icon = util.path("data/entities/transport_depot/fuel-depot-icon.png")
-
+fuel_depot.icon_size = 266
+fuel_depot.icon_mipmaps = 0
+fuel_depot.collision_box = {{-2.25, -2.25},{2.25, 2.25}}
+fuel_depot.selection_box = {{-2.25, -2.25},{2.25, 2.25}}
 fuel_depot.fluid_boxes =
 {
   {
     production_type = "output",
     base_area = 10,
     base_level = -1,
-    pipe_connections = {{ type="input-output", position = {0, -2} }},
+    pipe_connections = {{ type="input-output", position = {0, -3} }},
   },
   {
     production_type = "input",
     base_area = 10,
     base_level = -1,
     height = 4,
-    pipe_connections = {{ type="input-output", position = {0, 2} }},
+    pipe_connections = {{ type="input-output", position = {0, 3} }},
+    pipe_covers = pipecoverspictures(),
+    pipe_picture = assembler3pipepictures(),
+    secondary_draw_orders = { north = -1, east = -1, west = -1}
   },
   off_when_no_fluid_recipe = false
 }
 
-local fluid_base = function(shift)
+local fuel_base = function(shift)
   return
   {
     filename = util.path("data/entities/transport_depot/fuel-depot-base.png"),
-    width = 474,
-    height = 335,
+    width = 334,
+    height = 266,
     frame_count = 1,
-    scale = 0.45,
-    shift = shift
+    scale = (32 * 5) / 266,
+    shift = {0.66, -0.1}
   }
 end
 
@@ -336,28 +345,28 @@ fuel_depot.animation =
   {
     layers =
     {
-      fluid_base{0, 0.4},
+      fuel_base(),
     }
   },
   south =
   {
     layers =
     {
-      fluid_base{0, 0.4},
+      fuel_base(),
     }
   },
   east =
   {
     layers =
     {
-      fluid_base{0, 0.4},
+      fuel_base(),
     }
   },
   west =
   {
     layers =
     {
-      fluid_base{0, 0.4},
+      fuel_base(),
     }
   },
 }
@@ -446,6 +455,10 @@ local fluid_request_category =
 }
 
 local fluid_supply_depot = util.copy(fuel_depot)
+fluid_supply_depot.icon = util.path("data/entities/transport_depot/fluid-depot-icon.png")
+fluid_supply_depot.icon_size = 146
+fluid_supply_depot.collision_box = collision_box
+fluid_supply_depot.selection_box = selection_box
 fluid_supply_depot.name = "fluid-depot"
 fluid_supply_depot.type = "furnace"
 fluid_supply_depot.crafting_categories = {"transport-fluid-request"}
@@ -453,6 +466,74 @@ fluid_supply_depot.source_inventory_size = 0
 fluid_supply_depot.result_inventory_size = 0
 fluid_supply_depot.fixed_recipe = nil
 fluid_supply_depot.placeable_by = {item = "fluid-depot", count = 1}
+
+
+fluid_supply_depot.fluid_boxes =
+{
+  {
+    production_type = "output",
+    base_area = 10,
+    base_level = -1,
+    pipe_connections = {{ type="input-output", position = {0, -2} }},
+  },
+  {
+    production_type = "input",
+    base_area = 10,
+    base_level = -1,
+    height = 4,
+    pipe_connections = {{ type="input-output", position = {0, 2} }},
+    pipe_covers = pipecoverspictures(),
+    pipe_picture = assembler3pipepictures(),
+    secondary_draw_orders = { north = -1, east = -1, west = -1}
+  },
+  off_when_no_fluid_recipe = false
+}
+
+
+
+local fluid_base = function(shift)
+  return
+  {
+    filename = util.path("data/entities/transport_depot/fluid-depot-base.png"),
+    width = 231,
+    height = 146,
+    frame_count = 1,
+    scale = (32 * 3) / 146,
+    shift = {0.5, 0}
+  }
+end
+
+fluid_supply_depot.animation =
+{
+  north =
+  {
+    layers =
+    {
+      fluid_base(),
+    }
+  },
+  south =
+  {
+    layers =
+    {
+      fluid_base(),
+    }
+  },
+  east =
+  {
+    layers =
+    {
+      fluid_base(),
+    }
+  },
+  west =
+  {
+    layers =
+    {
+      fluid_base(),
+    }
+  },
+}
 
 data:extend
 {

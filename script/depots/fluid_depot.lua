@@ -96,7 +96,7 @@ function fluid_depot:update()
   end
 
   self:check_requests_for_item(box.name, box.amount)
-  self:say("U")
+  --self:say("U")
 
 end
 

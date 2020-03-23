@@ -12,10 +12,10 @@ local depot_metatable = {__index = fuel_depot}
 
 local corpse_offsets = 
 {
-  [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
+  [0] = {0, -3},
+  [2] = {3, 0},
+  [4] = {0, 3},
+  [6] = {-3, 0},
 }
 
 local get_corpse_position = function(entity)
@@ -170,7 +170,8 @@ function fuel_depot:update_sticker()
     forces = {self.entity.force},
     color = {r = 1, g = 1, b = 1},
     alignment = "center",
-    scale = 1.5
+    scale = 2,
+    target_offset = {0, 0.5}
   }
 
 end
