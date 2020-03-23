@@ -115,13 +115,19 @@ local on_entity_removed = function(event)
 
 end
 
-local load_depot = function(depot)
+local get_lib = function(depot)
   local name = depot.entity.name
-  local depot_lib = depot_names[name]
-  if not depot_lib then
-    return
-  end
-  depot_lib.load(depot)
+  return depot_names[name]
+end
+
+local load_depot = function(depot)
+  local lib = get_lib(depot)
+  if lib.load then lib.load(depot) end
+end
+
+local config_changed_depot = function(depot)
+  local lib = get_lib(depot)
+  if lib.config_changed then lib.config_changed(depot) end
 end
 
 local migrate_depots = function()
@@ -213,10 +219,17 @@ lib.on_load = function()
 end
 
 lib.on_configuration_changed = function()
+
   global.transport_depots = global.transport_depots or script_data
+
   if global.request_depots then
     migrate_depots()
   end
+
+  for k, depot in pairs (script_data.depots) do
+    config_changed_depot(depot)
+  end
+
 end
 
 lib.get_depot = function(entity)

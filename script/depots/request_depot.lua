@@ -384,6 +384,10 @@ lib.load = function(depot)
   setmetatable(depot, depot_metatable)
 end
 
+lib.config_changed = function(depot)
+  depot.mode = depot.mode or request_mode.item
+end
+
 lib.corpse_offsets = corpse_offsets
 
 lib.new = request_depot.new
