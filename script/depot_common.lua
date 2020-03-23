@@ -4,6 +4,7 @@ local depot_names =
 {
   ["request-depot"] = require("script/depots/request_depot"),
   ["supply-depot"] = require("script/depots/supply_depot"),
+  ["supply-depot-chest"] = require("script/depots/supply_depot"),
   ["fuel-depot"] = require("script/depots/fuel_depot"),
   ["mining-depot"] = require("script/depots/mining_depot"),
   ["fluid-depot"] = require("script/depots/fluid_depot")

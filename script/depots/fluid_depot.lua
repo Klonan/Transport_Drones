@@ -44,7 +44,7 @@ function fluid_depot.new(entity)
   }
   setmetatable(depot, depot_metatable)
 
-  --depot:add_to_network()
+  depot:add_to_network()
   depot:add_to_node()
 
   return depot
@@ -72,12 +72,28 @@ function fluid_depot:check_requests_for_item(name, count)
 
 end
 
+function fluid_depot:get_output_fluidbox()
+  return self.entity.fluidbox[1]
+end
+
 function fluid_depot:update()
   if not self.network_id then return end
-  local items = self.entity.get_output_inventory().get_contents()
-  for name, count in pairs(items) do
-    self:check_requests_for_item(name, count)
+
+  local box = self:get_output_fluidbox()
+  if not box then
+    if not self.entity.active then
+      self.entity.active = true
+    end
+    return
   end
+
+  if self.entity.active then
+    self.entity.active = false
+  end
+
+  self:check_requests_for_item(box.name, box.amount)
+  self:say("U")
+
 end
 
 function fluid_depot:say(string)
@@ -127,15 +143,13 @@ end
 
 function fluid_depot:add_to_network()
   --self:say("Adding to network") 
-  self.network_id = road_network.add_fluid_depot(self)
+  self.network_id = road_network.add_supply_depot(self)
 end
 
 function fluid_depot:on_removed()
   self:remove_from_network()
   self:remove_from_node()
   self.corpse.destroy()
-  self.assembler.destructible = true
-  self.assembler.destroy()
 end
 
 

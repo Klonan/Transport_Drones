@@ -3,6 +3,7 @@ local road_network = require("script/road_network")
 local transport_technologies = require("script/transport_technologies")
 
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
+local drone_fluid_capacity = shared.drone_fluid_capacity
 
 local request_spawn_timeout = 60
 
@@ -31,6 +32,12 @@ local get_corpse_position = function(entity)
 
 end
 
+local request_mode =
+{
+  item = 1,
+  fluid = 2
+}
+
 function request_depot.new(entity)
 
   local force = entity.force
@@ -51,7 +58,8 @@ function request_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
-    next_spawn_tick = 0
+    next_spawn_tick = 0,
+    mode = request_mode.item
   }
   setmetatable(depot, depot_metatable)
 
@@ -128,9 +136,30 @@ function request_depot:suicide_all_drones()
   end
 end
 
+function request_depot:set_request_mode()
+  local recipe = self.entity.get_recipe()
+  if not recipe then return end
+
+  local product_type = recipe.products[1].type
+  if product_type == "item" then
+    self:say("Set to item")
+    self.mode = request_mode.item
+    return
+  end
+  
+  if product_type == "fluid" then
+    self:say("Set to fluid")
+    self.mode = request_mode.fluid
+    return
+  end
+end
+
+
 function request_depot:check_request_change()
   local requested_item = self:get_requested_item()
   if self.item == requested_item then return end
+
+  self:set_request_mode()
 
   if self.item then
     self:remove_from_network()
@@ -152,7 +181,16 @@ function request_depot:get_requested_item()
 end
 
 function request_depot:get_stack_size()
-  return game.item_prototypes[self.item].stack_size
+
+  if self.mode == request_mode.item then
+    return game.item_prototypes[self.item].stack_size
+  end
+
+  
+  if self.mode == request_mode.fluid then
+    return drone_fluid_capacity
+  end
+
 end
 
 function request_depot:get_request_size()
@@ -189,10 +227,26 @@ function request_depot:get_minimum_request_size()
   return math.ceil(self:get_stack_size() / 2)
 end
 
+function request_depot:get_output_fluidbox()
+  return self.entity.fluidbox[2]
+end
+
+function request_depot:get_current_amount()
+
+  if self.mode == request_mode.item then
+    return self:get_output_inventory().get_item_count(self.item)
+  end
+
+  if self.mode == request_mode.fluid then
+    local box = self:get_output_fluidbox()
+    return box and box.amount or 0
+  end
+end
+
 function request_depot:should_order(plus_one)
   if self:get_fuel_amount() < fuel_amount_per_drone then return end
   local stack_size = self:get_request_size()
-  local current_count = self:get_output_inventory().get_item_count(self.item)
+  local current_count = self:get_current_amount()
   local max_count = self:get_drone_item_count()
   local drone_spawn_count = max_count - math.floor(current_count / stack_size)
   return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
