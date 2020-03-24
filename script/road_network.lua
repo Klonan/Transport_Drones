@@ -280,7 +280,7 @@ road_network.get_request_depots = function(id, name)
   if not network.requesters then return end
   local depots = network.requesters[name]
   if not depots then return end
-  --if true then return depots end
+  
   local to_shuffle = {}
   local i = 1
   for k, v in pairs (depots) do
@@ -294,8 +294,8 @@ end
 road_network.get_fuel_depots = function(id)
   local network = get_network_by_id(id)
   local depots = network.fuel
-  if not depots then game.print("NO FUEL DEPOTS") return end
-  --if true then return depots end
+  if not depots then return end
+  
   local to_shuffle = {}
   local i = 1
   for k, v in pairs (depots) do
