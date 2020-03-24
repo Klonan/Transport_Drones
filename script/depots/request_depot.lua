@@ -99,9 +99,11 @@ function request_depot:max_fuel_amount()
   return (self:get_drone_item_count() * fuel_amount_per_drone)
 end
 
-function request_depot:show_alert(icon, message)
+
+local icon_param = {type = "virtual", name = "fuel-signal"}
+function request_depot:show_fuel_alert(message)
   for k, player in pairs (game.connected_players) do
-    player.add_custom_alert(self.entity, icon, message, true)
+    player.add_custom_alert(self.entity, icon_param, message, true)
   end
 end
 
@@ -114,8 +116,8 @@ function request_depot:check_fuel_amount()
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
   local fuel_depots = road_network.get_fuel_depots(self.network_id)
-  if not fuel_depots then
-    self:show_alert({type = "item", name = "request-depot"}, "No fuel depots on network for request depot")
+  if not (fuel_depots and next(fuel_depots)) then
+    self:show_fuel_alert("No fuel depots on network for request depot")
     return
   end
 
@@ -126,7 +128,7 @@ function request_depot:check_fuel_amount()
     end
   end
 
-  self:show_alert({type = "item", name = "request-depot"}, "No fuel in network for request depot")
+  self:show_fuel_alert("No fuel in network for request depot")
 
 end
 

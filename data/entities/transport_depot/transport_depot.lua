@@ -441,6 +441,16 @@ local fuel_recipe =
   hidden = true
 }
 
+local fuel_signal = 
+{
+  type = "virtual-signal",
+  name = "fuel-signal",
+  icon = fuel_recipe.icon,
+  icon_size = fuel_recipe.icon_size, 
+  subgroup = "virtual-signal",
+  order = "oh-yea-baby"
+}
+
 fuel_depot.fixed_recipe = fuel_recipe.name
 fuel_depot.crafting_categories = {fuel_recipe.category}
 fuel_depot.minable.result = "fuel-depot"
@@ -448,6 +458,7 @@ fuel_depot.placeable_by = {item = "fuel-depot", count = 1},
 
 data:extend(fuel_depot_items)
 data:extend{fuel_recipe}
+data:extend{fuel_signal}
 
 local invisble_corpse =
 {
