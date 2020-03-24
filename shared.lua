@@ -11,7 +11,7 @@ data.transport_capacity_technology = "transport-drone-capacity"
 data.transport_system_technology = "transport-system"
 
 data.fuel_amount_per_drone = 50
-data.fuel_consumption_per_meter = 1 / 100
+data.fuel_consumption_per_meter = 1 / 55
 data.drone_fluid_capacity = 500
 
 return data

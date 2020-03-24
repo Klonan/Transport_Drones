@@ -131,6 +131,17 @@ supply_depot.localised_name = {"supply-depot"}
 supply_depot.icon = util.path("data/entities/transport_depot/supply-depot-icon.png")
 table.insert(supply_depot.flags, "not-deconstructable")
 
+supply_depot.fluid_boxes =
+{
+  {
+    production_type = "input",
+    base_area = 50,
+    base_level = -1,
+    pipe_connections = {{ type="input", position = {0, -2} }},
+  },
+  off_when_no_fluid_recipe = false
+}
+
 
 local supply_base = function(shift)
   return

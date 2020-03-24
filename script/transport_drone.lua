@@ -365,6 +365,7 @@ end
 function transport_drone:refund_fuel()
   local box = self.request_depot.entity.fluidbox[1]
   local consumption = ((game.tick - (self.tick_created or game.tick - 1)) * self.entity.speed * fuel_consumption_per_meter)
+  --self:say(consumption)
   self.entity.force.fluid_production_statistics.on_flow("petroleum-gas", -consumption)
   local fuel_refund = fuel_amount_per_drone - consumption
   --self:say(fuel_refund)
@@ -413,6 +414,7 @@ function transport_drone:process_reorder()
   end
   
   self.request_depot:remove_fuel(fuel_amount_per_drone)
+  self.tick_created = game.tick
   self:pickup_from_supply(self.supply_depot, item_count)
 
 end
