@@ -406,11 +406,11 @@ local fuel_depot_items =
     enabled = false,
     ingredients =
     {
-      {"iron-plate", 50},
-      {"iron-gear-wheel", 10},
-      {"iron-stick", 20},
+      {"steel-plate", 10},
+      {"iron-plate", 20},
+      {"iron-gear-wheel", 5},
     },
-    energy_required = 5,
+    energy_required = 10,
     result = "fuel-depot"
   }
 }
@@ -563,7 +563,7 @@ data:extend
   fluid_request_category
 }
 
-local fuel_depot_items = 
+local fluid_depot_items = 
 {
   {
     type = "item",
@@ -596,7 +596,7 @@ local fuel_depot_items =
   }
 }
 
-data:extend(fuel_depot_items)
+data:extend(fluid_depot_items)
 
 data:extend
 {

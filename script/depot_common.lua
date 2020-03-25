@@ -161,6 +161,14 @@ local migrate_depots = function()
     load_depot(depot)
   end
 
+  for k, force in pairs (game.forces) do
+    force.reset_technology_effects()
+  end
+
+  game.print("Transport drones 0.2.0 update:")
+  game.print("I added fuel depots and fluid depots. The transport drones now need petroleum to work properly, sorry for any inconvenience.")
+  game.print("Thanks for playing with my mod.")
+
 end
 
 local shuffle_table = util.shuffle_table
