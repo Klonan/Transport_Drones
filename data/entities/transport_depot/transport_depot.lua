@@ -427,7 +427,7 @@ local fuel_recipe =
   enabled = true,
   ingredients =
   {
-    {type = "item", name = "transport-drone", amount = 1},
+    {type = "item", name = "transport-drone", amount = 100},
     {type = "fluid", name = "petroleum-gas", amount = 3000}
   },
   overload_multipler = 50,
