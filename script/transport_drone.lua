@@ -142,7 +142,7 @@ function transport_drone:process_failed_command()
     return
   end
 
-  if self.state == states.wait_for_reorder then
+  if self.state == states.waiting_for_reorder then
     self:say("Forgive me master")
     self:suicide()
     return
