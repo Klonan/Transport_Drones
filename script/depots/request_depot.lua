@@ -59,7 +59,8 @@ function request_depot.new(entity)
     item = false,
     drones = {},
     next_spawn_tick = 0,
-    mode = request_mode.item
+    mode = request_mode.item,
+    fuel_on_the_way = 0
   }
   setmetatable(depot, depot_metatable)
 
