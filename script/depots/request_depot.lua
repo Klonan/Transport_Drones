@@ -152,13 +152,13 @@ function request_depot:set_request_mode()
 
   local product_type = recipe.products[1].type
   if product_type == "item" then
-    self:say("Set to item")
+    --self:say("Set to item")
     self.mode = request_mode.item
     return
   end
   
   if product_type == "fluid" then
-    self:say("Set to fluid")
+    --self:say("Set to fluid")
     self.mode = request_mode.fluid
     return
   end

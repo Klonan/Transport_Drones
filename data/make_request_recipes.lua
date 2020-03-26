@@ -22,7 +22,7 @@ local make_recipe = function(item)
   {
     type = "recipe",
     name = "request-"..item.name,
-    localised_name = {"", "Request ", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
+    localised_name = {"request-item", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
     icon = item.dark_background_icon or item.icon,
     icon_size = item.icon_size,
     icons = item.icons,
@@ -97,7 +97,7 @@ local make_fluid_request_recipe = function(fluid)
   {
     type = "recipe",
     name = "request-"..fluid.name,
-    localised_name = {"", "Request ", fluid.localised_name or {"fluid-name."..fluid.name}},
+    localised_name = {"request-item", fluid.localised_name or {"fluid-name."..fluid.name}},
     icon = fluid.icon,
     icon_size = fluid.icon_size,
     icons = fluid.icons,
