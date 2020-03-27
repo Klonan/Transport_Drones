@@ -488,6 +488,7 @@ fluid_supply_depot.source_inventory_size = 0
 fluid_supply_depot.result_inventory_size = 0
 fluid_supply_depot.fixed_recipe = nil
 fluid_supply_depot.placeable_by = {item = "fluid-depot", count = 1}
+fluid_supply_depot.minable.result = "fluid-depot"
 
 
 fluid_supply_depot.fluid_boxes =
@@ -510,8 +511,6 @@ fluid_supply_depot.fluid_boxes =
   },
   off_when_no_fluid_recipe = false
 }
-
-
 
 local fluid_base = function(shift)
   return

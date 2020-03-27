@@ -110,6 +110,8 @@ end
 
 function request_depot:check_fuel_amount()
 
+  if not self.item then return end
+
   local current_amount = self:get_fuel_amount()
   if current_amount >= self:minimum_fuel_amount() then return end
 
@@ -134,8 +136,8 @@ function request_depot:check_fuel_amount()
 end
 
 function request_depot:update()
-  self:check_fuel_amount()
   self:check_request_change()
+  self:check_fuel_amount()
   self:check_drone_validity()
   self:update_sticker()
 end
