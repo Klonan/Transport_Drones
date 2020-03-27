@@ -175,22 +175,26 @@ local shuffle_table = util.shuffle_table
 local update_next_depot = function()
   local index = script_data.last_update_index
   local depots = script_data.update_order
-  
+
   local depot_index = depots[index]
   if not depot_index then
     shuffle_table(depots)
     script_data.last_update_index = 1
     return
   end
-
+  
   local depot = script_data.depots[depot_index]
   if not depot then
-    depots[index], depots[#depots] = depots[#depots], nil
+    local last = #depots
+    if index == last then
+      depots[index] = nil
+    else
+      depots[index], depots[last] = depots[last], nil
+    end
     return
   end
   
   depot:update()
-  --depot:say(index)
   script_data.last_update_index = index + 1
 end
 
