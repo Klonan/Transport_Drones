@@ -87,6 +87,7 @@ function fluid_depot:update()
   if not box then
     if not self.entity.active then
       self.entity.active = true
+      self.entity.crafting_progress = 0
     end
     return
   end
