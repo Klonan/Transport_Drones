@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.2
+Date: 2020-03-28
+  Changes:
+    - Added feature to hitchhike on the transport drones. Just press 'enter' (or something else if you rebound the base game hotkey).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 2020-03-28
   Changes:
