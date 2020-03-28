@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.1
+Date: 2020-03-28
+  Changes:
+    - Fix missing changelog.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2020-03-28
+  Changes:
+    - Added fuel depots. They will deliver fuel to request depots. Request depots now need fuel to function, and transport drones will consume fuel based on how far they travel.
+    - Added fluid depots, and fluid requests.
+    - Added integration with Mining depots.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-03-17
   Changes:
