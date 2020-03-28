@@ -6,7 +6,8 @@ local fuel_consumption_per_meter = shared.fuel_consumption_per_meter
 
 local script_data =
 {
-  drones = {}
+  drones = {},
+  riding_players = {}
 }
 
 local transport_drone = {}
@@ -56,6 +57,54 @@ local variation_count = shared.variation_count
 local random = math.random
 local get_drone_name = function()
   return "transport-drone-"..random(variation_count)
+end
+
+
+local player_leave_drone = function(player)
+  player.exit_cutscene()
+
+  local drone = script_data.riding_players[player.index]
+  if not drone then return end
+
+  player.teleport(drone.entity.position)
+  if player.character then
+    player.character.active = true
+  end
+  drone.riding_player = nil
+
+  script_data.riding_players[player.index] = nil
+
+end
+
+local player_enter_drone = function(player, drone)
+
+  local character = player.character
+  if character then
+    character.active = false
+    character.teleport({1000000, 1000000})
+  end
+
+  local alt_mode = player.game_view_settings.show_entity_info
+
+  player.set_controller
+  {
+    type = defines.controllers.cutscene,
+    waypoints =
+    {
+      {
+        target = drone.entity,
+        time_to_wait = 2 ^ 31,
+        transition_time = 0,
+      }
+    },
+    final_transition_time = 2 ^ 21
+  }
+
+  player.game_view_settings.show_entity_info = alt_mode
+
+  script_data.riding_players[player.index] = drone
+  drone.riding_player = player.index
+
 end
 
 
@@ -385,8 +434,8 @@ end
 function transport_drone:remove_from_depot()
 
   self.request_depot:remove_drone(self)
+  self:clear_drone_data()
   self.entity.destroy()
-  remove_drone(self)
 
 end
 
@@ -478,6 +527,10 @@ function transport_drone:clear_drone_data()
   if self.state == states.going_to_supply then
     self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
   end
+  if self.riding_player then
+    local player = game.get_player(self.riding_player)
+    if player then player_leave_drone(player) end
+  end
   remove_drone(self)
 end
 
@@ -520,6 +573,37 @@ local on_entity_removed = function(event)
 
 end
 
+local follow_drone_hotkey = function(event)
+  local player = game.get_player(event.player_index)
+
+  if player.controller_type == defines.controllers.cutscene then
+    player_leave_drone(player)
+    return
+  end
+
+  local radius = player.character and player.character.prototype.enter_vehicle_distance or 5
+
+  local units = player.surface.find_entities_filtered{type = "unit", force = player.force, position = player.position, radius = radius}
+
+  for k, unit in pairs (units) do
+    local drone = get_drone(tostring(unit.unit_number))
+    if not drone then
+      units[k] = nil
+    elseif drone.riding_player then 
+      units[k] = nil
+    end
+  end
+
+  if not next(units) then return end
+
+  local closest = player.surface.get_closest(player.position, units)
+  if not closest then return end
+
+  local drone = get_drone(tostring(closest.unit_number))
+  player_enter_drone(player, drone)
+
+end
+
 transport_drone.events =
 {
   --[defines.events.on_built_entity] = on_built_entity,
@@ -534,6 +618,8 @@ transport_drone.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
 
   [defines.events.on_ai_command_completed] = on_ai_command_completed,
+
+  ["follow-drone"] = follow_drone_hotkey
 }
 
 transport_drone.on_load = function()
@@ -549,6 +635,7 @@ transport_drone.on_init = function()
 end
 
 transport_drone.on_configuration_changed = function()
+  script_data.riding_players = script_data.riding_players or {}
 end
 
 transport_drone.get_drone = get_drone
