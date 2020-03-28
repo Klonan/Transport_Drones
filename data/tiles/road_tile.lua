@@ -20,7 +20,7 @@ local proxy_entity =
   type = "simple-entity",
   name = "road-tile-collision-proxy",
   icon = "__base__/graphics/icons/ship-wreck/small-ship-wreck.png",
-  icon_size = 64, icon_mipmaps = 4,
+  icon_size = 64,
   flags = {"placeable-neutral", "placeable-off-grid", "not-on-map"},
   subgroup = "wrecks",
   order = "d[remnants]-d[ship-wreck]-c[small]-a",

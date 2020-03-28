@@ -33,6 +33,7 @@ local make_unit = function(k)
     localised_name = {name},
     icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
     icon_size = 113,
+    icon_mipmaps = 0,
     flags = transport_drone_flags,
     map_color = {b = 0.5, g = 1},
     enemy_map_color = {r = 1},

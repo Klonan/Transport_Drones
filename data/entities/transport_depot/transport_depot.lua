@@ -40,11 +40,11 @@ local request_base = function(shift)
   }
 end
 
-
 depot.name = "request-depot"
 depot.localised_name = {"request-depot"}
 depot.icon = util.path("data/entities/transport_depot/request-depot-icon.png")
 depot.icon_size = 216
+depot.icon_mipmaps = 0
 depot.collision_box = collision_box
 depot.selection_box = selection_box
 depot.max_health = 150
@@ -306,15 +306,11 @@ local items =
 
 data:extend(items)
 
-
-
-
 local fuel_depot = util.copy(depot)
 fuel_depot.name = "fuel-depot"
 fuel_depot.localised_name = {"fuel-depot"}
 fuel_depot.icon = util.path("data/entities/transport_depot/fuel-depot-icon.png")
 fuel_depot.icon_size = 266
-fuel_depot.icon_mipmaps = 0
 fuel_depot.collision_box = {{-2.25, -2.25},{2.25, 2.25}}
 fuel_depot.selection_box = {{-2.25, -2.25},{2.25, 2.25}}
 fuel_depot.fluid_boxes =
@@ -477,6 +473,7 @@ local fluid_request_category =
 }
 
 local fluid_supply_depot = util.copy(fuel_depot)
+fluid_supply_depot.localised_name = {"fluid-depot"}
 fluid_supply_depot.icon = util.path("data/entities/transport_depot/fluid-depot-icon.png")
 fluid_supply_depot.icon_size = 146
 fluid_supply_depot.collision_box = collision_box

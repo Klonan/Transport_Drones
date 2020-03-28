@@ -1,5 +1,6 @@
 local category = "transport-drone-request"
 local util = require("tf_util/tf_util")
+local shared = require("shared")
 
 local recipes = data.raw.recipe
 
