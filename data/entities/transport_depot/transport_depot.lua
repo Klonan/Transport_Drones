@@ -428,13 +428,13 @@ local fuel_recipe =
   ingredients =
   {
     {type = "item", name = "transport-drone", amount = 100},
-    {type = "fluid", name = "petroleum-gas", amount = 3000}
+    {type = "fluid", name = shared.fuel_fluid, amount = 3000}
   },
   overload_multipler = 50,
   energy_required = 5,
   results =
   {
-    {type = "fluid", name = "petroleum-gas", amount = 10}
+    {type = "fluid", name = shared.fuel_fluid, amount = 10}
   },
   subgroup = "other",
   category = "crafting-with-fluid",

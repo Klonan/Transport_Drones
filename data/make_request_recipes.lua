@@ -29,7 +29,7 @@ local make_recipe = function(item)
     ingredients =
     {
       {type = "item", name = "transport-drone", amount = 1},
-      {type = "fluid", name = "petroleum-gas", amount = 5000}
+      {type = "fluid", name = shared.fuel_fluid, amount = 5000}
     },
     results =
     {
@@ -104,7 +104,7 @@ local make_fluid_request_recipe = function(fluid)
     ingredients =
     {
       {type = "item", name = "transport-drone", amount = 1},
-      {type = "fluid", name = "petroleum-gas", amount = 5000}
+      {type = "fluid", name = shared.fuel_fluid, amount = 5000}
     },
     results =
     {

@@ -198,7 +198,7 @@ function transport_drone:process_deliver_fuel()
 
   local box = self.target_depot.entity.fluidbox[1]
   if not box then
-    box = {name = "petroleum-gas", amount = self.fuel_amount}
+    box = {name = shared.fuel_fluid, amount = self.fuel_amount}
   else
     box.amount = box.amount + self.fuel_amount
   end
@@ -366,11 +366,11 @@ function transport_drone:refund_fuel()
   local box = self.request_depot.entity.fluidbox[1]
   local consumption = ((game.tick - (self.tick_created or game.tick - 1)) * self.entity.speed * fuel_consumption_per_meter)
   --self:say(consumption)
-  self.entity.force.fluid_production_statistics.on_flow("petroleum-gas", -consumption)
+  self.entity.force.fluid_production_statistics.on_flow(shared.fuel_fluid, -consumption)
   local fuel_refund = fuel_amount_per_drone - consumption
   --self:say(fuel_refund)
   if not box then
-    box = {name = "petroleum-gas", amount = 0}
+    box = {name = shared.fuel_fluid, amount = 0}
   end
   
   box.amount = box.amount + fuel_refund
