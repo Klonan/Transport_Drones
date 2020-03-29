@@ -38,6 +38,7 @@ local request_mode =
   fluid = 2
 }
 
+
 function request_depot.new(entity)
 
   local force = entity.force

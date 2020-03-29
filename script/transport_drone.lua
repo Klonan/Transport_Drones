@@ -10,6 +10,15 @@ local script_data =
   riding_players = {}
 }
 
+local fuel_fluid
+local get_fuel_fluid = function()
+  if fuel_fluid then
+    return fuel_fluid
+  end
+  fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+  return fuel_fluid
+end
+
 local transport_drone = {}
 
 transport_drone.metatable = {__index = transport_drone}
@@ -247,7 +256,7 @@ function transport_drone:process_deliver_fuel()
 
   local box = self.target_depot.entity.fluidbox[1]
   if not box then
-    box = {name = shared.fuel_fluid, amount = self.fuel_amount}
+    box = {name = get_fuel_fluid(), amount = self.fuel_amount}
   else
     box.amount = box.amount + self.fuel_amount
   end
@@ -349,7 +358,7 @@ function transport_drone:update_sticker()
     
     self.item_rendering = rendering.draw_sprite
     {
-      sprite = "fluid/petroleum-gas",
+      sprite = "fluid/"..get_fuel_fluid(),
       target = self.entity,
       target_offset = self.entity.prototype.sticker_box.left_top,
       surface = self.entity.surface,
@@ -415,11 +424,11 @@ function transport_drone:refund_fuel()
   local box = self.request_depot.entity.fluidbox[1]
   local consumption = ((game.tick - (self.tick_created or game.tick - 1)) * self.entity.speed * fuel_consumption_per_meter)
   --self:say(consumption)
-  self.entity.force.fluid_production_statistics.on_flow(shared.fuel_fluid, -consumption)
+  self.entity.force.fluid_production_statistics.on_flow(get_fuel_fluid(), -consumption)
   local fuel_refund = fuel_amount_per_drone - consumption
   --self:say(fuel_refund)
   if not box then
-    box = {name = shared.fuel_fluid, amount = 0}
+    box = {name = get_fuel_fluid(), amount = 0}
   end
   
   box.amount = box.amount + fuel_refund
