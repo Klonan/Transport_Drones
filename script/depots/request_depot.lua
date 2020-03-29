@@ -75,7 +75,7 @@ function request_depot:remove_fuel(amount)
   local box = self.entity.fluidbox[1]
   if not box then return end
   box.amount = box.amount - amount
-  if amount <= 0 then
+  if box.amount <= 0 then
     self.entity.fluidbox[1] = nil
   else
     self.entity.fluidbox[1] = box

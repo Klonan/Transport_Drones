@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.3
+Date: 2020-03-29
+  Changes:
+    - Fix script error related to removing fluid from a request depot.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.2
 Date: 2020-03-28
   Changes:
@@ -15,6 +20,7 @@ Date: 2020-03-28
     - Added fuel depots. They will deliver fuel to request depots. Request depots now need fuel to function, and transport drones will consume fuel based on how far they travel.
     - Added fluid depots, and fluid requests.
     - Added integration with Mining depots.
+    - Added German locale (By LuziferSenpai).
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-03-17
