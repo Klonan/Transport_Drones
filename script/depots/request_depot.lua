@@ -94,7 +94,7 @@ function request_depot:check_drone_validity()
 end
 
 function request_depot:minimum_fuel_amount()
-  return (self:get_drone_item_count() * fuel_amount_per_drone) / 4
+  return (fuel_amount_per_drone * 2)
 end
 
 function request_depot:max_fuel_amount()
@@ -114,7 +114,9 @@ function request_depot:check_fuel_amount()
   if not self.item then return end
 
   local current_amount = self:get_fuel_amount()
-  if current_amount >= self:minimum_fuel_amount() then return end
+  if current_amount >= self:minimum_fuel_amount() then
+    return
+  end
 
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
@@ -261,7 +263,9 @@ function request_depot:get_current_amount()
 end
 
 function request_depot:should_order(plus_one)
-  if self:get_fuel_amount() < fuel_amount_per_drone then return end
+  if self:get_fuel_amount() < fuel_amount_per_drone then
+    return
+  end
   local stack_size = self:get_request_size()
   local current_count = self:get_current_amount()
   local max_count = self:get_drone_item_count()
