@@ -1,6 +1,6 @@
 {
   "name": "Transport_Drones",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "title": "Transport Drones",
   "author": "Klonan",
   "contact": "",
@@ -8,7 +8,8 @@
   "description": "Adds transport drones and transport depots",
   "dependencies": ["base >= 0.18.0", 
     "(?)deadlock_stacked_recipes",
-    "(?)Krastorio2"
+    "(?)Krastorio2",
+    "(?)alien-biomes"
   ],
   "factorio_version": "0.18"
 }
