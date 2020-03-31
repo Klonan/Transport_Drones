@@ -1,4 +1,3 @@
-require("data/tiles/road_tile")
 require("data/make_request_recipes")
 
 -- ruin gates and rails

@@ -82,3 +82,8 @@ data:extend
   item,
   recipe
 }
+
+if alien_biomes_priority_tiles then
+  table.insert(alien_biomes_priority_tiles, "transport-drone-proxy-tile")
+  table.insert(alien_biomes_priority_tiles, "transport-drone-road")
+end
