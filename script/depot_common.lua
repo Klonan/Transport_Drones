@@ -239,6 +239,8 @@ lib.on_configuration_changed = function()
   end
 
   for k, depot in pairs (script_data.depots) do
+    depot:remove_from_network()
+    depot:add_to_network()
     config_changed_depot(depot)
   end
 
