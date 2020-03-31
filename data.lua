@@ -3,7 +3,6 @@ names = require("shared")
 shared = require("shared")
 
 require "data/entities/entities"
-require "data/tiles/road_tile"
 require "data/technologies/transport_speed"
 require "data/technologies/transport_capacity"
 require "data/technologies/transport_system"
