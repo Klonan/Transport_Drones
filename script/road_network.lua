@@ -12,6 +12,7 @@ local new_id = function()
   {
     id = id
   }
+  --game.print("New network "..id)
   return id
 end
 
@@ -72,6 +73,8 @@ recursive_connection_check = function(surface, x, y, target_node, checked)
   if checked[node] then return end
   checked[node] = true
 
+  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = "?"}
+
   if node == target_node then
     return true
   end
@@ -106,6 +109,31 @@ recursive_set_id = function(surface, x, y, id)
     recursive_set_id(surface, x + offset[1], y + offset[2], id)
   end
 
+end
+
+local clear_network = function(id)
+  local network = script_data.networks[id]
+
+  for k, name in pairs ({"supply", "mining", "fuel"}) do
+    local depots = network[name]
+    if depots then
+      for k, depot in pairs (depots) do
+        depot:remove_from_network()
+        depot:add_to_network()
+      end
+    end
+  end
+
+  if network.requesters then
+    for name, depots in pairs (network.requesters) do
+      for k, depot in pairs (depots) do
+        depot:remove_from_network()
+        depot:add_to_network()
+      end
+    end
+  end
+
+  script_data.networks[id] = nil
 end
 
 local road_network = {}
@@ -179,9 +207,11 @@ road_network.remove_node = function(surface, x, y)
 
   local count = get_neighbor_count(surface, x, y)
   
+  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = count}
+
   if count == 0 then
     -- No neighbors, clear the network.    
-    script_data.networks[node.id] = nil
+    clear_network(node.id)
     return
   end
 

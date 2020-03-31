@@ -66,8 +66,16 @@ function supply_depot:check_requests_for_item(name, count)
 
 end
 
+function supply_depot:check_network()
+  local network = road_network.get_network_by_id(self.network_id)
+  if not network then
+    self:add_to_network()
+  end
+  return true
+end
+
 function supply_depot:update()
-  if not self.network_id then return end
+  self:check_network()
   local items = self.entity.get_output_inventory().get_contents()
   for name, count in pairs(items) do
     self:check_requests_for_item(name, count)
@@ -120,7 +128,6 @@ function supply_depot:remove_from_node()
 end
 
 function supply_depot:add_to_network()
-  --self:say("Adding to network") 
   self.network_id = road_network.add_supply_depot(self)
 end
 
