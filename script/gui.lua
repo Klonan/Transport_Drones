@@ -150,7 +150,6 @@ local gui_actions =
   end,
 }
 
-
 local on_gui_action = function(event)
   local element = event.element
   if not (element and element.valid) then return end
@@ -190,11 +189,17 @@ local on_lua_shortcut = function(event)
 end
 
 local on_toggle_key = function(event)
-  print("TOGGLE GUI")
   local player = game.players[event.player_index]
-  make_gui(player, nil)
+  local frame = get_gui_frame(player)
+  -- need to check for inactive not destroyed
+  if frame then
+    print("TOGGLE OFF")
+    close_gui(frame)
+  else
+    print("TOGGLE ON")
+    make_gui(player)
+  end
 end
-
 
 local lib = {}
 lib.events = {
