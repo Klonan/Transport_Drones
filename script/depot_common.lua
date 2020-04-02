@@ -326,4 +326,9 @@ lib.get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
 end
 
+lib.get_all_depots = function()
+  -- Seems a little encapsulation breaky.  Maybe return an array of indexes?
+  return script_data.depots
+end
+
 return lib

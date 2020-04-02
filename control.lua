@@ -12,3 +12,4 @@ handler.add_lib(require("script/blueprint_correction"))
 handler.add_lib(require("script/transport_technologies"))
 
 require("script/remote_interface")
+handler.add_lib(require("script/gui"))
