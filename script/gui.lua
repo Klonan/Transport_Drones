@@ -186,14 +186,20 @@ end
 local on_lua_shortcut = function(event)
   if event.prototype_name ~= "transport-drones-gui" then return end
 
+  on_toggle_gui(event)
+end
+
+local on_toggle_key = function(event)
   print("TOGGLE GUI")
   local player = game.players[event.player_index]
   make_gui(player, nil)
 end
 
+
 local lib = {}
 lib.events = {
   [defines.events.on_lua_shortcut] = on_lua_shortcut,
+  ["transport-drones-gui"] = on_toggle_key,
 
   [defines.events.on_gui_click] = on_gui_action,
   [defines.events.on_gui_text_changed] = on_gui_action,
