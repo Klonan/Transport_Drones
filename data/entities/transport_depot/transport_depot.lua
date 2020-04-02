@@ -498,9 +498,9 @@ fluid_supply_depot.fluid_boxes =
   },
   {
     production_type = "input",
-    base_area = 10,
+    base_area = 100,
     base_level = -1,
-    height = 4,
+    height = 1,
     pipe_connections = {{ type="input-output", position = {0, 2} }},
     pipe_covers = pipecoverspictures(),
     pipe_picture = assembler3pipepictures(),
