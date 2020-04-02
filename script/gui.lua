@@ -82,15 +82,14 @@ local make_gui = function(player)
 
   for i, depot in pairs(depot.get_all_depots()) do
     any = true
-    print(serpent.line(depot))
-    name = depot.entity.name..i
+    name = depot.entity.localised_name
     depot_entity = depot.entity
     local position = depot_entity.position
     local area = {{position.x - preview_size / 2, position.y - preview_size / 2}, {position.x + preview_size / 2, position.y + preview_size / 2}}
     chart(depot_entity.surface, area)
 
-    local button = table.add{type = "button", name = "_"..name}
-    button.style.height = preview_size + 32 + 8
+    local button = table.add{type = "button", name = "_"..i.."_"..depot_entity.name}
+    button.style.height = preview_size * 2 + 32 + 8
     button.style.width = preview_size + 8
     button.style.left_padding = 0
     button.style.right_padding = 0
@@ -119,6 +118,17 @@ local make_gui = function(player)
     label.style.font_color = {}
     label.style.horizontally_stretchable = true
     label.style.maximal_width = preview_size
+
+    local status_items = {
+      {"road-network-id", depot.network_id},
+      {"drone-status", serpent.line(depot.drones)},
+    }
+    local status = inner_flow.add({type = "list-box", items = status_items})
+    status.style.font = "default-dialog-button"
+    status.style.font_color = {}
+    status.style.horizontally_stretchable = true
+    status.style.maximal_width = preview_size
+
     util.register_gui(data.button_actions, button, {type = "depot_button", param = depot})
   end
 
