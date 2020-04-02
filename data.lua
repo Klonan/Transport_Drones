@@ -8,3 +8,4 @@ require "data/technologies/transport_capacity"
 require "data/technologies/transport_system"
 require "data/hotkey"
 require("data/tiles/road_tile")
+require "data/shortcut"
