@@ -14,7 +14,8 @@ local script_data =
 {
   depots = {},
   update_order = {},
-  last_update_index = 0
+  last_update_index = 0,
+  reset_to_be_taken = true
 }
 
 local get_depot = function(entity)
@@ -195,6 +196,7 @@ local update_next_depot = function()
   end
   
   depot:update()
+  --depot:say(index)
   script_data.last_update_index = index + 1
 end
 
@@ -242,6 +244,15 @@ lib.on_configuration_changed = function()
     depot:remove_from_network()
     depot:add_to_network()
     config_changed_depot(depot)
+  end
+
+  if not script_data.reset_to_be_taken then
+    script_data.reset_to_be_taken = true
+    for k, depot in pairs (script_data.depots) do
+      if depot.to_be_taken then
+        depot.to_be_taken = {}
+      end
+    end
   end
 
 end

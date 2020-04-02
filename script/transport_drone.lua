@@ -7,7 +7,8 @@ local fuel_consumption_per_meter = shared.fuel_consumption_per_meter
 local script_data =
 {
   drones = {},
-  riding_players = {}
+  riding_players = {},
+  reset_to_be_taken = true
 }
 
 local fuel_fluid
@@ -40,7 +41,7 @@ local get_drone = function(index)
   end
 
   if not drone.entity.valid then
-    drone:clear_things(index)
+    drone:clear_drone_data()
     return
   end
 
@@ -272,6 +273,12 @@ function transport_drone:process_deliver_fuel()
 end
 
 function transport_drone:return_to_requester()
+
+  if self.state == states.going_to_supply then
+    if self.supply_depot then
+      self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
+    end
+  end
   
   if not self.request_depot.entity.valid then
     self:suicide()
@@ -645,6 +652,16 @@ end
 
 transport_drone.on_configuration_changed = function()
   script_data.riding_players = script_data.riding_players or {}
+
+  if not script_data.reset_to_be_taken then
+    script_data.reset_to_be_taken = true
+    for k, drone in pairs (script_data.drones) do
+      if drone.state == states.going_to_supply then
+        drone:pickup_from_supply(drone.supply_depot, drone.requested_count)
+      end
+    end
+  end
+
 end
 
 transport_drone.get_drone = get_drone
