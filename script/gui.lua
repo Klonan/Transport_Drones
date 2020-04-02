@@ -142,7 +142,11 @@ local gui_actions =
     if param.box.visible then param.box.focus() end
   end,
   depot_button = function(event, param)
-    print("BUTTON: "..serpent.line(event).." "..serpent.line(param))
+    local player = game.get_player(event.player_index)
+    local where = param.param.node_position
+    local scale = player.display_scale
+    player.zoom_to_world(where, scale)
+    close_gui(get_gui_frame(player))
   end,
 }
 
