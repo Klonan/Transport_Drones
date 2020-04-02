@@ -54,7 +54,7 @@ function supply_depot:check_requests_for_item(name, count)
   if count - self:get_to_be_taken(name) <= 0 then
     return
   end
-  
+
   --self:say(serpent.block(self.to_be_taken))
 
   local request_depots = road_network.get_request_depots(self.network_id, name)
