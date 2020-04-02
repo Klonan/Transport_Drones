@@ -8,7 +8,7 @@ local script_data =
 {
   drones = {},
   riding_players = {},
-  reset_to_be_taken = true
+  reset_to_be_taken_again = true
 }
 
 local fuel_fluid
@@ -226,9 +226,7 @@ function transport_drone:process_pickup()
     self:return_to_requester()
     return
   end
-
-  self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
-
+  
   local available_count = self.supply_depot:get_available_item_count(self.request_depot.item)
   --self:say(available_count)
   local to_take = math.min(available_count, self.request_depot:get_request_size())
@@ -455,6 +453,7 @@ function transport_drone:remove_from_depot()
 
 end
 
+local min = math.min
 function transport_drone:process_reorder()
 
   if not self.supply_depot.entity.valid then
@@ -472,8 +471,8 @@ function transport_drone:process_reorder()
     return
   end
 
-  local item_count = self.supply_depot:get_available_item_count(self.request_depot.item)
-  if item_count <= self.request_depot:get_minimum_request_size() then 
+  local item_count = min(self.request_depot:get_request_size(), self.supply_depot:get_available_item_count(self.request_depot.item))
+  if item_count < self.request_depot:get_minimum_request_size() then 
     self:remove_from_depot()
     return
   end
@@ -653,11 +652,13 @@ end
 transport_drone.on_configuration_changed = function()
   script_data.riding_players = script_data.riding_players or {}
 
-  if not script_data.reset_to_be_taken then
-    script_data.reset_to_be_taken = true
+  if not script_data.reset_to_be_taken_again then
+    script_data.reset_to_be_taken_again = true
     for k, drone in pairs (script_data.drones) do
       if drone.state == states.going_to_supply then
-        drone:pickup_from_supply(drone.supply_depot, drone.requested_count)
+        local count = math.min(tonumber(drone.requested_count) or 0, drone.request_depot:get_request_size())
+        if count ~= count then count = drone.request_depot:get_request_size() end
+        drone:pickup_from_supply(drone.supply_depot, count)
       end
     end
   end

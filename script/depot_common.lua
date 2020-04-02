@@ -15,7 +15,7 @@ local script_data =
   depots = {},
   update_order = {},
   last_update_index = 0,
-  reset_to_be_taken = true
+  reset_to_be_taken_again = true
 }
 
 local get_depot = function(entity)
@@ -246,8 +246,8 @@ lib.on_configuration_changed = function()
     config_changed_depot(depot)
   end
 
-  if not script_data.reset_to_be_taken then
-    script_data.reset_to_be_taken = true
+  if not script_data.reset_to_be_taken_again then
+    script_data.reset_to_be_taken_again = true
     for k, depot in pairs (script_data.depots) do
       if depot.to_be_taken then
         depot.to_be_taken = {}
