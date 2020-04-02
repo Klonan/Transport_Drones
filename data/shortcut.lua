@@ -7,7 +7,7 @@ data:extend(
     order = "a[transport-drones]",
     action = 'lua',
     technology_to_unlock = shared.transport_system_technology,
-    style = 'green',
+    style = 'default',
     icon = {
       filename = util.path('data/shortcut/grid-x32-white.png'),
       priority = 'extra-high-no-scale',

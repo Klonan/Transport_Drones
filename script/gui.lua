@@ -185,18 +185,25 @@ end
 local on_lua_shortcut = function(event)
   if event.prototype_name ~= "transport-drones-gui" then return end
 
-  on_toggle_gui(event)
-end
-
-local on_toggle_key = function(event)
   local player = game.players[event.player_index]
   local frame = get_gui_frame(player)
-  -- need to check for inactive not destroyed
   if frame then
-    print("TOGGLE OFF")
+    print("SHORTCUT OFF")
     close_gui(frame)
   else
-    print("TOGGLE ON")
+    print("SHORTCUT ON")
+    make_gui(player)
+  end
+end
+
+local on_custom_key = function(event)
+  local player = game.players[event.player_index]
+  local frame = get_gui_frame(player)
+  if frame then
+    print("KEYBIND TOGGLE OFF")
+    close_gui(frame)
+  else
+    print("KEYBIND TOGGLE ON")
     make_gui(player)
   end
 end
@@ -204,7 +211,7 @@ end
 local lib = {}
 lib.events = {
   [defines.events.on_lua_shortcut] = on_lua_shortcut,
-  ["transport-drones-gui"] = on_toggle_key,
+  ["transport-drones-gui"] = on_custom_key,
 
   [defines.events.on_gui_click] = on_gui_action,
   [defines.events.on_gui_text_changed] = on_gui_action,
