@@ -172,10 +172,12 @@ function fluid_depot:get_status_lines()
   local lines = {}
   local box = self:get_output_fluidbox()
 
-  return {
-    {"supply-fluid", box.name, box.amount},
-    {"road-network-id", self.network_id},
-  }
+  if (box and box.name) then
+    lines[#lines + 1] = {"supply-fluid", box.name, box.amount}
+  end
+
+  lines[#lines + 1] = {"road-network-id", self.network_id}
+  return lines
 end
 
 return fluid_depot
