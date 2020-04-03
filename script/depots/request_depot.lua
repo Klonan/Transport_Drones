@@ -399,7 +399,7 @@ function request_depot:get_status_lines()
   end
 
   return {
-    {"request-item", self.item},
+    {"request-item-status", self.item},
     {"drone-status", self:get_active_drone_count(), self:get_drone_item_count()},
     {"fuel-level", self:get_fuel_amount()},
     -- Minimum stack size is useful in knowing why the requestor didn't request
@@ -407,7 +407,6 @@ function request_depot:get_status_lines()
     -- now.
     -- Maybe move to the main dashboard as it's tied to technology level.
     -- Or maybe leave it here in case it's configurable per depot later.
-    {"stack-size", self:get_stack_size()},
     {"minimum-stack-size", self:get_minimum_request_size()},
     {"road-network-id", self.network_id}
   }

@@ -169,9 +169,12 @@ function fluid_depot:on_removed()
 end
 
 function fluid_depot:get_status_lines()
+  local lines = {}
+  local box = self:get_output_fluidbox()
+
   return {
-    {"supplying", serpent.line(self.to_be_taken)},
-    {"road-network-id", self.network_id}
+    {"supply-fluid", box.name, box.amount},
+    {"road-network-id", self.network_id},
   }
 end
 
