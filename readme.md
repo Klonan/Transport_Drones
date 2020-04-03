@@ -20,3 +20,5 @@ Drones start with a speed of 22km/h, and a stack capacity of 1.
 There are 2 upgrade technologies, Transport drone speed and Transport drone stack capacity.
 ![technologies](https://i.imgur.com/Om53Jax.png)
 
+Mining depots from ![Mining Drones](https://mods.factorio.com/mod/Mining_Drones) can be
+added to the road network, if you are also using that mod.
