@@ -6,7 +6,7 @@ local request_spawn_timeout = 60
 local request_depot = {}
 request_depot.metatable = {__index = request_depot}
 
-request_depot.corpse_offsets = 
+request_depot.corpse_offsets =
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -390,5 +390,23 @@ function request_depot:on_config_changed()
   self.mode = self.mode or request_mode.item
   self.fuel_on_the_way = self.fuel_on_the_way or 0
 end
+
+function request_depot:get_status_lines()
+  if not self.item then
+    return {
+      {"requester-unconfigured"}
+    }
+  end
+
+  return {
+    {"request-item", self.item},
+    {"drone-status", self:get_active_drone_count(), self:get_drone_item_count()},
+    {"fuel-level", self:get_fuel_amount()},
+    {"stack-size", self:get_stack_size()},
+    {"minimum-stack-size", self:get_minimum_request_size()},
+    {"road-network-id", self.network_id}
+  }
+end
+
 
 return request_depot

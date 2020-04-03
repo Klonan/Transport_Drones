@@ -191,4 +191,12 @@ function fuel_depot:on_removed()
   self.corpse.destroy()
 end
 
+function fuel_depot:get_status_lines()
+  return {
+    --{"drone-status", self.get_active_drone_count(),self.get_drone_item_count()},
+    {"fuel-level", self:get_fuel_amount()},
+    {"road-network-id", self.network_id}
+  }
+end
+
 return fuel_depot

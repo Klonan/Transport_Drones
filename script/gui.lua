@@ -33,12 +33,6 @@ local get_gui_frame = function(player)
   data.gui_frames[player.index] = nil
 end
 
-local extend = function(t1, t2)
-  for _,v in pairs(t2) do
-    t1[#t1+1] = v
-  end
-end
-
 local make_gui = function(player)
   local location
   local gui_frame = get_gui_frame(player)
@@ -125,51 +119,7 @@ local make_gui = function(player)
     label.style.horizontally_stretchable = true
     label.style.maximal_width = preview_size
 
-    -- Things I want to surface:
-    -- Type {requestor,provider,fluidprovider,fuel} - already in the name as depots can't be (currently) renamed
-    -- All {road-network-id, tick stats}
-    -- Providers {levels}
-    -- Requestors {drone count, petrol count, min/max loads}
-    print(serpent.block(depot))
-    local status_items = {}
-    -- Doesn't feel super-good to do this assembly here.  Maybe push it into a method on the depot protocol?
-    if depot_entity.prototype.name == "request-depot" then
-      extend(status_items, {
-        {"request-item", depot.item},
-        {"drone-status", depot:get_active_drone_count(), depot:get_drone_item_count()},
-        {"fuel-level", depot:get_fuel_amount()},
-        {"stack-size", depot:get_stack_size()},
-        {"minimum-stack-size", depot:get_minimum_request_size()},
-      })
-    end
-
-    if depot_entity.prototype.name == "fuel-depot" then
-      extend(status_items, {
-        {"drone-status", depot:get_active_drone_count(), depot:get_drone_item_count()},
-        {"fuel-level", depot:get_fuel_amount()},
-      })
-    end
-
-    if depot_entity.prototype.name == "supply-depot-chest" then
-      extend(status_items, {
-        {"supplying", serpent.line(depot.to_be_taken)},
-      })
-    end
-
-    if depot_entity.prototype.name == "fluid-depot" then
-      extend(status_items, {
-        {"supplying", serpent.line(depot.to_be_taken)},
-      })
-    end
-
-    -- Unconfigured requestors aren't on networks
-    if depot.network_id then
-      extend(status_items, {
-        {"road-network-id", depot.network_id},
-      })
-    end
-
-    local status = inner_flow.add({type = "list-box", items = status_items})
+    local status = inner_flow.add({type = "list-box", items = depot:get_status_lines()})
     status.style.font = "default-dialog-button"
     status.style.font_color = {}
     status.style.horizontally_stretchable = true

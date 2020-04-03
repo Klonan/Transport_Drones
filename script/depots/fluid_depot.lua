@@ -168,4 +168,11 @@ function fluid_depot:on_removed()
   self.corpse.destroy()
 end
 
+function fluid_depot:get_status_lines()
+  return {
+    {"supplying", serpent.line(self.to_be_taken)},
+    {"road-network-id", self.network_id}
+  }
+end
+
 return fluid_depot
