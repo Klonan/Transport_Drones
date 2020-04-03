@@ -76,6 +76,7 @@ local make_gui = function(player)
   util.register_gui(data.button_actions, search_box, {type = "search_text_changed", parent = table})
   table.style.horizontal_spacing = 2
   table.style.vertical_spacing = 2
+  table.vertical_centering = false
   local any = false
 
   local chart = player.force.chart
@@ -89,7 +90,7 @@ local make_gui = function(player)
     chart(depot_entity.surface, area)
 
     local button = table.add{type = "button", name = "_"..i.."_"..depot_entity.name}
-    button.style.height = preview_size * 2 + 32 + 8
+    -- button.style.height = preview_size + 32 + 8
     button.style.width = preview_size + 8
     button.style.left_padding = 0
     button.style.right_padding = 0
@@ -113,7 +114,6 @@ local make_gui = function(player)
     map.style.vertically_stretchable = true
 
     local label = inner_flow.add{type = "label", caption = name}
-    label.style.horizontally_stretchable = true
     label.style.font = "default-dialog-button"
     label.style.font_color = {}
     label.style.horizontally_stretchable = true
@@ -124,6 +124,10 @@ local make_gui = function(player)
     status.style.font_color = {}
     status.style.horizontally_stretchable = true
     status.style.maximal_width = preview_size
+
+    -- grow button to fit statuses.  feels like I'm not setting some layout
+    -- stuff up correctly that this is needed
+    button.style.height = preview_size + table_size(status.items) * 28 + 8 + 32 + 8
 
     util.register_gui(data.button_actions, button, {type = "depot_button", param = depot})
   end
