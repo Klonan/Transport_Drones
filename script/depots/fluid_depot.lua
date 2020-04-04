@@ -1,4 +1,3 @@
-local request_depot = require("script/depots/request_depot")
 local road_network = require("script/road_network")
 
 local corpse_offsets = 

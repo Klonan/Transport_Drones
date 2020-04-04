@@ -7,11 +7,6 @@ local drone_fluid_capacity = shared.drone_fluid_capacity
 
 local request_spawn_timeout = 60
 
-local script_data = 
-{
-  request_depots = {}
-}
-
 local request_depot = {}
 local depot_metatable = {__index = request_depot}
 
