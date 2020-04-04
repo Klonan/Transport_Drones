@@ -14,19 +14,19 @@ local required_interfaces =
   update = "function"
 }
 
-local add_depot_lib = function(lib_name, lib)
+local add_depot_lib = function(entity_name, lib)
   for name, value_type in pairs (required_interfaces) do
     if not lib[name] or type(lib[name]) ~= value_type then
       error("Trying to add lib without all required interfaces: "..serpent.block(
         {
-          lib_name = lib_name,
+          entity_name = entity_name,
           missing_value_key = name,
           value_type = type(lib[name]),
           expected_type = value_type
         }))
     end
   end
-  depot_libs[lib_name] = lib
+  depot_libs[entity_name] = lib
 end
 
 add_depot_lib("request-depot", require("script/depots/request_depot"))
@@ -300,8 +300,6 @@ lib.get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
 end
 
-lib.add_depot_lib = function(entity_name, lib)
-  add_depot_lib(entity_name, lib)
-end
+lib.add_depot_lib = add_depot_lib
 
 return lib
