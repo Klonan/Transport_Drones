@@ -13,12 +13,14 @@ local raw_road_tile_built = function(event)
 
 end
 
+local product_amount = util.product_amount
 local road_tile_built = function(event)
 
   local tiles = event.tiles
   local surface = game.get_surface(event.surface_index)
   local refund_count = 0
   local new_tiles = {}
+  local refund_product = {}
 
   for k, tile in pairs (tiles) do
     local position = tile.position
@@ -34,26 +36,32 @@ local road_tile_built = function(event)
     else
       new_tiles[k] = {name = tile.old_tile.name, position = position}
       refund_count = refund_count + 1
+      if tile.old_tile.mineable_properties.minable then
+        refund_product[tile.old_tile.name] = (refund_product[tile.old_tile.name] or 0) + 1
+      end
     end
   end
 
   surface.set_tiles(new_tiles)
-
-  if event.item then
-
-    if refund_count > 0 then
-      if event.player_index then
-        local player = game.get_player(event.player_index)
-        if player then
-          player.insert({name = event.item.name, count = refund_count})
+  
+  if next(refund_product) then
+    -- Remove first, so we make space in the inventory
+    local remove_function = (event.player_index and game.get_player(event.player_index).remove_item) or (event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).remove)
+    local tile_prototypes = game.tile_prototypes
+    for tile_name, count in pairs(refund_product) do
+      local tile = tile_prototypes[tile_name]
+      for k, product in pairs (tile.mineable_properties.products) do
+        local count = product_amount(product) * count
+        if count > 0 then
+          remove_function({name = product.name, count = count})
         end
       end
-      local robot = event.robot
-      if robot then
-        robot.get_inventory(defines.inventory.robot_cargo).insert({name = event.item.name, count = refund_count})
-      end
     end
+  end
 
+  if event.item and refund_count > 0 then
+    local insert_function = (event.player_index and game.get_player(event.player_index).insert) or (event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).insert)
+    local inserted = insert_function({name = event.item.name, count = refund_count})
   end
 
 end
