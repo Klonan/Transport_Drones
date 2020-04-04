@@ -94,7 +94,7 @@ local on_created_entity = function(event)
   if not attempt_to_place_node(entity, depot_lib, event) then
     --refund
     refund_build(event, entity.name)
-    entity.destroy()
+    entity.destroy({raise_destroy = true})
     return
   end
   

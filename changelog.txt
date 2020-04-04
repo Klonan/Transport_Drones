@@ -3,6 +3,7 @@ Version: 0.2.11
 Date: 2020-04-04
   Changes:
     - Fixed getting free tile products when placing road over minable tiles.
+    - Fixed mining depots with blocked placement leaving the caution corpse.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.10
 Date: 2020-04-02
