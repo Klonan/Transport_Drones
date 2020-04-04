@@ -398,8 +398,15 @@ function request_depot:get_status_lines()
     }
   end
 
+  local request = {}
+  if self.mode == request_mode.fluid then
+     request = {"request-fluid-status", self.item}
+  else
+     request = {"request-item-status", self.item}
+  end
+
   return {
-    {"request-item-status", self.item},
+    request,
     {"drone-status", self:get_active_drone_count(), self:get_drone_item_count()},
     {"fuel-level", self:get_fuel_amount()},
     -- Minimum stack size is useful in knowing why the requestor didn't request
