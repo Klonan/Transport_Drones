@@ -4,7 +4,6 @@ local transport_technologies = require("script/transport_technologies")
 
 local depot_libs = {}
 
-
 local required_interfaces =
 {
   corpse_offsets = "table",
@@ -14,7 +13,8 @@ local required_interfaces =
   update = "function"
 }
 
-local add_depot_lib = function(entity_name, lib)
+local add_depot_lib = function(entity_name, lib_path)
+  local lib = require(lib_path)
   for name, value_type in pairs (required_interfaces) do
     if not lib[name] or type(lib[name]) ~= value_type then
       error("Trying to add lib without all required interfaces: "..serpent.block(
@@ -29,12 +29,12 @@ local add_depot_lib = function(entity_name, lib)
   depot_libs[entity_name] = lib
 end
 
-add_depot_lib("request-depot", require("script/depots/request_depot"))
-add_depot_lib("supply-depot", require("script/depots/supply_depot"))
-add_depot_lib("supply-depot-chest", require("script/depots/supply_depot"))
-add_depot_lib("fuel-depot", require("script/depots/fuel_depot"))
-add_depot_lib("mining-depot", require("script/depots/mining_depot"))
-add_depot_lib("fluid-depot", require("script/depots/fluid_depot"))
+add_depot_lib("request-depot", "script/depots/request_depot")
+add_depot_lib("supply-depot", "script/depots/supply_depot")
+add_depot_lib("supply-depot-chest", "script/depots/supply_depot")
+add_depot_lib("fuel-depot", "script/depots/fuel_depot")
+add_depot_lib("mining-depot", "script/depots/mining_depot")
+add_depot_lib("fluid-depot", "script/depots/fluid_depot")
 
 local script_data = 
 {
