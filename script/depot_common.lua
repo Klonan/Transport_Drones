@@ -1,14 +1,40 @@
+local transport_drone = require("script/transport_drone")
 local road_network = require("script/road_network")
+local transport_technologies = require("script/transport_technologies")
 
-local depot_names =
+local depot_libs = {}
+
+
+local required_interfaces =
 {
-  ["request-depot"] = require("script/depots/request_depot"),
-  ["supply-depot"] = require("script/depots/supply_depot"),
-  ["supply-depot-chest"] = require("script/depots/supply_depot"),
-  ["fuel-depot"] = require("script/depots/fuel_depot"),
-  ["mining-depot"] = require("script/depots/mining_depot"),
-  ["fluid-depot"] = require("script/depots/fluid_depot")
+  corpse_offsets = "table",
+  metatable = "table",
+  new = "function",
+  on_removed = "function",
+  update = "function"
 }
+
+local add_depot_lib = function(lib_name, lib)
+  for name, value_type in pairs (required_interfaces) do
+    if not lib[name] or type(lib[name]) ~= value_type then
+      error("Trying to add lib without all required interfaces: "..serpent.block(
+        {
+          lib_name = lib_name,
+          missing_value_key = name,
+          value_type = type(lib[name]),
+          expected_type = value_type
+        }))
+    end
+  end
+  depot_libs[lib_name] = lib
+end
+
+add_depot_lib("request-depot", require("script/depots/request_depot"))
+add_depot_lib("supply-depot", require("script/depots/supply_depot"))
+add_depot_lib("supply-depot-chest", require("script/depots/supply_depot"))
+add_depot_lib("fuel-depot", require("script/depots/fuel_depot"))
+add_depot_lib("mining-depot", require("script/depots/mining_depot"))
+add_depot_lib("fluid-depot", require("script/depots/fluid_depot"))
 
 local script_data = 
 {
@@ -86,7 +112,7 @@ local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
 
-  local depot_lib = depot_names[entity.name]
+  local depot_lib = depot_libs[entity.name]
   if not depot_lib then
     return
   end
@@ -118,12 +144,14 @@ end
 
 local get_lib = function(depot)
   local name = depot.entity.name
-  return depot_names[name]
+  return depot_libs[name]
 end
 
 local load_depot = function(depot)
   local lib = get_lib(depot)
-  if lib.load then lib.load(depot) end
+  if lib.metatable then
+    setmetatable(depot, lib.metatable)
+  end
 end
 
 local config_changed_depot = function(depot)
@@ -204,6 +232,8 @@ local on_tick = function(event)
   update_next_depot()
 end
 
+
+
 local lib = {}
 
 lib.events = 
@@ -227,6 +257,13 @@ end
 
 lib.on_load = function()
   script_data = global.transport_depots or script_data
+
+  for k, lib in pairs (depot_libs) do
+    lib.road_network = road_network
+    lib.transport_drone = transport_drone
+    lib.transport_technologies = transport_technologies
+  end
+
   for k, depot in pairs (script_data.depots) do
     load_depot(depot)
   end
@@ -243,7 +280,9 @@ lib.on_configuration_changed = function()
   for k, depot in pairs (script_data.depots) do
     depot:remove_from_network()
     depot:add_to_network()
-    config_changed_depot(depot)
+    if depot.on_config_changed then
+      depot:on_config_changed()
+    end
   end
 
   if not script_data.reset_to_be_taken_again then
@@ -259,6 +298,10 @@ end
 
 lib.get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
+end
+
+lib.add_depot_lib = function(entity_name, lib)
+  add_depot_lib(entity_name, lib)
 end
 
 return lib

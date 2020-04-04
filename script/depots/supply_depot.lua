@@ -1,6 +1,9 @@
-local road_network = require("script/road_network")
+--local supply_depot.road_network = require("script/supply_depot.road_network")
+local supply_depot = {}
 
-local corpse_offsets = 
+supply_depot.metatable = {__index = supply_depot}
+
+supply_depot.corpse_offsets = 
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -8,15 +11,12 @@ local corpse_offsets =
   [6] = {-2, 0},
 }
 
-local supply_depot = {}
-local depot_metatable = {__index = supply_depot}
-
 function supply_depot.new(entity)
   local position = entity.position
   local direction = entity.direction
   local force = entity.force
   local surface = entity.surface
-  local offset = corpse_offsets[direction]
+  local offset = supply_depot.corpse_offsets[direction]
   entity.destructible = false
   entity.minable = false
   entity.rotatable = false  
@@ -35,7 +35,7 @@ function supply_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     index = tostring(chest.unit_number)
   }
-  setmetatable(depot, depot_metatable)
+  setmetatable(depot, supply_depot.metatable)
 
   depot:add_to_network()
   depot:add_to_node()
@@ -56,7 +56,7 @@ function supply_depot:check_requests_for_item(name, count)
 
   --self:say(serpent.block(self.to_be_taken))
 
-  local request_depots = road_network.get_request_depots(self.network_id, name)
+  local request_depots = supply_depot.road_network.get_request_depots(self.network_id, name)
   if not request_depots then return end
   if not next(request_depots) then return end
 
@@ -70,7 +70,7 @@ function supply_depot:check_requests_for_item(name, count)
 end
 
 function supply_depot:check_network()
-  local network = road_network.get_network_by_id(self.network_id)
+  local network = supply_depot.road_network.get_network_by_id(self.network_id)
   if not network then
     self:add_to_network()
   end
@@ -107,7 +107,7 @@ end
 
 function supply_depot:remove_from_network()
 
-  local network = road_network.get_network_by_id(self.network_id)
+  local network = supply_depot.road_network.get_network_by_id(self.network_id)
 
   local supply = network.supply
 
@@ -118,20 +118,20 @@ function supply_depot:remove_from_network()
 end
 
 function supply_depot:add_to_node()
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = supply_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function supply_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = supply_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  supply_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function supply_depot:add_to_network()
-  self.network_id = road_network.add_supply_depot(self)
+  self.network_id = supply_depot.road_network.add_supply_depot(self)
 end
 
 function supply_depot:on_removed()
@@ -142,15 +142,4 @@ function supply_depot:on_removed()
   self.assembler.destroy()
 end
 
-
-local lib = {}
-
-lib.load = function(depot)
-  setmetatable(depot, depot_metatable)
-end
-
-lib.new = supply_depot.new
-
-lib.corpse_offsets = corpse_offsets
-
-return lib
+return supply_depot

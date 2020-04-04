@@ -1,16 +1,12 @@
-local transport_drone = require("script/transport_drone")
-local road_network = require("script/road_network")
-local transport_technologies = require("script/transport_technologies")
-
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local drone_fluid_capacity = shared.drone_fluid_capacity
 
 local request_spawn_timeout = 60
 
 local request_depot = {}
-local depot_metatable = {__index = request_depot}
+request_depot.metatable = {__index = request_depot}
 
-local corpse_offsets = 
+request_depot.corpse_offsets = 
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -22,7 +18,7 @@ local get_corpse_position = function(entity)
 
   local position = entity.position
   local direction = entity.direction
-  local offset = corpse_offsets[direction]
+  local offset = request_depot.corpse_offsets[direction]
   return {position.x + offset[1], position.y + offset[2]}
 
 end
@@ -32,7 +28,6 @@ local request_mode =
   item = 1,
   fluid = 2
 }
-
 
 function request_depot.new(entity)
 
@@ -58,7 +53,7 @@ function request_depot.new(entity)
     mode = request_mode.item,
     fuel_on_the_way = 0
   }
-  setmetatable(depot, depot_metatable)
+  setmetatable(depot, request_depot.metatable)
 
   depot:add_to_node()
 
@@ -116,7 +111,7 @@ function request_depot:check_fuel_amount()
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
-  local fuel_depots = road_network.get_fuel_depots(self.network_id)
+  local fuel_depots = request_depot.road_network.get_fuel_depots(self.network_id)
   if not (fuel_depots and next(fuel_depots)) then
     self:show_fuel_alert("No fuel depots on network for request depot")
     return
@@ -204,7 +199,7 @@ function request_depot:get_stack_size()
 end
 
 function request_depot:get_request_size()
-  return self:get_stack_size() * (1 + transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
+  return self:get_stack_size() * (1 + request_depot.transport_technologies.get_transport_capacity_bonus(self.entity.force.index))
 end
 
 function request_depot:get_output_inventory()
@@ -279,7 +274,7 @@ function request_depot:handle_offer(supply_depot, name, count)
 
   local needed_count = math.min(self:get_request_size(), count)
 
-  local drone = transport_drone.new(self)
+  local drone = request_depot.transport_drone.new(self)
   drone:pickup_from_supply(supply_depot, needed_count)
   self:remove_fuel(fuel_amount_per_drone)
 
@@ -353,27 +348,27 @@ function request_depot:say(string)
 end
 
 function request_depot:add_to_node()
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = request_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function request_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = request_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  request_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function request_depot:add_to_network()
   if not self.item then return end
   --self:say("Adding to network")
-  self.network_id = road_network.add_request_depot(self, self.item)
+  self.network_id = request_depot.road_network.add_request_depot(self, self.item)
 end
 
 function request_depot:remove_from_network()
   if not self.item then return end
-  local network = road_network.get_network_by_id(self.network_id)
+  local network = request_depot.road_network.get_network_by_id(self.network_id)
   if not network then return end
 
   local requesters = network.requesters
@@ -390,19 +385,9 @@ function request_depot:on_removed()
   self.corpse.destroy()
 end
 
-local lib = {}
-
-lib.load = function(depot)
-  setmetatable(depot, depot_metatable)
+function request_depot:on_config_changed()
+  self.mode = self.mode or request_mode.item
+  self.fuel_on_the_way = self.fuel_on_the_way or 0
 end
 
-lib.config_changed = function(depot)
-  depot.mode = depot.mode or request_mode.item
-  depot.fuel_on_the_way = depot.fuel_on_the_way or 0
-end
-
-lib.corpse_offsets = corpse_offsets
-
-lib.new = request_depot.new
-
-return lib
+return request_depot

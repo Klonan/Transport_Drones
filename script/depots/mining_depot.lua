@@ -1,10 +1,7 @@
-local transport_drone = require("script/transport_drone")
-local road_network = require("script/road_network")
-
 local mining_depot = {}
-local depot_metatable = {__index = mining_depot}
+mining_depot.metatable = {__index = mining_depot}
 
-local corpse_offsets = 
+mining_depot.corpse_offsets = 
 {
   [0] = {0, -3},
   [2] = {3, 0},
@@ -16,7 +13,7 @@ local get_corpse_position = function(entity)
 
   local position = entity.position
   local direction = entity.direction
-  local offset = corpse_offsets[direction]
+  local offset = mining_depot.corpse_offsets[direction]
   return {position.x + offset[1], position.y + offset[2]}
 
 end
@@ -41,7 +38,7 @@ function mining_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     to_be_taken = {},
   }
-  setmetatable(depot, depot_metatable)
+  setmetatable(depot, mining_depot.metatable)
 
   depot:add_to_node()
   depot:add_to_network()
@@ -58,7 +55,7 @@ function mining_depot:check_requests_for_item(name, count)
 
   if count - self:get_to_be_taken(name) <= 0 then return end
 
-  local request_depots = road_network.get_request_depots(self.network_id, name)
+  local request_depots = mining_depot.road_network.get_request_depots(self.network_id, name)
   if not request_depots then return end
   if not next(request_depots) then return end
 
@@ -102,7 +99,7 @@ end
 
 function mining_depot:remove_from_network()
 
-  local network = road_network.get_network_by_id(self.network_id)
+  local network = mining_depot.road_network.get_network_by_id(self.network_id)
 
   local mining = network.mining
 
@@ -112,21 +109,21 @@ function mining_depot:remove_from_network()
 end
 
 function mining_depot:add_to_node()
-  local node = road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = mining_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function mining_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = mining_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  mining_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function mining_depot:add_to_network()
   --self:say("Adding to network")
-  self.network_id = road_network.add_mining_depot(self)
+  self.network_id = mining_depot.road_network.add_mining_depot(self)
 end
 
 function mining_depot:on_removed()
@@ -135,16 +132,4 @@ function mining_depot:on_removed()
   self.corpse.destroy()
 end
 
-
-
-local lib = {}
-
-lib.load = function(depot)
-  setmetatable(depot, depot_metatable)
-end
-
-lib.new = mining_depot.new
-
-lib.corpse_offsets = corpse_offsets
-
-return lib
+return mining_depot
