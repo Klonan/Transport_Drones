@@ -29,13 +29,12 @@ local neighbor_offsets =
 }
 
 local get_node = function(surface, x, y)
-
   local surface_map = script_data.node_map[surface]
   if not surface_map then return end
-
+  
   local x_map = surface_map[x]
   if not x_map then return end
-
+  
   return x_map[y]
 
 end
@@ -200,8 +199,10 @@ road_network.remove_node = function(surface, x, y)
 
   local node = get_node(surface, x, y)
   if not node then return end
-
-  if node.depots and next(node.depots) then return true end
+  
+  if node.depots and next(node.depots) then
+    return true
+  end
 
   script_data.node_map[surface][x][y] = nil
 

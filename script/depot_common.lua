@@ -81,6 +81,13 @@ end
 local attempt_to_place_node = function(entity, depot_lib, event)
   local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
+  
+  local node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
+
+  if road_network.get_node(surface.index, node_position[1], node_position[2]) then
+    --Already a node here, don't worry
+    return true
+  end
 
   if not surface.can_place_entity(
     {
@@ -92,8 +99,6 @@ local attempt_to_place_node = function(entity, depot_lib, event)
     return
   end
 
-  
-  local node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
   refund_tile_placement(surface, event, node_position)
   surface.set_tiles
   {
@@ -250,6 +255,11 @@ local setup_lib_values = function()
 
 end
 
+local set_map_settings = function()
+  game.map_settings.steering.default.force_unit_fuzzy_goto_behavior = false
+  game.map_settings.steering.moving.force_unit_fuzzy_goto_behavior = false
+end
+
 
 local lib = {}
 
@@ -271,6 +281,7 @@ lib.events =
 lib.on_init = function()
   global.transport_depots = global.transport_depots or script_data
   setup_lib_values()
+  set_map_settings()
 end
 
 lib.on_load = function()
@@ -292,6 +303,7 @@ lib.on_configuration_changed = function()
   for k, depot in pairs (script_data.depots) do
     depot:remove_from_network()
     depot:add_to_network()
+    depot:add_to_node()
     if depot.on_config_changed then
       depot:on_config_changed()
     end
@@ -305,6 +317,8 @@ lib.on_configuration_changed = function()
       end
     end
   end
+
+  set_map_settings()
 
 end
 
