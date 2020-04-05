@@ -159,7 +159,7 @@ function transport_drone:pickup_from_supply(supply, count)
     type = defines.command.go_to_location,
     destination_entity = self.supply_depot.corpse,
     distraction = defines.distraction.none,
-    radius = 0.5,
+    radius = 0.8,
     pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
   }
 
@@ -181,7 +181,7 @@ function transport_drone:deliver_fuel(depot, amount)
     type = defines.command.go_to_location,
     destination_entity = self.target_depot.corpse,
     distraction = defines.distraction.none,
-    radius = 0.5,
+    radius = 0.8,
     pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
   }
 
@@ -251,8 +251,6 @@ end
 
 function transport_drone:process_deliver_fuel()
 
-  self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
-
   local box = self.target_depot.entity.fluidbox[1]
   if not box then
     box = {name = get_fuel_fluid(), amount = self.fuel_amount}
@@ -260,8 +258,6 @@ function transport_drone:process_deliver_fuel()
     box.amount = box.amount + self.fuel_amount
   end
   self.target_depot.entity.fluidbox[1] = box
-
-  self.fuel_amount = nil
 
   self:add_slow_sticker()
   self:update_speed()
@@ -277,6 +273,13 @@ function transport_drone:return_to_requester()
       self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
     end
   end
+
+  if self.state == states.delivering_fuel then
+    if self.target_depot then
+      self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
+      self.fuel_amount = nil
+    end
+  end
   
   if not self.request_depot.entity.valid then
     self:suicide()
@@ -290,7 +293,7 @@ function transport_drone:return_to_requester()
     type = defines.command.go_to_location,
     destination_entity = self.request_depot.corpse,
     distraction = defines.distraction.none,
-    radius = 0.5,
+    radius = 0.8,
     pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
   }
 
@@ -542,10 +545,19 @@ function transport_drone:clear_drone_data()
   if self.state == states.going_to_supply then
     self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
   end
+
+  if self.state == states.delivering_fuel then
+    if self.target_depot and self.fuel_amount then
+      self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
+      self.fuel_amount = nil
+    end
+  end
+
   if self.riding_player then
     local player = game.get_player(self.riding_player)
     if player then player_leave_drone(player) end
   end
+  
   remove_drone(self)
 end
 
