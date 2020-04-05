@@ -261,7 +261,6 @@ function transport_drone:process_deliver_fuel()
 
   self:add_slow_sticker()
   self:update_speed()
-  self:update_sticker()
   self:return_to_requester()
   
 end
@@ -285,6 +284,8 @@ function transport_drone:return_to_requester()
     self:suicide()
     return
   end
+
+  self:update_sticker()
 
   self.state = states.return_to_requester
   
