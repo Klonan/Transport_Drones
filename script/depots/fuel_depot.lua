@@ -63,6 +63,8 @@ function fuel_depot:remove_from_network()
 
   local network = fuel_depot.road_network.get_network_by_id(self.network_id)
 
+  if not network then return end
+
   local fuel = network.fuel
 
   fuel[self.index] = nil

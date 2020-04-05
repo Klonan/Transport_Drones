@@ -369,6 +369,7 @@ end
 function request_depot:remove_from_network()
   if not self.item then return end
   local network = request_depot.road_network.get_network_by_id(self.network_id)
+  
   if not network then return end
 
   local requesters = network.requesters

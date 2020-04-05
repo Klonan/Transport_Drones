@@ -108,6 +108,8 @@ end
 function supply_depot:remove_from_network()
 
   local network = supply_depot.road_network.get_network_by_id(self.network_id)
+  
+  if not network then return end
 
   local supply = network.supply
 

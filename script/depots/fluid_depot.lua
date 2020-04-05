@@ -38,7 +38,7 @@ function fluid_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     index = tostring(entity.unit_number)
   }
-  setmetatable(depot, depot_metatable)
+  setmetatable(depot, fluid_depot.metatable)
 
   depot:add_to_network()
   depot:add_to_node()
@@ -133,6 +133,8 @@ end
 function fluid_depot:remove_from_network()
 
   local network = fluid_depot.road_network.get_network_by_id(self.network_id)
+
+  if not network then return end
 
   local supply = network.supply
 

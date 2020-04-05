@@ -101,6 +101,8 @@ function mining_depot:remove_from_network()
 
   local network = mining_depot.road_network.get_network_by_id(self.network_id)
 
+  if not network then return end
+  
   local mining = network.mining
 
   mining[self.index] = nil

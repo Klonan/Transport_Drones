@@ -13,8 +13,7 @@ local required_interfaces =
   update = "function"
 }
 
-local add_depot_lib = function(entity_name, lib_path)
-  local lib = require(lib_path)
+local add_depot_lib = function(entity_name, lib)
   for name, value_type in pairs (required_interfaces) do
     if not lib[name] or type(lib[name]) ~= value_type then
       error("Trying to add lib without all required interfaces: "..serpent.block(
@@ -29,12 +28,21 @@ local add_depot_lib = function(entity_name, lib_path)
   depot_libs[entity_name] = lib
 end
 
-add_depot_lib("request-depot", "script/depots/request_depot")
-add_depot_lib("supply-depot", "script/depots/supply_depot")
-add_depot_lib("supply-depot-chest", "script/depots/supply_depot")
-add_depot_lib("fuel-depot", "script/depots/fuel_depot")
-add_depot_lib("mining-depot", "script/depots/mining_depot")
-add_depot_lib("fluid-depot", "script/depots/fluid_depot")
+add_depot_lib("request-depot", require("script/depots/request_depot"))
+add_depot_lib("supply-depot", require("script/depots/supply_depot"))
+add_depot_lib("supply-depot-chest", require("script/depots/supply_depot"))
+add_depot_lib("fuel-depot", require("script/depots/fuel_depot"))
+add_depot_lib("mining-depot", require("script/depots/mining_depot"))
+add_depot_lib("fluid-depot", require("script/depots/fluid_depot"))
+
+local match = "transport_drones_add_"
+for name, setting in pairs (settings.startup) do
+  if name:find(match) then
+    local lib_name = name:sub(match:len() + 1)
+    local path = setting.value
+    add_depot_lib(lib_name, require(path))
+  end
+end
 
 local script_data = 
 {
@@ -232,6 +240,15 @@ local on_tick = function(event)
   update_next_depot()
 end
 
+local setup_lib_values = function()
+
+  for k, lib in pairs (depot_libs) do
+    lib.road_network = road_network
+    lib.transport_drone = transport_drone
+    lib.transport_technologies = transport_technologies
+  end
+
+end
 
 
 local lib = {}
@@ -253,17 +270,12 @@ lib.events =
 
 lib.on_init = function()
   global.transport_depots = global.transport_depots or script_data
+  setup_lib_values()
 end
 
 lib.on_load = function()
   script_data = global.transport_depots or script_data
-
-  for k, lib in pairs (depot_libs) do
-    lib.road_network = road_network
-    lib.transport_drone = transport_drone
-    lib.transport_technologies = transport_technologies
-  end
-
+  setup_lib_values()
   for k, depot in pairs (script_data.depots) do
     load_depot(depot)
   end
@@ -299,7 +311,5 @@ end
 lib.get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
 end
-
-lib.add_depot_lib = add_depot_lib
 
 return lib

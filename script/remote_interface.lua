@@ -5,9 +5,6 @@ local interface =
 {
   get_drone_count = function()
     return transport_drone.get_drone_count()
-  end,
-  add_depot_lib = function(entity_name, lib)
-    depot_common.add_depot_lib(entity_name, lib)
   end
 }
 

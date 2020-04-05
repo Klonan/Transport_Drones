@@ -9,6 +9,7 @@
   "dependencies": ["base >= 0.18.0", 
     "(?)deadlock_stacked_recipes",
     "(?)Krastorio2",
+    "(?)apm_recycling",
     "(?)alien-biomes"
   ],
   "factorio_version": "0.18"
