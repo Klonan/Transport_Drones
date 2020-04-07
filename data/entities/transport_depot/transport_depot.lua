@@ -604,3 +604,45 @@ data:extend
   category,
   fuel_depot
 }
+
+local buffer_depot = util.copy(depot)
+buffer_depot.name = "buffer-depot"
+buffer_depot.localised_name = {"buffer-depot"}
+buffer_depot.minable.result = "buffer-depot"
+buffer_depot.placeable_by = {item = "buffer-depot", count = 1}
+
+local buffer_depot_items = 
+{
+  {
+    type = "item",
+    name = "buffer-depot",
+    localised_name = {"buffer-depot"},
+    icon = fluid_supply_depot.icon,
+    icon_size = fluid_supply_depot.icon_size,
+    flags = {},
+    subgroup = "transport-drones",
+    order = "e-f",
+    stack_size = 10,
+    place_result = "buffer-depot"
+  },
+  {
+    type = "recipe",
+    name = "buffer-depot",
+    localised_name = {"buffer-depot"},
+    icon = fluid_supply_depot.icon,
+    icon_size = fluid_supply_depot.icon_size,
+    --category = "transport",
+    enabled = true,
+    ingredients =
+    {
+      {"iron-plate", 50},
+      {"iron-gear-wheel", 10},
+      {"iron-stick", 20},
+    },
+    energy_required = 5,
+    result = "buffer-depot"
+  }
+}
+
+data:extend{buffer_depot}
+data:extend(buffer_depot_items)

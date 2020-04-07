@@ -34,6 +34,7 @@ add_depot_lib("supply-depot-chest", require("script/depots/supply_depot"))
 add_depot_lib("fuel-depot", require("script/depots/fuel_depot"))
 add_depot_lib("mining-depot", require("script/depots/mining_depot"))
 add_depot_lib("fluid-depot", require("script/depots/fluid_depot"))
+add_depot_lib("buffer-depot", require("script/depots/buffer_depot"))
 
 local match = "transport_drones_add_"
 for name, setting in pairs (settings.startup) do
