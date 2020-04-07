@@ -55,11 +55,14 @@ function fluid_depot:check_requests_for_item(name, count)
 
   if count - self:get_to_be_taken(name) <= 0 then return end
 
-  local request_depots = fluid_depot.road_network.get_request_depots(self.network_id, name)
+  local request_depots = fluid_depot.road_network.get_request_depots(self.network_id, name, self.node_position)
   if not request_depots then return end
-  if not next(request_depots) then return end
+  
+  local size = #request_depots
+  if size == 0 then return end
 
-  for k, depot in pairs (request_depots) do
+  for k = 1, size do
+    local depot = request_depots[k]
     local available = count - self:get_to_be_taken(name)
     if available <= 0 then return end
     depot:handle_offer(self, name, available)

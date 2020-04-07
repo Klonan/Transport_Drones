@@ -306,7 +306,18 @@ road_network.add_request_depot = function(depot, item_name)
 end
 
 local shuffle = util.shuffle_table
-road_network.get_request_depots = function(id, name)
+local distance_squared = function(a, b)
+  local dx = a[1] - b[1]
+  local dy = a[2] - b[2]
+  return (dx * dx) + (dy * dy)
+end
+local sort = table.sort
+
+road_network.get_request_depots = function(id, name, node_position)
+  local sort_function = function(depot_a, depot_b)
+    return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
+  end
+  --local profiler = game.create_profiler()
   local network = get_network_by_id(id)
   if not network.requesters then return end
   local depots = network.requesters[name]
@@ -318,7 +329,12 @@ road_network.get_request_depots = function(id, name)
     to_shuffle[i] = v
     i = i + 1
   end
-  shuffle(to_shuffle)
+  --shuffle(to_shuffle)
+  sort(to_shuffle, sort_function)  
+
+  --profiler.stop()
+  --game.print({"", "Got depots ", profiler})
+  --log({"", "Got depots ", profiler})
   return to_shuffle
 end
 
