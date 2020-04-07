@@ -610,6 +610,52 @@ buffer_depot.name = "buffer-depot"
 buffer_depot.localised_name = {"buffer-depot"}
 buffer_depot.minable.result = "buffer-depot"
 buffer_depot.placeable_by = {item = "buffer-depot", count = 1}
+buffer_depot.icon = util.path("data/entities/transport_depot/buffer-depot-icon.png")
+
+
+local buffer_base = function(shift)
+  return
+  {
+    filename = util.path("data/entities/transport_depot/buffer-depot-base.png"),
+    width = 474,
+    height = 335,
+    frame_count = 1,
+    scale = 0.45,
+    shift = shift
+  }
+end
+
+buffer_depot.animation =
+{
+  north =
+  {
+    layers =
+    {
+      buffer_base{0, 0.4},
+    }
+  },
+  south =
+  {
+    layers =
+    {
+      buffer_base{0, 0.4},
+    }
+  },
+  east =
+  {
+    layers =
+    {
+      buffer_base{0, 0.4},
+    }
+  },
+  west =
+  {
+    layers =
+    {
+      buffer_base{0, 0.4},
+    }
+  }
+}
 
 local buffer_depot_items = 
 {

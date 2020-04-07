@@ -338,6 +338,51 @@ road_network.get_request_depots = function(id, name, node_position)
   return to_shuffle
 end
 
+road_network.add_buffer_depot = function(depot, item_name)
+  local x, y = depot.node_position[1], depot.node_position[2]
+  local surface = depot.entity.surface.index
+  local node = get_node(surface, x, y)
+
+  local network = get_network_by_id(node.id)
+
+  if not network.buffers then network.buffers = {} end
+
+  local item_map = network.buffers[item_name]
+  if not item_map then
+    item_map = {}
+    network.buffers[item_name] = item_map
+  end
+
+  item_map[depot.index] = depot
+
+  return network.id
+end
+
+road_network.get_buffer_depots = function(id, name, node_position)
+  local sort_function = function(depot_a, depot_b)
+    return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
+  end
+  --local profiler = game.create_profiler()
+  local network = get_network_by_id(id)
+  if not network.buffers then return end
+  local depots = network.buffers[name]
+  if not depots then return end
+  
+  local to_shuffle = {}
+  local i = 1
+  for k, v in pairs (depots) do
+    to_shuffle[i] = v
+    i = i + 1
+  end
+  --shuffle(to_shuffle)
+  sort(to_shuffle, sort_function)  
+
+  --profiler.stop()
+  --game.print({"", "Got depots ", profiler})
+  --log({"", "Got depots ", profiler})
+  return to_shuffle
+end
+
 road_network.get_fuel_depots = function(id)
   local network = get_network_by_id(id)
   local depots = network.fuel

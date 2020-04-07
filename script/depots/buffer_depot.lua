@@ -14,6 +14,8 @@ buffer_depot.corpse_offsets =
   [6] = {-2, 0},
 }
 
+buffer_depot.is_buffer_depot = true
+
 local get_corpse_position = function(entity)
 
   local position = entity.position
@@ -51,7 +53,8 @@ function buffer_depot.new(entity)
     drones = {},
     next_spawn_tick = 0,
     mode = request_mode.item,
-    fuel_on_the_way = 0
+    fuel_on_the_way = 0,
+    to_be_taken = {},
   }
   setmetatable(depot, buffer_depot.metatable)
 
@@ -60,7 +63,6 @@ function buffer_depot.new(entity)
   return depot
 
 end
-
 
 function buffer_depot:remove_fuel(amount)
   local box = self.entity.fluidbox[1]
@@ -128,10 +130,16 @@ function buffer_depot:check_fuel_amount()
 
 end
 
+function buffer_depot:offer_item()
+  if not self.item then return end
+  self:check_requests_for_item(self.item, self:get_current_amount())
+end
+
 function buffer_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
   self:check_drone_validity()
+  self:offer_item()
   self:update_sticker()
 end
 
@@ -285,6 +293,34 @@ function buffer_depot:handle_offer(supply_depot, name, count)
 
 end
 
+function buffer_depot:check_requests_for_item(name, count)
+
+  if count - self:get_to_be_taken(name) <= 0 then
+    return
+  end
+
+  local request_depots = self.road_network.get_request_depots(self.network_id, name, self.node_position)
+  if request_depots then
+    local size = #request_depots
+    if size > 0 then
+      for k = 1, size do
+        local depot = request_depots[k]
+        local available = count - self:get_to_be_taken(name)
+        if available <= 0 then return end
+        depot:handle_offer(self, name, available, true)
+        depot.updates_without_buffer_offer = 0
+      end
+    end
+  end
+
+end
+
+function buffer_depot:give_item(requested_name, requested_count)
+  local inventory = self.entity.get_output_inventory()
+  local removed_count = inventory.remove({name = requested_name, count = requested_count})
+  return removed_count
+end
+
 function buffer_depot:take_item(name, count)
   if game.item_prototypes[name] then
     self.entity.get_output_inventory().insert({name = name, count = count})
@@ -303,6 +339,20 @@ function buffer_depot:take_item(name, count)
 
   
 
+end
+
+function buffer_depot:get_to_be_taken(name)
+  return self.to_be_taken[name] or 0
+end
+
+function buffer_depot:add_to_be_taken(name, count)
+  --if not (name and count) then return end
+  self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
+  --self:say(self.to_be_taken[name])
+end
+
+function buffer_depot:get_available_item_count(name)
+  return self:get_current_amount() - self:get_to_be_taken(name)
 end
 
 function buffer_depot:remove_drone(drone, remove_item)
@@ -372,8 +422,8 @@ function buffer_depot:remove_from_network()
   
   if not network then return end
 
-  local requesters = network.requesters
-  requesters[self.item][self.index] = nil
+  local buffers = network.buffers
+  buffers[self.item][self.index] = nil
 
   self.network_id = nil
 
@@ -387,8 +437,7 @@ function buffer_depot:on_removed()
 end
 
 function buffer_depot:on_config_changed()
-  self.mode = self.mode or request_mode.item
-  self.fuel_on_the_way = self.fuel_on_the_way or 0
+  self.to_be_taken = self.to_be_taken or {}
 end
 
 return buffer_depot

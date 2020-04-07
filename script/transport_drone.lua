@@ -470,6 +470,13 @@ function transport_drone:process_reorder()
     return
   end
 
+  if not self.supply_depot.is_buffer_depot then
+    if not self.request_depot.is_buffer_depot and self.request_depot:has_recent_buffer_offer() then
+      self:remove_from_depot()
+      return
+    end
+  end
+
   if not self.request_depot:should_order(true) then
     self:remove_from_depot()
     return

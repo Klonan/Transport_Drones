@@ -2,6 +2,7 @@ local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local drone_fluid_capacity = shared.drone_fluid_capacity
 
 local request_spawn_timeout = 60
+local no_buffer_offer_limit = 5
 
 local request_depot = {}
 request_depot.metatable = {__index = request_depot}
@@ -162,7 +163,12 @@ end
 
 function request_depot:check_request_change()
   local requested_item = self:get_requested_item()
-  if self.item == requested_item then return end
+  if self.item == requested_item then
+    self.updates_without_buffer_offer = self.updates_without_buffer_offer + 1
+    return
+  end
+
+  self.updates_without_buffer_offer = 0
 
   self:set_request_mode()
 
@@ -263,7 +269,13 @@ function request_depot:should_order(plus_one)
   return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
 end
 
-function request_depot:handle_offer(supply_depot, name, count)
+function request_depot:has_recent_buffer_offer()
+  return self.updates_without_buffer_offer < no_buffer_offer_limit
+end
+
+function request_depot:handle_offer(supply_depot, name, count, buffer_offer)
+
+  if (not buffer_offer and self:has_recent_buffer_offer()) then return end
 
   if count < self:get_minimum_request_size() then return end
 
@@ -389,6 +401,7 @@ end
 function request_depot:on_config_changed()
   self.mode = self.mode or request_mode.item
   self.fuel_on_the_way = self.fuel_on_the_way or 0
+  self.updates_without_buffer_offer = 0
 end
 
 return request_depot

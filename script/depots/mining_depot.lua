@@ -51,22 +51,37 @@ function mining_depot:get_to_be_taken(name)
   return self.to_be_taken[name] or 0
 end
 
+
 function mining_depot:check_requests_for_item(name, count)
 
-  if count - self:get_to_be_taken(name) <= 0 then return end
+  if count - self:get_to_be_taken(name) <= 0 then
+    return
+  end
 
-  local request_depots = mining_depot.road_network.get_request_depots(self.network_id, name, self.node_position)
-  if not request_depots then return end
-  
-  local size = #request_depots
-  if size == 0 then return end
+  local buffer_depots = self.road_network.get_buffer_depots(self.network_id, name, self.node_position)
+  if buffer_depots then
+    local size = #buffer_depots
+    if size > 0 then
+      for k = 1, size do
+        local depot = buffer_depots[k]
+        local available = count - self:get_to_be_taken(name)
+        if available <= 0 then return end
+        depot:handle_offer(self, name, available)
+      end
+    end
+  end
 
-  for k = 1, size do
-    local depot = request_depots[k]
-    local available = count - self:get_to_be_taken(name)
-    if available <= 0 then return end
-    depot:handle_offer(self, name, available)
-    --depot:say(k)
+  local request_depots = supply_depot.road_network.get_request_depots(self.network_id, name, self.node_position)
+  if request_depots then
+    local size = #request_depots
+    if size > 0 then
+      for k = 1, size do
+        local depot = request_depots[k]
+        local available = count - self:get_to_be_taken(name)
+        if available <= 0 then return end
+        depot:handle_offer(self, name, available)
+      end
+    end
   end
 
 end
