@@ -84,8 +84,9 @@ function request_depot:check_drone_validity()
   end
 end
 
+local max = math.max
 function request_depot:minimum_fuel_amount()
-  return (fuel_amount_per_drone * 2)
+  return max(fuel_amount_per_drone * 2, fuel_amount_per_drone * self:get_drone_item_count() * 0.2)
 end
 
 function request_depot:max_fuel_amount()
