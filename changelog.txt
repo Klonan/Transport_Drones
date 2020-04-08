@@ -5,6 +5,7 @@ Date: 2020-04-08
     - Added buffer depot. The buffer depot has priority over normal request depots. Request depots also won't take from supply depots if they have been offered the same items from a buffer depot.
     - Supplying depots (supply, fluid, mining, buffer) will offer to the closest request depots first.
     - Fixed some issue with modded rails and gates not being placeable on roads.
+    - Buffed fuel depot capacity to 10k.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: 2020-04-05

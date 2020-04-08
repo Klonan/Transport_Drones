@@ -324,8 +324,8 @@ fuel_depot.fluid_boxes =
   {
     production_type = "input",
     base_area = 10,
-    base_level = -0.25,
-    height = 1.5,
+    base_level = -1,
+    height = 1,
     pipe_connections = {{ type="input-output", position = {0, 3} }},
     pipe_covers = pipecoverspictures(),
     pipe_picture = assembler3pipepictures(),
@@ -424,7 +424,7 @@ local fuel_recipe =
   ingredients =
   {
     {type = "item", name = "transport-drone", amount = 100},
-    {type = "fluid", name = shared.fuel_fluid, amount = 3000}
+    {type = "fluid", name = shared.fuel_fluid, amount = 5000}
   },
   overload_multipler = 50,
   energy_required = 5,
