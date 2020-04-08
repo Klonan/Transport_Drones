@@ -98,14 +98,18 @@ local attempt_to_place_node = function(entity, depot_lib, event)
   return true
 end
 
-local refund_build = function(event, item_name)
+local refund_build = function(event, entity_prototype)
+
+  local item = entity_prototype.items_to_place_this[1]
+  if not item then return end
+
   if event.player_index then
-    game.get_player(event.player_index).insert{name = item_name, count = 1}
+    game.get_player(event.player_index).insert(item)
     return
   end
 
   if event.robot and event.robot.valid then
-    event.robot.get_inventory(defines.inventory.robot_cargo).insert({name = item_name, count = 1})
+    event.robot.get_inventory(defines.inventory.robot_cargo).insert(item)
     return
   end
 end
@@ -121,7 +125,7 @@ local on_created_entity = function(event)
 
   if not attempt_to_place_node(entity, depot_lib, event) then
     --refund
-    refund_build(event, entity.name)
+    refund_build(event, entity.prototype)
     entity.destroy({raise_destroy = true})
     return
   end
@@ -139,7 +143,7 @@ local on_entity_removed = function(event)
   local depot = get_depot(entity)
   if depot then
     script_data.depots[depot.index] = nil
-    depot:on_removed()
+    depot:on_removed(event)
   end
 
 end

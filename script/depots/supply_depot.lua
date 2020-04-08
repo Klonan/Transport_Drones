@@ -148,12 +148,20 @@ function supply_depot:add_to_network()
   self.network_id = self.road_network.add_supply_depot(self)
 end
 
-function supply_depot:on_removed()
+function supply_depot:on_removed(event)
+
   self:remove_from_network()
   self:remove_from_node()
   self.corpse.destroy()
   self.assembler.destructible = true
-  self.assembler.destroy()
+  
+  if event.name == defines.events.on_entity_died then
+    self.entity.destroy()
+    self.assembler.die()
+    game.print("HUH")
+  else
+    self.assembler.destroy()    
+  end
 end
 
 return supply_depot
