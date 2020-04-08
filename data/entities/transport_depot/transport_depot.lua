@@ -411,6 +411,14 @@ local fuel_depot_items =
   }
 }
 
+local fuel_recipe_category =
+{
+  type = "recipe-category",
+  name = "fuel-depot"
+}
+
+data:extend{fuel_recipe_category}
+
 local fuel_recipe = 
 {
   type = "recipe",
@@ -433,7 +441,7 @@ local fuel_recipe =
     {type = "fluid", name = shared.fuel_fluid, amount = 10}
   },
   subgroup = "other",
-  category = "crafting-with-fluid",
+  category = "fuel-depot",
   hidden = true
 }
 
@@ -678,7 +686,7 @@ local buffer_depot_items =
     icon = buffer_depot.icon,
     icon_size = buffer_depot.icon_size,
     --category = "transport",
-    enabled = true,
+    enabled = false,
     ingredients =
     {
       {"iron-plate", 50},
