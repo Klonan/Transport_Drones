@@ -237,11 +237,6 @@ function buffer_depot:get_drone_item_count()
   return self.entity.get_item_count("transport-drone")
 end
 
-function buffer_depot:get_minimum_request_size()
-  return 1  
-  --return math.ceil(self:get_stack_size() / 2)
-end
-
 function buffer_depot:get_output_fluidbox()
   return self.entity.fluidbox[2]
 end
@@ -274,8 +269,6 @@ function buffer_depot:should_order(plus_one)
 end
 
 function buffer_depot:handle_offer(supply_depot, name, count)
-
-  if count < self:get_minimum_request_size() then return end
 
   if not self:can_spawn_drone() then return end
 
