@@ -238,7 +238,8 @@ function buffer_depot:get_drone_item_count()
 end
 
 function buffer_depot:get_minimum_request_size()
-  return math.ceil(self:get_stack_size() / 2)
+  return 1  
+  --return math.ceil(self:get_stack_size() / 2)
 end
 
 function buffer_depot:get_output_fluidbox()
