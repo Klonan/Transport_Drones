@@ -50,7 +50,8 @@ local script_data =
   depots = {},
   update_order = {},
   last_update_index = 0,
-  reset_to_be_taken_again = true
+  reset_to_be_taken_again = true,
+  refresh_techs = true
 }
 
 local get_depot = function(entity)
@@ -64,19 +65,6 @@ local get_corpse_position = function(entity, corpse_offsets)
   local offset = corpse_offsets[direction]
   return {position.x + offset[1], position.y + offset[2]}
 
-end
-
-local refund_tile_placement = function(surface, event, position)
-  local insert = event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).insert or event.player_index and game.get_player(event.player_index).insert
-  if not insert then return end
-  local tile = surface.get_tile(position)
-  local mineable_properties = tile.prototype.mineable_properties
-  if not mineable_properties.minable then return end
-  for k, product in pairs (mineable_properties.products) do
-    if product.amount >= 1 then
-      insert{name = product.name, count = product.amount}
-    end
-  end
 end
 
 local attempt_to_place_node = function(entity, depot_lib, event)
@@ -100,7 +88,7 @@ local attempt_to_place_node = function(entity, depot_lib, event)
     return
   end
 
-  refund_tile_placement(surface, event, node_position)
+  surface.set_hidden_tile(node_position, surface.get_tile(node_position).name)
   surface.set_tiles
   {
     {name = "transport-drone-road", position = node_position}
@@ -204,9 +192,6 @@ local migrate_depots = function()
     load_depot(depot)
   end
 
-  for k, force in pairs (game.forces) do
-    force.reset_technology_effects()
-  end
 
   game.print("Transport drones 0.2.0 update:")
   game.print("I added fuel depots and fluid depots. The transport drones now need petroleum to work properly, sorry for any inconvenience.")
@@ -320,6 +305,13 @@ lib.on_configuration_changed = function()
   end
 
   set_map_settings()
+
+  if not script_data.refresh_techs then
+    script_data.refresh_techs = true
+    for k, force in pairs (game.forces) do
+      force.reset_technology_effects()
+    end
+  end
 
 end
 
