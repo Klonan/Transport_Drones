@@ -131,6 +131,15 @@ local clear_network = function(id)
       end
     end
   end
+  
+  if network.buffers then
+    for name, depots in pairs (network.buffers) do
+      for k, depot in pairs (depots) do
+        depot:remove_from_network()
+        depot:add_to_network()
+      end
+    end
+  end
 
   script_data.networks[id] = nil
 end

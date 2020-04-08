@@ -114,7 +114,7 @@ function buffer_depot:check_fuel_amount()
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
-  local fuel_depots = buffer_depot.road_network.get_fuel_depots(self.network_id)
+  local fuel_depots = self.road_network.get_fuel_depots(self.network_id)
   if not (fuel_depots and next(fuel_depots)) then
     self:show_fuel_alert("No fuel depots on network for request depot")
     return
@@ -399,27 +399,27 @@ function buffer_depot:say(string)
 end
 
 function buffer_depot:add_to_node()
-  local node = buffer_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function buffer_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = buffer_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  buffer_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function buffer_depot:add_to_network()
   if not self.item then return end
   --self:say("Adding to network")
-  self.network_id = buffer_depot.road_network.add_buffer_depot(self, self.item)
+  self.network_id = self.road_network.add_buffer_depot(self, self.item)
 end
 
 function buffer_depot:remove_from_network()
   if not self.item then return end
-  local network = buffer_depot.road_network.get_network_by_id(self.network_id)
+  local network = self.road_network.get_network_by_id(self.network_id)
   
   if not network then return end
 

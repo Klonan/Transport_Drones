@@ -1,4 +1,3 @@
---local supply_depot.road_network = require("script/supply_depot.road_network")
 local supply_depot = {}
 
 supply_depot.metatable = {__index = supply_depot}
@@ -83,7 +82,7 @@ function supply_depot:check_requests_for_item(name, count)
 end
 
 function supply_depot:check_network()
-  local network = supply_depot.road_network.get_network_by_id(self.network_id)
+  local network = self.road_network.get_network_by_id(self.network_id)
   if not network then
     self:add_to_network()
   end
@@ -120,7 +119,7 @@ end
 
 function supply_depot:remove_from_network()
 
-  local network = supply_depot.road_network.get_network_by_id(self.network_id)
+  local network = self.road_network.get_network_by_id(self.network_id)
   
   if not network then return end
 
@@ -133,20 +132,20 @@ function supply_depot:remove_from_network()
 end
 
 function supply_depot:add_to_node()
-  local node = supply_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function supply_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = supply_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  supply_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function supply_depot:add_to_network()
-  self.network_id = supply_depot.road_network.add_supply_depot(self)
+  self.network_id = self.road_network.add_supply_depot(self)
 end
 
 function supply_depot:on_removed()

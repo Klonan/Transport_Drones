@@ -71,7 +71,7 @@ function mining_depot:check_requests_for_item(name, count)
     end
   end
 
-  local request_depots = supply_depot.road_network.get_request_depots(self.network_id, name, self.node_position)
+  local request_depots = self.road_network.get_request_depots(self.network_id, name, self.node_position)
   if request_depots then
     local size = #request_depots
     if size > 0 then
@@ -117,7 +117,7 @@ end
 
 function mining_depot:remove_from_network()
 
-  local network = mining_depot.road_network.get_network_by_id(self.network_id)
+  local network = self.road_network.get_network_by_id(self.network_id)
 
   if not network then return end
   
@@ -129,21 +129,21 @@ function mining_depot:remove_from_network()
 end
 
 function mining_depot:add_to_node()
-  local node = mining_depot.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
   node.depots = node.depots or {}
   node.depots[self.index] = self
 end
 
 function mining_depot:remove_from_node()
   local surface = self.entity.surface.index
-  local node = mining_depot.road_network.get_node(surface, self.node_position[1], self.node_position[2])
+  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
   node.depots[self.index] = nil
-  mining_depot.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
+  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function mining_depot:add_to_network()
   --self:say("Adding to network")
-  self.network_id = mining_depot.road_network.add_mining_depot(self)
+  self.network_id = self.road_network.add_mining_depot(self)
 end
 
 function mining_depot:on_removed()
