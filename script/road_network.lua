@@ -392,7 +392,10 @@ road_network.get_buffer_depots = function(id, name, node_position)
   return to_shuffle
 end
 
-road_network.get_fuel_depots = function(id)
+road_network.get_fuel_depots = function(id, node_position)
+  local sort_function = function(depot_a, depot_b)
+    return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
+  end
   local network = get_network_by_id(id)
   local depots = network.fuel
   if not depots then return end
@@ -403,7 +406,8 @@ road_network.get_fuel_depots = function(id)
     to_shuffle[i] = v
     i = i + 1
   end
-  shuffle(to_shuffle)
+  --shuffle(to_shuffle)
+  sort(to_shuffle, sort_function)  
   return to_shuffle
 end
 

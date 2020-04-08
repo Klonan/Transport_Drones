@@ -114,13 +114,14 @@ function buffer_depot:check_fuel_amount()
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
-  local fuel_depots = self.road_network.get_fuel_depots(self.network_id)
-  if not (fuel_depots and next(fuel_depots)) then
+  local fuel_depots = self.road_network.get_fuel_depots(self.network_id, self.node_position)
+  if not (fuel_depots and fuel_depots[1]) then
     self:show_fuel_alert("No fuel depots on network for request depot")
     return
   end
 
-  for k, depot in pairs (fuel_depots) do
+  for k = 1, #fuel_depots do
+    local depot = fuel_depots[k]
     depot:handle_fuel_request(self)
     if fuel_request_amount <= self.fuel_on_the_way then
       return
