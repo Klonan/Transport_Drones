@@ -6,6 +6,7 @@ Date: 2020-04-08
     - Supplying depots (supply, fluid, mining, buffer) will offer to the closest request depots first.
     - Fixed some issue with modded rails and gates not being placeable on roads.
     - Buffed fuel depot capacity to 10k.
+    - Removed 'minimum request amount' logic.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: 2020-04-05
