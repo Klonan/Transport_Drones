@@ -158,7 +158,6 @@ function supply_depot:on_removed(event)
   if event.name == defines.events.on_entity_died then
     self.entity.destroy()
     self.assembler.die()
-    game.print("HUH")
   else
     self.assembler.destroy()    
   end
