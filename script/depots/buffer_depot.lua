@@ -141,7 +141,7 @@ function buffer_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
   self:check_drone_validity()
-  self:offer_item()
+  --self:offer_item()
   self:update_sticker()
 end
 
@@ -258,6 +258,14 @@ function buffer_depot:get_current_amount()
   end
 end
 
+function buffer_depot:get_minimum_request_size()
+  local stack_size = self:get_stack_size()
+  if self:get_current_amount() < stack_size then 
+    return 1
+  end
+  return stack_size
+end
+
 function buffer_depot:should_order(plus_one)
   if self:get_fuel_amount() < fuel_amount_per_drone then
     return
@@ -270,6 +278,8 @@ function buffer_depot:should_order(plus_one)
 end
 
 function buffer_depot:handle_offer(supply_depot, name, count)
+
+  if count < self:get_minimum_request_size() then return end
 
   if not self:can_spawn_drone() then return end
 
@@ -288,6 +298,8 @@ function buffer_depot:handle_offer(supply_depot, name, count)
   self:update_sticker()
 
 end
+
+
 
 function buffer_depot:check_requests_for_item(name, count)
 
@@ -311,10 +323,34 @@ function buffer_depot:check_requests_for_item(name, count)
 
 end
 
+local min = math.min
 function buffer_depot:give_item(requested_name, requested_count)
-  local inventory = self.entity.get_output_inventory()
-  local removed_count = inventory.remove({name = requested_name, count = requested_count})
-  return removed_count
+
+  if game.item_prototypes[requested_name] then
+    local inventory = self.entity.get_output_inventory()
+    local removed_count = inventory.remove({name = requested_name, count = requested_count})
+    return removed_count
+  end
+
+  if game.fluid_prototypes[requested_name] then
+    local box = self:get_output_fluidbox()
+    if not box then
+      return 0
+    end
+
+    if box.name ~= requested_name then
+      return 0
+    end
+
+    if requested_count >= box.amount then
+      self:set_output_fluidbox(nil)
+      return box.amount
+    end
+
+    box.amount = box.amount - requested_count
+    self:set_output_fluidbox(box)
+    return requested_count
+  end
 end
 
 function buffer_depot:take_item(name, count)

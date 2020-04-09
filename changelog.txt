@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.3
+Date: 2020-04-09
+  Changes:
+    - Fixed buffer depots providing fluids.
+    - Readded minimum request amount logic, with some better logic. If the request depot has less that 1 stack of the item, the minimum request will be 1 item. If there is more, the minimum will be 1 stack.
+    - Adjusted logic of requesting from buffers. Request depots should tend to request from nearest buffers more reliably.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.2
+Date: 2020-04-09
+  Changes:
+    - Fixed a script error when removing a depot which was holding a reference to a dead drone.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: 2020-04-08
   Changes:
