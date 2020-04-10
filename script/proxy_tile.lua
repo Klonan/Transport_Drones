@@ -118,7 +118,19 @@ local on_built_tile = function(event)
   
 end
 
+local text = "You're playing with a naughty mod that isn't raising events properly. Surface index is missing from the tile mined event."
+local broken_now = "The road network will probably be broken now if you were doing anything with road tiles."
 local on_mined_tile = function(event)
+  if not event.surface_index then
+    if game.is_multiplayer() then
+      game.print(text)
+      game.print(broken_now)
+    else
+      game.show_message_dialog{text = text}
+      game.show_message_dialog{text = broken_now}
+    end
+    return
+  end
   local tiles = event.tiles
   local new_tiles = {}
   local refund_count = 0
