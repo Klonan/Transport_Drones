@@ -248,6 +248,8 @@ end
 
 function buffer_depot:get_current_amount()
 
+  if not self.item then return 0 end
+
   if self.mode == request_mode.item then
     return self:get_output_inventory().get_item_count(self.item)
   end
