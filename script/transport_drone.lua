@@ -133,6 +133,8 @@ transport_drone.new = function(request_depot)
   }
   setmetatable(drone, transport_drone.metatable)
   add_drone(drone)
+
+  entity.ai_settings.path_resolution_modifier = -1
   
   return drone
 end
@@ -154,14 +156,7 @@ function transport_drone:pickup_from_supply(supply, count)
   self:update_speed()
   self.state = states.going_to_supply
 
-  self.entity.set_command
-  {
-    type = defines.command.go_to_location,
-    destination_entity = self.supply_depot.corpse,
-    distraction = defines.distraction.none,
-    radius = 0.8,
-    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
-  }
+  self:go_to_depot(self.supply_depot)
 
 end
 
@@ -176,18 +171,58 @@ function transport_drone:deliver_fuel(depot, amount)
   self:update_speed()
   self:update_sticker()
 
-  self.entity.set_command
-  {
-    type = defines.command.go_to_location,
-    destination_entity = self.target_depot.corpse,
-    distraction = defines.distraction.none,
-    radius = 0.8,
-    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
-  }
+  self:go_to_depot(self.target_depot)
+
+end
+
+function transport_drone:retry_command()
+
+  if self.entity.ai_settings.path_resolution_modifier == -1 then
+    self.entity.ai_settings.path_resolution_modifier = 0
+  end
+
+  if self.state == states.going_to_supply then
+    if self.supply_depot.entity.valid then
+      self:go_to_depot(self.supply_depot, 1.5)
+    else
+      self:return_to_requester()
+    end
+    return
+  end
+
+  if self.state == states.delivering_fuel then
+    if self.target_depot.entity.valid then
+      self:go_to_depot(self.target_depot, 1.5)
+    else
+      self:return_to_requester()
+    end
+    return
+  end
+  
+  if self.state == states.waiting_for_reorder then
+    self:say("Forgive me master")
+    self:suicide()
+    return
+  end
+
+  if self.state == states.return_to_requester then
+    if self.request_depot.entity.valid then
+      self:go_to_depot(self.request_depot, 1.5)
+    else
+      self:suicide()
+    end
+    return
+  end
 
 end
 
 function transport_drone:process_failed_command()
+
+  if (self.failed_command_count or 0) < 4 then
+    self.failed_command_count = (self.failed_command_count or 0) + 1
+    self:retry_command()
+    return
+  end
 
   self:say("F")
 
@@ -211,7 +246,6 @@ function transport_drone:process_failed_command()
     self:suicide()
     return
   end
-
 
 end
 
@@ -289,14 +323,8 @@ function transport_drone:return_to_requester()
 
   self.state = states.return_to_requester
   
-  self.entity.set_command
-  {
-    type = defines.command.go_to_location,
-    destination_entity = self.request_depot.corpse,
-    distraction = defines.distraction.none,
-    radius = 0.8,
-    pathfind_flags = {prefer_straight_paths = (math.random() > 0.5), use_cache = false}
-  }
+
+  self:go_to_depot(self.request_depot)
 
 end
 
@@ -502,6 +530,10 @@ function transport_drone:update(event)
     return
   end
 
+  if self.failed_command_count then
+    self.failed_command_count = nil
+  end
+
   if self.state == states.going_to_supply then
     self:process_pickup()
     return
@@ -546,6 +578,18 @@ function transport_drone:go_to_entity(entity, radius)
     radius = radius or 1,
     distraction = defines.distraction.none,
     pathfind_flags = {prefer_straight_paths = false, use_cache = false}
+  }
+end
+
+local random = math.random
+function transport_drone:go_to_depot(depot, radius)
+  self.entity.set_command
+  {
+    type = defines.command.go_to_location,
+    destination_entity = depot.corpse,
+    distraction = defines.distraction.none,
+    radius = radius or 0.5,
+    pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false}
   }
 end
 

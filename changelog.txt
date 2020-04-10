@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.4
+Date: 2020-04-10
+  Changes:
+    - Somewhat fixed drones getting stuck and suiciding at the entrance to the depots.
+    - Fixed script error related to buffer depots with no item set.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.3
 Date: 2020-04-09
   Changes:
