@@ -93,8 +93,7 @@ local accumulate_nodes = function(surface, x, y)
       end
     end
   end
-
-  game.print(table_size(nodes))
+  
   return nodes
 
 end
