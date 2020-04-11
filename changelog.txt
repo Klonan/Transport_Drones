@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.5
+Date: 2020-04-11
+  Changes:
+    - Fixed error trying to refund bad tile placement with Construction drones built tile event.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.4
 Date: 2020-04-10
   Changes:
