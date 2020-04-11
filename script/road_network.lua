@@ -63,49 +63,79 @@ local get_neighbor_count = function(surface, x, y)
   return count
 end
 
-local recursive_connection_check
-recursive_connection_check = function(surface, x, y, target_node, checked)
 
+local accumulate_nodes = function(surface, x, y)
+  local nodes = {}
+  local new_nodes = {}
   local node = get_node(surface, x, y)
-  if not node then return end
+  nodes[node] = true
+  new_nodes[node] = {x, y}
 
-  if checked[node] then return end
-  checked[node] = true
-
-  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = "?"}
-
-  if node == target_node then
-    return true
-  end
-
-  for k, offset in pairs (neighbor_offsets) do
-    local nx, ny = x + offset[1], y + offset[2]
-    if recursive_connection_check(surface, nx, ny, target_node, checked) then
-      return true
+  while true do
+    local node, node_position = next(new_nodes)
+    if not node then break end
+    new_nodes[node] = nil
+    for k, offset in pairs (neighbor_offsets) do
+      local nx, ny = node_position[1] + offset[1], node_position[2] + offset[2]
+      local neighbor = get_node(surface, nx, ny)
+      if neighbor then
+        if not nodes[neighbor] then
+          nodes[neighbor] = true
+          new_nodes[neighbor] = {nx, ny}
+        end
+      end
     end
   end
+
+  game.print(table_size(nodes))
+  return nodes
+
 end
 
-local recursive_set_id
-recursive_set_id = function(surface, x, y, id)
-  
+local connection_check = function(surface, x, y, target_node)
+
+  local nodes = {}
+  local new_nodes = {}
   local node = get_node(surface, x, y)
-  if not node then return end
-  if node.id == id then return end
+  nodes[node] = true
+  new_nodes[node] = {x, y}
 
-  --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = id}
-
-  node.id = id
-
-  if node.depots then
-    for k, depot in pairs (node.depots) do
-      depot:remove_from_network()
-      depot:add_to_network()
+  while true do
+    local node, node_position = next(new_nodes)
+    if not node then break end
+    new_nodes[node] = nil
+    for k, offset in pairs (neighbor_offsets) do
+      local nx, ny = node_position[1] + offset[1], node_position[2] + offset[2]
+      local neighbor = get_node(surface, nx, ny)
+      
+      if neighbor then
+        if neighbor == target_node then return true end
+        if not nodes[neighbor] then
+          nodes[neighbor] = true
+          new_nodes[neighbor] = {nx, ny}
+        end
+      end
     end
   end
 
-  for k, offset in pairs (neighbor_offsets) do
-    recursive_set_id(surface, x + offset[1], y + offset[2], id)
+  return false 
+  
+end
+
+local set_node_ids = function(surface, x, y, id)
+  
+  local nodes = accumulate_nodes(surface, x, y)
+
+  for node, bool in pairs (nodes) do
+    node.id = id
+    --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = id}
+
+    if node.depots then
+      for k, depot in pairs (node.depots) do
+        depot:remove_from_network()
+        depot:add_to_network()
+      end
+    end
   end
 
 end
@@ -193,8 +223,8 @@ road_network.add_node = function(surface, x, y)
       if node then
         local old_id = node.id
         if old_id ~= prospective_id then
-          recursive_set_id(surface, nx, ny, prospective_id)
-          script_data.networks[old_id] = nil
+          set_node_ids(surface, nx, ny, prospective_id)
+          clear_network(old_id)
         end
       end
     end
@@ -239,8 +269,8 @@ road_network.remove_node = function(surface, x, y)
       if not fx then
         fx, fy = nx, ny 
       else
-        if not (recursive_connection_check(surface, fx, fy, neighbor, {})) then              
-          recursive_set_id(surface, nx, ny, new_id()) 
+        if not (connection_check(surface, fx, fy, neighbor)) then              
+          set_node_ids(surface, nx, ny, new_id()) 
         end
       end
     end
