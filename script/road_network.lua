@@ -93,7 +93,7 @@ local accumulate_nodes = function(surface, x, y)
       end
     end
   end
-  
+
   return nodes
 
 end
@@ -419,9 +419,9 @@ road_network.add_buffer_depot = function(depot, item_name)
   return network.id
 end
 
-road_network.get_buffer_depots = function(id, name, node_position, consider_amount)
+road_network.get_buffer_depots = function(id, name, node_position)
   local sort_function = function(depot_a, depot_b)
-    return (distance(depot_a.node_position, node_position) - (consider_amount and depot_a:get_current_stack_amount() or 0)) < (distance(depot_b.node_position, node_position) - (consider_amount and depot_b:get_current_stack_amount() or 0))
+    return distance(depot_a.node_position, node_position) < distance(depot_b.node_position, node_position)
   end
   --local profiler = game.create_profiler()
   local network = get_network_by_id(id)
@@ -442,6 +442,13 @@ road_network.get_buffer_depots = function(id, name, node_position, consider_amou
   --game.print({"", "Got depots ", profiler})
   --log({"", "Got depots ", profiler})
   return to_shuffle
+end
+
+road_network.get_buffer_depots_raw = function(id, name)
+  local network = get_network_by_id(id)
+  if not network.buffers then return end
+  local depots = network.buffers[name]
+  return depots
 end
 
 road_network.get_fuel_depots = function(id, node_position)

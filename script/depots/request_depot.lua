@@ -2,7 +2,7 @@ local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local drone_fluid_capacity = shared.drone_fluid_capacity
 
 local request_spawn_timeout = 60
-local no_buffer_offer_limit = 5
+local no_buffer_offer_limit = 2
 
 local request_depot = {}
 request_depot.metatable = {__index = request_depot}
@@ -139,6 +139,14 @@ function request_depot:get_minimum_request_size()
   return stack_size
 end
 
+
+local distance = function(a, b)
+  local dx = a[1] - b[1]
+  local dy = a[2] - b[2]
+  return ((dx * dx) + (dy * dy)) ^ 0.5
+end
+
+local big = math.huge
 function request_depot:request_from_buffers()
 
   local name = self.item
@@ -148,21 +156,33 @@ function request_depot:request_from_buffers()
   if not self:should_order() then return end
 
   self.updates_without_buffer_offer = self.updates_without_buffer_offer + 1
+  
+  local buffer_depots = self.road_network.get_buffer_depots_raw(self.network_id, name)
+  if not buffer_depots then return end
 
-  local buffer_depots = self.road_network.get_buffer_depots(self.network_id, name, self.node_position, true)
-  if buffer_depots then
-    local size = #buffer_depots
-    if size > 0 then
-      for k = 1, size do
-        local depot = buffer_depots[k]
-        local available = depot:get_available_item_count(self.item)
-        if available >= self:get_minimum_request_size() then
-          self:dispatch_drone(depot, available)
-          self.updates_without_buffer_offer = 0
-          return
-        end
-      end
+  local node_position = self.node_position
+  local heuristic = function(depot)
+    local stack_amount = depot:get_current_stack_amount()
+    if stack_amount < 1 then
+      return big
     end
+    return distance(depot.node_position, node_position) - stack_amount
+  end
+  
+  local best_buffer
+  local lowest_score = big
+    
+  for k, depot in pairs (buffer_depots) do
+    local score = heuristic(depot)
+    if score < lowest_score then
+      best_buffer = depot
+      lowest_score = score
+    end
+  end
+
+  if best_buffer then
+    self:dispatch_drone(best_buffer, best_buffer:get_available_item_count(self.item))
+    self.updates_without_buffer_offer = 0
   end
 
 end
