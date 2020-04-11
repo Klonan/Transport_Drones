@@ -47,13 +47,15 @@ local road_tile_built = function(event)
   if next(refund_product) then
     -- Remove first, so we make space in the inventory
     local remove_function = (event.player_index and game.get_player(event.player_index).remove_item) or (event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).remove)
-    local tile_prototypes = game.tile_prototypes
-    for tile_name, count in pairs(refund_product) do
-      local tile = tile_prototypes[tile_name]
-      for k, product in pairs (tile.mineable_properties.products) do
-        local count = product_amount(product) * count
-        if count > 0 then
-          remove_function({name = product.name, count = count})
+    if remove_function then
+      local tile_prototypes = game.tile_prototypes
+      for tile_name, count in pairs(refund_product) do
+        local tile = tile_prototypes[tile_name]
+        for k, product in pairs (tile.mineable_properties.products) do
+          local count = product_amount(product) * count
+          if count > 0 then
+            remove_function({name = product.name, count = count})
+          end
         end
       end
     end
@@ -61,7 +63,9 @@ local road_tile_built = function(event)
 
   if event.item and refund_count > 0 then
     local insert_function = (event.player_index and game.get_player(event.player_index).insert) or (event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).insert)
-    local inserted = insert_function({name = event.item.name, count = refund_count})
+    if insert_function then
+      local inserted = insert_function({name = event.item.name, count = refund_count})
+    end
   end
 
 end
