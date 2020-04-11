@@ -65,12 +65,19 @@ end
 
 
 local accumulate_nodes = function(surface, x, y)
+
   local nodes = {}
   local new_nodes = {}
-  local node = get_node(surface, x, y)
-  nodes[node] = true
-  new_nodes[node] = {x, y}
 
+  local root_node = get_node(surface, x, y)
+  nodes[root_node] = true
+  new_nodes[root_node] = {x, y}
+
+  local neighbor_offsets = neighbor_offsets
+  local get_node = get_node
+  local next = next
+  local pairs = pairs
+  
   while true do
     local node, node_position = next(new_nodes)
     if not node then break end
@@ -96,9 +103,15 @@ local connection_check = function(surface, x, y, target_node)
 
   local nodes = {}
   local new_nodes = {}
-  local node = get_node(surface, x, y)
-  nodes[node] = true
-  new_nodes[node] = {x, y}
+
+  local root_node = get_node(surface, x, y)
+  nodes[root_node] = true
+  new_nodes[root_node] = {x, y}
+
+  local neighbor_offsets = neighbor_offsets
+  local get_node = get_node
+  local next = next
+  local pairs = pairs
 
   while true do
     local node, node_position = next(new_nodes)
