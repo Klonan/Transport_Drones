@@ -100,6 +100,10 @@ function fuel_depot:minimum_request_size()
   return (fuel_amount_per_drone * 2)
 end
 
+function fuel_depot:get_drone_inventory()
+  return self.entity.get_inventory(defines.inventory.assembling_machine_input)
+end
+
 function fuel_depot:remove_drone(drone, remove_item)
   self.drones[drone.index] = nil
   if remove_item then
