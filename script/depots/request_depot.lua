@@ -149,7 +149,7 @@ function request_depot:request_from_buffers()
 
   self.updates_without_buffer_offer = self.updates_without_buffer_offer + 1
 
-  local buffer_depots = self.road_network.get_buffer_depots(self.network_id, name, self.node_position)
+  local buffer_depots = self.road_network.get_buffer_depots(self.network_id, name, self.node_position, true)
   if buffer_depots then
     local size = #buffer_depots
     if size > 0 then
@@ -234,10 +234,20 @@ function request_depot:get_requested_item()
   return recipe.products[1].name
 end
 
+local stack_cache = {}
+local get_stack_size = function(item)
+  local size = stack_cache[item]
+  if not size then
+    size = game.item_prototypes[item].stack_size
+    stack_cache[item] = size
+  end
+  return size
+end
+
 function request_depot:get_stack_size()
 
   if self.mode == request_mode.item then
-    return game.item_prototypes[self.item].stack_size
+    return get_stack_size(self.item)
   end
 
   

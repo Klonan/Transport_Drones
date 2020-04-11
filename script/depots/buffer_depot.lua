@@ -195,10 +195,20 @@ function buffer_depot:get_requested_item()
   return recipe.products[1].name
 end
 
+local stack_cache = {}
+local get_stack_size = function(item)
+  local size = stack_cache[item]
+  if not size then
+    size = game.item_prototypes[item].stack_size
+    stack_cache[item] = size
+  end
+  return size
+end
+
 function buffer_depot:get_stack_size()
 
   if self.mode == request_mode.item then
-    return game.item_prototypes[self.item].stack_size
+    return get_stack_size(self.item)
   end
 
   
@@ -257,6 +267,20 @@ function buffer_depot:get_current_amount()
   if self.mode == request_mode.fluid then
     local box = self:get_output_fluidbox()
     return box and box.amount or 0
+  end
+end
+
+function buffer_depot:get_current_stack_amount()
+
+  if not self.item then return 0 end
+
+  if self.mode == request_mode.item then
+    return self:get_output_inventory().get_item_count(self.item) / self:get_stack_size()
+  end
+
+  if self.mode == request_mode.fluid then
+    local box = self:get_output_fluidbox()
+    return (box and box.amount or 0) / fuel_amount_per_drone
   end
 end
 

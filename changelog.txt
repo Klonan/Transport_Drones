@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.6
+Date: 2020-04-11
+  Changes:
+    - Added a simple heuristic related to item count to the buffer selection function. This should help the situation of requesters always taking from the closest buffer even if it has a very small amount of available items.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.5
 Date: 2020-04-11
   Changes:

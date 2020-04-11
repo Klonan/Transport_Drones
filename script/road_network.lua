@@ -320,6 +320,16 @@ local distance_squared = function(a, b)
   local dy = a[2] - b[2]
   return (dx * dx) + (dy * dy)
 end
+local distance = function(a, b)
+  local dx = a[1] - b[1]
+  local dy = a[2] - b[2]
+  return ((dx * dx) + (dy * dy)) ^ 0.5
+end
+local rect_distance = function(a, b)
+  local dx = a[1] - b[1]
+  local dy = a[2] - b[2]
+  return dx + dy
+end
 local sort = table.sort
 
 road_network.get_request_depots = function(id, name, node_position)
@@ -367,9 +377,9 @@ road_network.add_buffer_depot = function(depot, item_name)
   return network.id
 end
 
-road_network.get_buffer_depots = function(id, name, node_position)
+road_network.get_buffer_depots = function(id, name, node_position, consider_amount)
   local sort_function = function(depot_a, depot_b)
-    return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
+    return (distance(depot_a.node_position, node_position) - (consider_amount and depot_a:get_current_stack_amount() or 0)) < (distance(depot_b.node_position, node_position) - (consider_amount and depot_b:get_current_stack_amount() or 0))
   end
   --local profiler = game.create_profiler()
   local network = get_network_by_id(id)
