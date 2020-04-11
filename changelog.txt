@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.7
+Date: 2020-04-11
+  Changes:
+    - Switched from recursive road network functions to accumulator ones, because someone made a map with a 280,000 tile square and it broke the stack limit.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.6
 Date: 2020-04-11
   Changes:
