@@ -46,7 +46,6 @@ function fuel_depot.new(entity)
   }
   setmetatable(depot, fuel_depot.metatable)
 
-  depot:add_to_node()
   depot:add_to_network()
 
   return depot
@@ -71,19 +70,6 @@ function fuel_depot:remove_from_network()
 
   self.network_id = nil
 
-end
-
-function fuel_depot:add_to_node()
-  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.depots = node.depots or {}
-  node.depots[self.index] = self
-end
-
-function fuel_depot:remove_from_node()
-  local surface = self.entity.surface.index
-  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
-  node.depots[self.index] = nil
-  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
 end
 
 function fuel_depot:add_to_network()
@@ -190,7 +176,6 @@ end
 
 function fuel_depot:on_removed()
   self:remove_from_network()
-  self:remove_from_node()
   --self:suicide_all_drones()
   self.corpse.destroy()
 end

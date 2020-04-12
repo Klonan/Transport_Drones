@@ -114,6 +114,19 @@ local refund_build = function(event, entity_prototype)
   end
 end
 
+local add_depot_to_node = function(depot)
+  local node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+  node.depots = node.depots or {}
+  node.depots[depot.index] = depot
+end
+
+local remove_depot_from_node = function(depot)
+  local surface = depot.entity.surface.index
+  local node = road_network.get_node(surface, depot.node_position[1], depot.node_position[2])
+  node.depots[depot.index] = nil
+  road_network.check_clear_lonely_node(surface, depot.node_position[1], depot.node_position[2])
+end
+
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
@@ -133,7 +146,9 @@ local on_created_entity = function(event)
   local depot = depot_lib.new(entity)
   script_data.depots[depot.index] = depot
   script_data.update_order[#script_data.update_order + 1] = depot.index
+  add_depot_to_node(depot)
 end
+
 
 local on_entity_removed = function(event)
   local entity = event.entity
@@ -141,7 +156,9 @@ local on_entity_removed = function(event)
   if not (entity and entity.valid) then return end
 
   local depot = get_depot(entity)
+  
   if depot then
+    remove_depot_from_node(depot)
     script_data.depots[depot.index] = nil
     depot:on_removed(event)
   end
@@ -158,11 +175,6 @@ local load_depot = function(depot)
   if lib.metatable then
     setmetatable(depot, lib.metatable)
   end
-end
-
-local config_changed_depot = function(depot)
-  local lib = get_lib(depot)
-  if lib.config_changed then lib.config_changed(depot) end
 end
 
 local migrate_depots = function()
@@ -191,7 +203,6 @@ local migrate_depots = function()
   script_data.depots = depots
   script_data.update_order = update_order
 
-  
   for k, depot in pairs (script_data.depots) do
     load_depot(depot)
   end
@@ -245,12 +256,6 @@ local setup_lib_values = function()
 
 end
 
-local set_map_settings = function()
-  game.map_settings.steering.default.force_unit_fuzzy_goto_behavior = false
-  game.map_settings.steering.moving.force_unit_fuzzy_goto_behavior = false
-end
-
-
 local lib = {}
 
 lib.events = 
@@ -271,7 +276,6 @@ lib.events =
 lib.on_init = function()
   global.transport_depots = global.transport_depots or script_data
   setup_lib_values()
-  set_map_settings()
 end
 
 lib.on_load = function()
@@ -291,9 +295,9 @@ lib.on_configuration_changed = function()
   end
 
   for k, depot in pairs (script_data.depots) do
+    add_depot_to_node(depot)
     depot:remove_from_network()
     depot:add_to_network()
-    depot:add_to_node()
     if depot.on_config_changed then
       depot:on_config_changed()
     end
@@ -307,8 +311,6 @@ lib.on_configuration_changed = function()
       end
     end
   end
-
-  set_map_settings()
 
   if not script_data.refresh_techs then
     script_data.refresh_techs = true

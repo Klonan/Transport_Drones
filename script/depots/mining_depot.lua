@@ -40,7 +40,6 @@ function mining_depot.new(entity)
   }
   setmetatable(depot, mining_depot.metatable)
 
-  depot:add_to_node()
   depot:add_to_network()
 
   return depot
@@ -128,19 +127,6 @@ function mining_depot:remove_from_network()
 
 end
 
-function mining_depot:add_to_node()
-  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.depots = node.depots or {}
-  node.depots[self.index] = self
-end
-
-function mining_depot:remove_from_node()
-  local surface = self.entity.surface.index
-  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
-  node.depots[self.index] = nil
-  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
-end
-
 function mining_depot:add_to_network()
   --self:say("Adding to network")
   self.network_id = self.road_network.add_mining_depot(self)
@@ -148,7 +134,6 @@ end
 
 function mining_depot:on_removed()
   self:remove_from_network()
-  self:remove_from_node()
   self.corpse.destroy()
 end
 

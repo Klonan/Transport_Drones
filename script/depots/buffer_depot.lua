@@ -58,8 +58,6 @@ function buffer_depot.new(entity)
   }
   setmetatable(depot, buffer_depot.metatable)
 
-  depot:add_to_node()
-
   return depot
 
 end
@@ -446,19 +444,6 @@ function buffer_depot:say(string)
   self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
 end
 
-function buffer_depot:add_to_node()
-  local node = self.road_network.get_node(self.entity.surface.index, self.node_position[1], self.node_position[2])
-  node.depots = node.depots or {}
-  node.depots[self.index] = self
-end
-
-function buffer_depot:remove_from_node()
-  local surface = self.entity.surface.index
-  local node = self.road_network.get_node(surface, self.node_position[1], self.node_position[2])
-  node.depots[self.index] = nil
-  self.road_network.check_clear_lonely_node(surface, self.node_position[1], self.node_position[2])
-end
-
 function buffer_depot:add_to_network()
   if not self.item then return end
   --self:say("Adding to network")
@@ -480,7 +465,6 @@ end
 
 function buffer_depot:on_removed()
   self:remove_from_network()
-  self:remove_from_node()
   self:suicide_all_drones()
   self.corpse.destroy()
 end
