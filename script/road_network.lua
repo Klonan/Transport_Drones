@@ -303,33 +303,6 @@ local road_network = {}
 
 road_network.add_node = function(surface, x, y)
 
-  local prospective_id
-  local prospective_position
-
-  for k, offset in pairs (neighbor_offsets) do
-    local nx, ny = x + offset[1], y + offset[2]
-    local node = get_node(surface, nx, ny)
-    if node then
-      if not prospective_id then
-        prospective_id = node.id
-        prospective_position = {nx, ny}
-      else
-        if node.id ~= prospective_id then
-          --merging networks
-          local smaller_node_set = accumulate_smaller_node(surface, prospective_position[1], prospective_position[2], nx, ny)
-          local smaller_id = next(smaller_node_set).id
-          if smaller_id == prospective_id then
-            prospective_id = node.id
-            prospective_position = {nx, ny}
-          end
-          set_node_ids(smaller_node_set, prospective_id)
-          clear_network(smaller_id)
-        end
-      end
-    end
-  end
-
-
   local new_node_id
   local checked = {}
   for k, offset in pairs(neighbor_offsets) do
@@ -348,6 +321,7 @@ road_network.add_node = function(surface, x, y)
 
           local nx, ny = x + offset[1], y + offset[2]
           local other_neighbor = get_node(surface, nx, ny)
+
           if other_neighbor then
             if neighbor.id ~= other_neighbor.id then
               local smaller_node_set = accumulate_smaller_node(surface, fx, fy, nx, ny)
@@ -361,9 +335,7 @@ road_network.add_node = function(surface, x, y)
         end
       end
     end
-
-  end
-  
+  end  
 
   local surface_map = script_data.node_map[surface]
   if not surface_map then
