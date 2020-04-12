@@ -156,7 +156,7 @@ local on_entity_removed = function(event)
   if not (entity and entity.valid) then return end
 
   local depot = get_depot(entity)
-  
+
   if depot then
     remove_depot_from_node(depot)
     script_data.depots[depot.index] = nil
@@ -256,6 +256,25 @@ local setup_lib_values = function()
 
 end
 
+local on_selected_entity_changed = function(event)
+
+  --Cheesy tactic to make the drones feel more responsive
+
+  local player = game.get_player(event.player_index)
+
+  if not (player and player.valid) then return end
+
+  local entity = player.selected
+  if not (entity and entity.valid) then return end
+
+  local depot = get_depot(entity)
+
+  if depot then
+    depot:update()
+  end
+
+end
+
 local lib = {}
 
 lib.events = 
@@ -270,7 +289,9 @@ lib.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
 
-  [defines.events.on_tick] = on_tick
+  [defines.events.on_tick] = on_tick,
+  [defines.events.on_selected_entity_changed] = on_selected_entity_changed,
+
 }
 
 lib.on_init = function()
