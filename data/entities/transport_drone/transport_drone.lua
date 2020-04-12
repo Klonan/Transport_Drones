@@ -48,7 +48,7 @@ local make_unit = function(k)
         decrease = 0,
         percent = 90
       }
-    }
+    },
     healing_per_tick = 0.1,
     --minable = {result = name, mining_time = 2},
     collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
