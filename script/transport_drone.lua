@@ -81,7 +81,7 @@ local player_leave_drone = function(player)
     player.character.active = true
   end
   drone.riding_player = nil
-
+  drone:update_speed()
   script_data.riding_players[player.index] = nil
 
 end
@@ -114,6 +114,8 @@ local player_enter_drone = function(player, drone)
 
   script_data.riding_players[player.index] = drone
   drone.riding_player = player.index
+  drone:update_speed()
+  drone.entity.speed = drone.entity.speed * 1.5
 
 end
 
@@ -660,7 +662,17 @@ local follow_drone_hotkey = function(event)
     return
   end
 
+  if player.vehicle then
+    --He is getting out of a vehicle.
+    return
+  end
+
   local radius = player.character and player.character.prototype.enter_vehicle_distance or 5
+
+  if player.surface.count_entities_filtered{type = "car", force = player.force, position = player.position, radius = radius, limit = 1} > 0 then
+    --There is a vehicle nearby, let him get into that.
+    return
+  end
 
   local units = player.surface.find_entities_filtered{type = "unit", force = player.force, position = player.position, radius = radius}
 

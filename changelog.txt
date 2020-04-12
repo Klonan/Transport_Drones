@@ -3,6 +3,8 @@ Version: 0.3.10
 Date: 2020-04-12
   Changes:
     - Drones will now make a little bit of pollution as they drive around.
+    - The enter drone hotkey won't activate if it thinks you might be doing something with a nearby vehicle instead.
+    - When riding a drone, that drone will have a 50% speed boost.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.9
 Date: 2020-04-12
