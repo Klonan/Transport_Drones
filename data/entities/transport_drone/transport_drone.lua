@@ -129,7 +129,8 @@ local make_unit = function(k)
     {
       sound = sprite_base.working_sound.sound
     },
-    run_animation = sprite_base.animation
+    run_animation = sprite_base.animation,
+    emissions_per_second = 1 / 200
   }
   data:extend{unit}
 end
