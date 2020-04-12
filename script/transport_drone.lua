@@ -82,8 +82,8 @@ local player_leave_drone = function(player)
     player.character.active = true
   end
   drone.riding_player = nil
-  drone:update_speed()
   script_data.riding_players[player.index] = nil
+  drone:update_speed()
 
 end
 
@@ -116,7 +116,6 @@ local player_enter_drone = function(player, drone)
   script_data.riding_players[player.index] = drone
   drone.riding_player = player.index
   drone:update_speed()
-  drone.entity.speed = drone.entity.speed * 1.5
 
 end
 
@@ -143,7 +142,11 @@ transport_drone.new = function(request_depot)
 end
 
 function transport_drone:update_speed()
-  self.entity.speed = get_drone_speed(self.entity.force.index)
+  local speed = get_drone_speed(self.entity.force.index)
+  if self.riding_player then
+    speed = speed * 1.5
+  end
+  self.entity.speed = speed
 end
 
 function transport_drone:add_slow_sticker()
