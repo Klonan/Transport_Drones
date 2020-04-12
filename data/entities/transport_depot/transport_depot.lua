@@ -252,7 +252,7 @@ local items =
     icon_size = supply_depot_chest.icon_size,
     flags = {},
     subgroup = "transport-drones",
-    order = "e-a",
+    order = "e-a-a",
     stack_size = 10,
     place_result = "supply-depot"
   },
@@ -281,7 +281,7 @@ local items =
     icon_size = depot.icon_size,
     flags = {},
     subgroup = "transport-drones",
-    order = "e-b",
+    order = "e-a-b",
     stack_size = 10,
     place_result = "request-depot"
   },
@@ -675,7 +675,7 @@ local buffer_depot_items =
     icon_size = buffer_depot.icon_size,
     flags = {},
     subgroup = "transport-drones",
-    order = "e-f",
+    order = "e-a-c",
     stack_size = 10,
     place_result = "buffer-depot"
   },
