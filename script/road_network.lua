@@ -303,6 +303,12 @@ local road_network = {}
 
 road_network.add_node = function(surface, x, y)
 
+  local node = get_node(surface, x, y)
+  if node then
+    --Eh... maybe I should error?
+    return
+  end
+
   local new_node_id
   local checked = {}
   for k, offset in pairs(neighbor_offsets) do
