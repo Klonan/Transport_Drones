@@ -3,6 +3,7 @@ local transport_technologies = require("script/transport_technologies")
 
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local fuel_consumption_per_meter = shared.fuel_consumption_per_meter
+local drone_pollution_per_second = shared.drone_pollution_per_second
 
 local script_data =
 {
@@ -287,13 +288,7 @@ end
 
 function transport_drone:process_deliver_fuel()
 
-  local box = self.target_depot.entity.fluidbox[1]
-  if not box then
-    box = {name = get_fuel_fluid(), amount = self.fuel_amount}
-  else
-    box.amount = box.amount + self.fuel_amount
-  end
-  self.target_depot.entity.fluidbox[1] = box
+  self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
 
   self:add_slow_sticker()
   self:update_speed()
@@ -460,23 +455,23 @@ function transport_drone:wait_for_reorder()
 end
 
 function transport_drone:refund_fuel()
-  local box = self.request_depot.entity.fluidbox[1]
-  local consumption = ((game.tick - (self.tick_created or game.tick - 1)) * self.entity.speed * fuel_consumption_per_meter)
+  local age = game.tick - (self.tick_created or game.tick - 1)
+  local consumption = age * self.entity.speed * fuel_consumption_per_meter
+  
+  local pollution = (age / 60) * drone_pollution_per_second
+  game.pollution_statistics.on_flow("transport-drone-1", pollution)
+  
   --self:say(consumption)
   self.entity.force.fluid_production_statistics.on_flow(get_fuel_fluid(), -consumption)
   local fuel_refund = fuel_amount_per_drone - consumption
   --self:say(fuel_refund)
-  if not box then
-    box = {name = get_fuel_fluid(), amount = 0}
-  end
-  
-  box.amount = box.amount + fuel_refund
 
-  if box.amount > 0 then
-    self.request_depot.entity.fluidbox[1] = box
-  else
-    self.request_depot.entity.fluidbox[1] = nil
+  if fuel_refund > 0 then
+  self.request_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = fuel_refund})
+  elseif fuel_refund < 0 then
+    self.request_depot.entity.remove_fluid({name = get_fuel_fluid(), amount = -fuel_refund})
   end
+
 end
 
 function transport_drone:remove_from_depot()

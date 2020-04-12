@@ -140,7 +140,7 @@ local make_unit = function(k)
       audible_distance_modifier = 0.7
     },
     run_animation = sprite_base.animation,
-    emissions_per_second = 1 / 200
+    emissions_per_second = shared.drone_pollution_per_second
   }
   data:extend{unit}
 end

@@ -14,5 +14,6 @@ data.fuel_fluid = "petroleum-gas"
 data.fuel_amount_per_drone = 50
 data.fuel_consumption_per_meter = 1 / 55
 data.drone_fluid_capacity = 500
+data.drone_pollution_per_second = 1 / 200
 
 return data

@@ -16,6 +16,15 @@ buffer_depot.corpse_offsets =
 
 buffer_depot.is_buffer_depot = true
 
+local fuel_fluid
+local get_fuel_fluid = function()
+  if fuel_fluid then
+    return fuel_fluid
+  end
+  fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+  return fuel_fluid
+end
+
 local get_corpse_position = function(entity)
 
   local position = entity.position
@@ -63,14 +72,7 @@ function buffer_depot.new(entity)
 end
 
 function buffer_depot:remove_fuel(amount)
-  local box = self.entity.fluidbox[1]
-  if not box then return end
-  box.amount = box.amount - amount
-  if box.amount <= 0 then
-    self.entity.fluidbox[1] = nil
-  else
-    self.entity.fluidbox[1] = box
-  end
+  self.entity.remove_fluid({name = get_fuel_fluid(), amount = amount})
 end
 
 function buffer_depot:check_drone_validity()
@@ -233,8 +235,7 @@ function buffer_depot:get_active_drone_count()
 end
 
 function buffer_depot:get_fuel_amount()
-  local box = self.entity.fluidbox[1]
-  return (box and box.amount) or 0
+  return self.entity.get_fluid_count(get_fuel_fluid())
 end
 
 function buffer_depot:can_spawn_drone()
