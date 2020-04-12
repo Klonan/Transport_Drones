@@ -270,18 +270,9 @@ function buffer_depot:get_current_amount()
   end
 end
 
-function buffer_depot:get_current_stack_amount()
-
+function buffer_depot:get_available_stack_amount()
   if not self.item then return 0 end
-
-  if self.mode == request_mode.item then
-    return self:get_output_inventory().get_item_count(self.item) / self:get_stack_size()
-  end
-
-  if self.mode == request_mode.fluid then
-    local box = self:get_output_fluidbox()
-    return (box and box.amount or 0) / fuel_amount_per_drone
-  end
+  return self:get_available_item_count(self.item) / self:get_stack_size()
 end
 
 function buffer_depot:get_minimum_request_size()

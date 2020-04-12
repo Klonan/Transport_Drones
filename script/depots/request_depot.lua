@@ -162,7 +162,7 @@ function request_depot:request_from_buffers()
 
   local node_position = self.node_position
   local heuristic = function(depot)
-    local stack_amount = depot:get_current_stack_amount()
+    local stack_amount = depot:get_available_stack_amount()
     if stack_amount < 1 then
       return big
     end
@@ -373,6 +373,7 @@ function request_depot:handle_offer(supply_depot, name, count, buffer_offer)
 end
 
 function request_depot:take_item(name, count)
+  if not count then error("NO COUMT?") end
   if game.item_prototypes[name] then
     self.entity.get_output_inventory().insert({name = name, count = count})
     return
