@@ -134,7 +134,7 @@ end
 
 
 function fuel_depot:get_drone_item_count()
-  return self.entity.get_item_count("transport-drone")
+  return self:get_drone_inventory().get_item_count("transport-drone")
 end
 
 function fuel_depot:get_active_drone_count()

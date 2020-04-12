@@ -243,7 +243,7 @@ function buffer_depot:can_spawn_drone()
 end
 
 function buffer_depot:get_drone_item_count()
-  return self.entity.get_item_count("transport-drone")
+  return self:get_drone_inventory().get_item_count("transport-drone")
 end
 
 function buffer_depot:get_output_fluidbox()
