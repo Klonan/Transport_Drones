@@ -41,6 +41,14 @@ local make_unit = function(k)
     radar_range = 1,
     order="i-d",
     subgroup = "transport",
+    resistances = 
+    {
+      {
+        type = "acid",
+        decrease = 0,
+        percent = 90
+      }
+    }
     healing_per_tick = 0.1,
     --minable = {result = name, mining_time = 2},
     collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
@@ -127,7 +135,9 @@ local make_unit = function(k)
     vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
     working_sound =
     {
-      sound = sprite_base.working_sound.sound
+      sound = sprite_base.working_sound.sound,
+      max_sounds_per_type = 5,
+      audible_distance_modifier = 0.7
     },
     run_animation = sprite_base.animation,
     emissions_per_second = 1 / 200
