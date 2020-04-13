@@ -262,6 +262,14 @@ local on_selected_entity_changed = function(event)
 
   --Cheesy tactic to make the drones feel more responsive
 
+  local last_entity = event.last_entity
+  if (last_entity and last_entity.valid) then
+    local depot = get_depot(last_entity)
+    if depot then
+      depot:update()
+    end
+  end
+
   local player = game.get_player(event.player_index)
 
   if not (player and player.valid) then return end
