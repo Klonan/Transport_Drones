@@ -120,11 +120,10 @@ local add_depot_to_node = function(depot)
   node.depots[depot.index] = depot
 end
 
-local remove_depot_from_node = function(depot)
-  local surface = depot.entity.surface.index
-  local node = road_network.get_node(surface, depot.node_position[1], depot.node_position[2])
-  node.depots[depot.index] = nil
-  road_network.check_clear_lonely_node(surface, depot.node_position[1], depot.node_position[2])
+local remove_depot_from_node = function(surface, x, y, depot_index)
+  local node = road_network.get_node(surface, x, y)
+  node.depots[depot_index] = nil
+  road_network.check_clear_lonely_node(surface, x, y)
 end
 
 local on_created_entity = function(event)
@@ -158,9 +157,12 @@ local on_entity_removed = function(event)
   local depot = get_depot(entity)
 
   if depot then
-    script_data.depots[depot.index] = nil
+    local surface = depot.entity.surface
+    local index = depot.index
+    local x, y = depot.node_position[1], depot.node_position[2]
+    script_data.depots[index] = nil
     depot:on_removed(event)
-    remove_depot_from_node(depot)
+    remove_depot_from_node(surface.index, x, y, index)
   end
 
 end
