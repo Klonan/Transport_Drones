@@ -74,12 +74,13 @@ function request_depot:remove_fuel(amount)
 end
 
 function request_depot:check_drone_validity()
-  local index, drone = next(self.drones)
-  if not index then return end
-
-  if not drone.entity.valid then
-    drone:clear_drone_data()
-    self:remove_drone(drone)
+  for k, drone in pairs (self.drones) do
+    if drone.entity.valid then
+      return
+    else
+      drone:clear_drone_data()
+      self:remove_drone(drone)
+    end
   end
 end
 

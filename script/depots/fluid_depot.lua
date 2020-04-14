@@ -62,12 +62,15 @@ end
 
 function fluid_depot:update_contents()
 
-  if not self.item then return end
-
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
-  local new_contents = self.entity.get_output_inventory().get_fluid_contents()
-
+  local new_contents = {}
+  
+  local box = self:get_output_fluidbox()
+  if box then
+    new_contents[box.name] = box.amount
+  end
+  
   for name, count in pairs (self.old_contents) do
     if not new_contents[name] then
       local item_supply = supply[name]

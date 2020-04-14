@@ -62,6 +62,7 @@ function fuel_depot.new(entity)
 end
 
 function fuel_depot:update()
+  self:check_drone_validity()
   self:update_sticker()
   --game.print("AHOY!")
 end
@@ -106,8 +107,18 @@ function fuel_depot:remove_drone(drone, remove_item)
   self:update_sticker()
 end
 
+function fuel_depot:check_drone_validity()
+  for k, drone in pairs (self.drones) do
+    if drone.entity.valid then
+      return
+    else
+      drone:clear_drone_data()
+      self:remove_drone(drone)
+    end
+  end
+end
+
 function fuel_depot:can_spawn_drone()
-  if game.tick < (self.next_spawn_tick or 0) then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 

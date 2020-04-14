@@ -77,12 +77,13 @@ function buffer_depot:remove_fuel(amount)
 end
 
 function buffer_depot:check_drone_validity()
-  local index, drone = next(self.drones)
-  if not index then return end
-
-  if not drone.entity.valid then
-    drone:clear_drone_data()
-    self:remove_drone(drone)
+  for k, drone in pairs (self.drones) do
+    if drone.entity.valid then
+      return
+    else
+      drone:clear_drone_data()
+      self:remove_drone(drone)
+    end
   end
 end
 
@@ -139,11 +140,13 @@ function buffer_depot:offer_item()
 end
 
 function buffer_depot:update_contents()
-  if not self.item then return end
   
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
-  local new_contents = self.entity.get_output_inventory().get_contents()
+  local new_contents = {}
+  if self.item then
+    new_contents[self.item] = self:get_current_amount()
+  end
 
   for name, count in pairs (self.old_contents) do
     if not new_contents[name] then
@@ -181,7 +184,6 @@ function buffer_depot:dispatch_drone(depot, count)
 
   self.drones[drone.index] = drone
 
-  self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 end
 
@@ -212,6 +214,7 @@ function buffer_depot:make_request()
 
   local node_position = self.node_position
   local heuristic = function(depot, count)
+    if depot.is_buffer_depot then return big end
     local amount = min(count, request_size)
     if amount < minimum_size then
       return big
@@ -353,7 +356,6 @@ function buffer_depot:get_fuel_amount()
 end
 
 function buffer_depot:can_spawn_drone()
-  if game.tick < (self.next_spawn_tick or 0) then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
