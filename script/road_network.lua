@@ -15,7 +15,8 @@ local new_id = function()
   local id = script_data.id_number
   script_data.networks[id] =
   {
-    id = id
+    id = id,
+    item_supply = {}
   }
   --print("New network "..id)
   return id
@@ -299,7 +300,18 @@ local clear_network = function(id)
   script_data.networks[id] = nil
 end
 
+
 local road_network = {}
+
+road_network.get_network_item_supply = function(id)
+  local network = get_network_by_id(id)
+  return network.item_supply
+end
+
+road_network.get_supply_depots = function(id, name)
+  local network = get_network_by_id(id)
+  return network.item_supply[name]
+end
 
 road_network.add_node = function(surface, x, y)
 
@@ -636,7 +648,9 @@ road_network.on_load = function()
 end
 
 road_network.on_configuration_changed = function()
-
+  for k, network in pairs (script_data.networks) do
+    network.item_supply = network.item_supply or {}
+  end
 end
 
 road_network.get_network_by_id = get_network_by_id

@@ -64,6 +64,7 @@ function buffer_depot.new(entity)
     mode = request_mode.item,
     fuel_on_the_way = 0,
     to_be_taken = {},
+    old_contents = {}
   }
   setmetatable(depot, buffer_depot.metatable)
 
@@ -137,11 +138,124 @@ function buffer_depot:offer_item()
   self:check_requests_for_item(self.item, self:get_current_amount())
 end
 
+function buffer_depot:update_contents()
+  if not self.item then return end
+  
+  local supply = self.road_network.get_network_item_supply(self.network_id)
+
+  local new_contents = self.entity.get_output_inventory().get_contents()
+
+  for name, count in pairs (self.old_contents) do
+    if not new_contents[name] then
+      local item_supply = supply[name]
+      if item_supply then
+        item_supply[self.index] = nil      
+      end
+    end
+  end
+
+  for name, count in pairs (new_contents) do
+    local item_supply = supply[name]
+    if not item_supply then
+      item_supply = {}
+      supply[name] = item_supply
+    end
+    local new_count = count - self:get_to_be_taken(name)
+    if new_count > 0 then
+      item_supply[self.index] = new_count
+    else
+      item_supply[self.index] = nil
+    end
+  end
+
+  self.old_contents = new_contents
+
+end
+
+local min = math.min
+function buffer_depot:dispatch_drone(depot, count)
+  
+  local drone = self.transport_drone.new(self)
+  drone:pickup_from_supply(depot, count)
+  self:remove_fuel(fuel_amount_per_drone)
+
+  self.drones[drone.index] = drone
+
+  self.next_spawn_tick = game.tick + request_spawn_timeout
+  self:update_sticker()
+end
+
+
+local distance = function(a, b)
+  local dx = a[1] - b[1]
+  local dy = a[2] - b[2]
+  return ((dx * dx) + (dy * dy)) ^ 0.5
+end
+
+local big = math.huge
+local min = math.min
+local item_heuristic_bonus = 50
+function buffer_depot:make_request()
+
+  local name = self.item
+  if not name then return end
+
+  if not self:can_spawn_drone() then return end
+  if not self:should_order() then return end
+  
+  local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
+  if not supply_depots then return end
+
+  local request_size = self:get_request_size()
+  local minimum_size = self:get_minimum_request_size()
+  local stack_size = self:get_stack_size()
+
+  local node_position = self.node_position
+  local heuristic = function(depot, count)
+    local amount = min(count, request_size)
+    if amount < minimum_size then
+      return big
+    end
+    return distance(depot.node_position, node_position) - ((amount / request_size) * item_heuristic_bonus)
+  end
+  
+  local best_buffer
+  local best_index
+  local lowest_score = big
+  local get_depot = self.get_depot
+    
+  for depot_index, count in pairs (supply_depots) do
+    local depot = get_depot(depot_index)
+    if depot then
+      local score = heuristic(depot, count)
+      if score < lowest_score then
+        best_buffer = depot
+        lowest_score = score
+        best_index = depot_index
+      end
+    end
+  end
+
+  if not best_buffer then return end
+
+  local count = supply_depots[best_index]
+  if request_size >= count then
+    supply_depots[best_index] = nil
+    self:dispatch_drone(best_buffer, count)
+  else
+    supply_depots[best_index] = count - request_size
+    self:dispatch_drone(best_buffer, request_size)
+  end
+
+end
+
+
 function buffer_depot:update()
-  self:check_request_change()
+  self:update_contents()
   self:check_fuel_amount()
+  self:check_request_change()
   self:check_drone_validity()
-  --self:offer_item()
+  self:make_request()
   self:update_sticker()
 end
 
@@ -293,52 +407,6 @@ function buffer_depot:should_order(plus_one)
   return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
 end
 
-function buffer_depot:handle_offer(supply_depot, name, count)
-
-  if count < self:get_minimum_request_size() then return end
-
-  if not self:can_spawn_drone() then return end
-
-  if not self:should_order() then return end
-
-
-  local needed_count = math.min(self:get_request_size(), count)
-
-  local drone = buffer_depot.transport_drone.new(self)
-  drone:pickup_from_supply(supply_depot, needed_count)
-  self:remove_fuel(fuel_amount_per_drone)
-
-  self.drones[drone.index] = drone
-
-  self.next_spawn_tick = game.tick + request_spawn_timeout
-  self:update_sticker()
-
-end
-
-
-
-function buffer_depot:check_requests_for_item(name, count)
-
-  if count - self:get_to_be_taken(name) <= 0 then
-    return
-  end
-
-  local request_depots = self.road_network.get_request_depots(self.network_id, name, self.node_position)
-  if request_depots then
-    local size = #request_depots
-    if size > 0 then
-      for k = 1, size do
-        local depot = request_depots[k]
-        local available = count - self:get_to_be_taken(name)
-        if available <= 0 then return end
-        depot:handle_offer(self, name, available, true)
-        depot.updates_without_buffer_offer = 0
-      end
-    end
-  end
-
-end
-
 local min = math.min
 function buffer_depot:give_item(requested_name, requested_count)
 
@@ -472,6 +540,7 @@ end
 
 function buffer_depot:on_config_changed()
   self.to_be_taken = self.to_be_taken or {}
+  self.old_contents = self.old_contents or {}
 end
 
 return buffer_depot

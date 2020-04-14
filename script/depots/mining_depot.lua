@@ -37,6 +37,7 @@ function mining_depot.new(entity)
     index = tostring(entity.unit_number),
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     to_be_taken = {},
+    old_contents = {}
   }
   setmetatable(depot, mining_depot.metatable)
 
@@ -50,48 +51,43 @@ function mining_depot:get_to_be_taken(name)
   return self.to_be_taken[name] or 0
 end
 
+function mining_depot:update_contents()
+  if not self.item then return end
+  
+  local supply = self.road_network.get_network_item_supply(self.network_id)
 
-function mining_depot:check_requests_for_item(name, count)
+  local new_contents = self.entity.get_output_inventory().get_contents()
 
-  if count - self:get_to_be_taken(name) <= 0 then
-    return
-  end
-
-  local buffer_depots = self.road_network.get_buffer_depots(self.network_id, name, self.node_position)
-  if buffer_depots then
-    local size = #buffer_depots
-    if size > 0 then
-      for k = 1, size do
-        local depot = buffer_depots[k]
-        local available = count - self:get_to_be_taken(name)
-        if available <= 0 then return end
-        depot:handle_offer(self, name, available)
+  for name, count in pairs (self.old_contents) do
+    if not new_contents[name] then
+      local item_supply = supply[name]
+      if item_supply then
+        item_supply[self.index] = nil      
       end
     end
   end
 
-  local request_depots = self.road_network.get_request_depots(self.network_id, name, self.node_position)
-  if request_depots then
-    local size = #request_depots
-    if size > 0 then
-      for k = 1, size do
-        local depot = request_depots[k]
-        local available = count - self:get_to_be_taken(name)
-        if available <= 0 then return end
-        depot:handle_offer(self, name, available)
-      end
+  for name, count in pairs (new_contents) do
+    local item_supply = supply[name]
+    if not item_supply then
+      item_supply = {}
+      supply[name] = item_supply
+    end
+    local new_count = count - self:get_to_be_taken(name)
+    if new_count > 0 then
+      item_supply[self.index] = new_count
+    else
+      item_supply[self.index] = nil
     end
   end
+
+  self.old_contents = new_contents
 
 end
 
+
 function mining_depot:update()
-  if not self.network_id then return end
-  local items = self.entity.get_output_inventory().get_contents()
-  for name, count in pairs(items) do
-    self:check_requests_for_item(name, count)
-  end
-  --self:say("U")
+  self:update_contents()
 end
 
 function mining_depot:say(string)
@@ -135,6 +131,10 @@ end
 function mining_depot:on_removed()
   self:remove_from_network()
   self.corpse.destroy()
+end
+
+function mining_depot:on_config_changed()
+  self.old_contents = self.old_contents or {}
 end
 
 return mining_depot

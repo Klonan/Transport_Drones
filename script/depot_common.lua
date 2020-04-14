@@ -55,9 +55,14 @@ local script_data =
   refresh_techs = true
 }
 
-local get_depot = function(entity)
-  return script_data.depots[tostring(entity.unit_number)]
+local get_depot_by_index = function(index)
+  return script_data.depots[index]
 end
+
+local get_depot = function(entity)
+  return get_depot_by_index(tostring(entity.unit_number))
+end
+
 
 local get_corpse_position = function(entity, corpse_offsets)
 
@@ -265,7 +270,6 @@ local update_depots = function(tick)
       end
     else
       depot:update()
-      depot:say(k)
       k = k + 1
     end
   end
@@ -282,6 +286,7 @@ local setup_lib_values = function()
     lib.road_network = road_network
     lib.transport_drone = transport_drone
     lib.transport_technologies = transport_technologies
+    lib.get_depot = get_depot_by_index
   end
 
 end

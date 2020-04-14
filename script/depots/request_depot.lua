@@ -146,7 +146,9 @@ local distance = function(a, b)
 end
 
 local big = math.huge
-function request_depot:request_from_buffers()
+local min = math.min
+local item_heuristic_bonus = 50
+function request_depot:make_request()
 
   local name = self.item
   if not name then return end
@@ -156,32 +158,48 @@ function request_depot:request_from_buffers()
 
   self.updates_without_buffer_offer = self.updates_without_buffer_offer + 1
   
-  local buffer_depots = self.road_network.get_buffer_depots_raw(self.network_id, name)
-  if not buffer_depots then return end
+  local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
+  if not supply_depots then return end
+
+  local request_size = self:get_request_size()
+  local minimum_size = self:get_minimum_request_size()
+  local stack_size = self:get_stack_size()
 
   local node_position = self.node_position
-  local heuristic = function(depot)
-    local stack_amount = depot:get_available_stack_amount()
-    if stack_amount < 1 then
+  local heuristic = function(depot, count)
+    local amount = min(count, request_size)
+    if amount < minimum_size then
       return big
     end
-    return distance(depot.node_position, node_position) - stack_amount
+    return distance(depot.node_position, node_position) - ((amount / request_size) * item_heuristic_bonus)
   end
   
   local best_buffer
+  local best_index
   local lowest_score = big
+  local get_depot = self.get_depot
     
-  for k, depot in pairs (buffer_depots) do
-    local score = heuristic(depot)
-    if score < lowest_score then
-      best_buffer = depot
-      lowest_score = score
+  for depot_index, count in pairs (supply_depots) do
+    local depot = get_depot(depot_index)
+    if depot then
+      local score = heuristic(depot, count)
+      if score < lowest_score then
+        best_buffer = depot
+        lowest_score = score
+        best_index = depot_index
+      end
     end
   end
 
-  if best_buffer then
-    self:dispatch_drone(best_buffer, best_buffer:get_available_item_count(self.item))
-    self.updates_without_buffer_offer = 0
+  if not best_buffer then return end
+
+  local count = supply_depots[best_index]
+  if request_size >= count then
+    supply_depots[best_index] = nil
+    self:dispatch_drone(best_buffer, count)
+  else
+    supply_depots[best_index] = count - request_size
+    self:dispatch_drone(best_buffer, request_size)
   end
 
 end
@@ -190,7 +208,7 @@ function request_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
   self:check_drone_validity()
-  self:request_from_buffers()
+  self:make_request()
   self:update_sticker()
 end
 
@@ -297,7 +315,6 @@ function request_depot:get_fuel_amount()
 end
 
 function request_depot:can_spawn_drone()
-  if game.tick < (self.next_spawn_tick or 0) then return end
   return self:get_drone_item_count() > self:get_active_drone_count()
 end
 
@@ -336,17 +353,10 @@ function request_depot:should_order(plus_one)
   return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
 end
 
-function request_depot:has_recent_buffer_offer()
-  return self.updates_without_buffer_offer < no_buffer_offer_limit
-end
-
 local min = math.min
 function request_depot:dispatch_drone(depot, count)
-
   
-  count = min(self:get_request_size(), count)
-  
-  local drone = request_depot.transport_drone.new(self)
+  local drone = self.transport_drone.new(self)
   drone:pickup_from_supply(depot, count)
   self:remove_fuel(fuel_amount_per_drone)
 
@@ -354,20 +364,6 @@ function request_depot:dispatch_drone(depot, count)
 
   self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
-end
-
-function request_depot:handle_offer(supply_depot, name, count, buffer_offer)
-
-  if (not buffer_offer and self:has_recent_buffer_offer()) then return end
-
-  if count < self:get_minimum_request_size() then return end
-
-  if not self:can_spawn_drone() then return end
-
-  if not self:should_order() then return end
-
-  self:dispatch_drone(supply_depot, count)
-
 end
 
 function request_depot:take_item(name, count)
