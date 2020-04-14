@@ -290,33 +290,6 @@ local setup_lib_values = function()
 
 end
 
-local on_selected_entity_changed = function(event)
-  if true then return end
-  --Cheesy tactic to make the drones feel more responsive
-
-  local last_entity = event.last_entity
-  if (last_entity and last_entity.valid) then
-    local depot = get_depot(last_entity)
-    if depot then
-      depot:update()
-    end
-  end
-
-  local player = game.get_player(event.player_index)
-
-  if not (player and player.valid) then return end
-
-  local entity = player.selected
-  if not (entity and entity.valid) then return end
-
-  local depot = get_depot(entity)
-
-  if depot then
-    depot:update()
-  end
-
-end
-
 local insert = table.insert
 local refresh_update_buckets = function()
   local count = 1
@@ -358,7 +331,6 @@ lib.events =
   [defines.events.on_player_mined_entity] = on_entity_removed,
 
   [defines.events.on_tick] = on_tick,
-  [defines.events.on_selected_entity_changed] = on_selected_entity_changed,
   [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
 
 }
