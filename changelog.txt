@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.4.0
+Date: 2020-04-14
+  Changes:
+    - Rewrote the logic regarding how depots choose where to send drones.
+    - Changed update logic so it has a fixed interval, within which all depots will be updated. It defaults to 60 ticks.
+    - Added a runtime global mod setting to adjust this interval. Lower values mean more script update time, but the depots are more responsive. Higher values mean reduced UPS usage, at the cost of less responsive depots.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.12
 Date: 2020-04-13
   Changes:
