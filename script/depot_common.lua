@@ -4,6 +4,8 @@ local transport_technologies = require("script/transport_technologies")
 
 local depot_libs = {}
 
+local depot_update_interval = 60
+
 local required_interfaces =
 {
   corpse_offsets = "table",
@@ -48,8 +50,7 @@ end
 local script_data = 
 {
   depots = {},
-  update_order = {},
-  last_update_index = 0,
+  update_buckets = {},
   reset_to_be_taken_again = true,
   refresh_techs = true
 }
@@ -216,36 +217,36 @@ local migrate_depots = function()
 
 end
 
-local shuffle_table = util.shuffle_table
-local update_next_depot = function()
-  local index = script_data.last_update_index
-  local depots = script_data.update_order
+local update_depots = function(tick)
+  local bucket_index = tick % depot_update_interval
+  local update_list = script_data.update_buckets[bucket_index]
+  if not update_list then return end
 
-  local depot_index = depots[index]
-  if not depot_index then
-    shuffle_table(depots)
-    script_data.last_update_index = 1
-    return
-  end
-  
-  local depot = script_data.depots[depot_index]
-  if not depot then
-    local last = #depots
-    if index == last then
-      depots[index] = nil
+  local depots = script_data.depots
+
+  local k = 1
+  while true do
+    local depot_index = update_list[k]
+    if not depot_index then return end
+    local depot = depots[depot_index]
+    if not depot then
+      local last = #update_list
+      if k == last then
+        update_list[k] = nil
+      else
+        update_list[k], update_list[last] = update_list[last], nil
+      end
     else
-      depots[index], depots[last] = depots[last], nil
+      depot:update()
+      depot:say(k)
+      k = k + 1
     end
-    return
   end
-  
-  depot:update()
-  --depot:say(index)
-  script_data.last_update_index = index + 1
+
 end
 
 local on_tick = function(event)
-  update_next_depot()
+  update_depots(event.tick)
 end
 
 local setup_lib_values = function()
@@ -283,6 +284,20 @@ local on_selected_entity_changed = function(event)
     depot:update()
   end
 
+end
+
+local insert = table.insert
+local refresh_update_buckets = function()
+  local count = 1
+  local interval = depot_update_interval
+  local buckets = {}
+  for index, depot in pairs (script_data.depots) do
+    local bucket_index = count % interval
+    buckets[bucket_index] = buckets[bucket_index] or {}
+    insert(buckets[bucket_index], index)
+    count = count + 1
+  end
+  script_data.update_buckets = buckets
 end
 
 local lib = {}
@@ -349,6 +364,8 @@ lib.on_configuration_changed = function()
       force.reset_technology_effects()
     end
   end
+
+  refresh_update_buckets()
 
 end
 
