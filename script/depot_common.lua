@@ -127,6 +127,31 @@ local remove_depot_from_node = function(surface, x, y, depot_index)
   road_network.check_clear_lonely_node(surface, x, y)
 end
 
+local big = math.huge
+local insert = table.insert
+local add_to_update_bucket = function(index)
+  local best_bucket
+  local best_count = big
+  local buckets = script_data.update_buckets
+  for k = 1, depot_update_interval do
+    local bucket_index = k % depot_update_interval
+    local bucket = buckets[bucket_index]
+    if not bucket then
+      bucket = {}
+      buckets[bucket_index] = bucket
+      best_bucket = bucket
+      best_count = 0
+      break
+    end
+    local size = #bucket
+    if size < best_count then
+      best_bucket = bucket
+      best_count = size
+    end
+  end
+  best_bucket[best_count + 1] = index
+end
+
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
@@ -145,8 +170,10 @@ local on_created_entity = function(event)
   
   local depot = depot_lib.new(entity)
   script_data.depots[depot.index] = depot
-  script_data.update_order[#script_data.update_order + 1] = depot.index
   add_depot_to_node(depot)
+
+  add_to_update_bucket(depot.index)
+
 end
 
 
