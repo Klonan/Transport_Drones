@@ -4,8 +4,6 @@ local transport_technologies = require("script/transport_technologies")
 
 local depot_libs = {}
 
-local depot_update_interval = 60
-
 local required_interfaces =
 {
   corpse_offsets = "table",
@@ -52,7 +50,8 @@ local script_data =
   depots = {},
   update_buckets = {},
   reset_to_be_taken_again = true,
-  refresh_techs = true
+  refresh_techs = true,
+  update_rate = 60
 }
 
 local get_depot_by_index = function(index)
@@ -138,8 +137,8 @@ local add_to_update_bucket = function(index)
   local best_bucket
   local best_count = big
   local buckets = script_data.update_buckets
-  for k = 1, depot_update_interval do
-    local bucket_index = k % depot_update_interval
+  for k = 1, script_data.update_rate do
+    local bucket_index = k % script_data.update_rate
     local bucket = buckets[bucket_index]
     if not bucket then
       bucket = {}
@@ -250,7 +249,7 @@ local migrate_depots = function()
 end
 
 local update_depots = function(tick)
-  local bucket_index = tick % depot_update_interval
+  local bucket_index = tick % script_data.update_rate
   local update_list = script_data.update_buckets[bucket_index]
   if not update_list then return end
 
@@ -292,7 +291,7 @@ local setup_lib_values = function()
 end
 
 local on_selected_entity_changed = function(event)
-
+  if true then return end
   --Cheesy tactic to make the drones feel more responsive
 
   local last_entity = event.last_entity
@@ -321,7 +320,7 @@ end
 local insert = table.insert
 local refresh_update_buckets = function()
   local count = 1
-  local interval = depot_update_interval
+  local interval = script_data.update_rate
   local buckets = {}
   for index, depot in pairs (script_data.depots) do
     local bucket_index = count % interval
@@ -330,6 +329,18 @@ local refresh_update_buckets = function()
     count = count + 1
   end
   script_data.update_buckets = buckets
+end
+
+local refresh_update_rate = function()
+  local update_rate = settings.global["transport-depot-update-interval"].value
+  if script_data.update_rate == update_rate then return end
+  script_data.update_rate = update_rate
+  refresh_update_buckets()
+  --game.print(script_data.update_rate)
+end
+
+local on_runtime_mod_setting_changed = function(event)
+  refresh_update_rate()
 end
 
 local lib = {}
@@ -348,12 +359,14 @@ lib.events =
 
   [defines.events.on_tick] = on_tick,
   [defines.events.on_selected_entity_changed] = on_selected_entity_changed,
+  [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
 
 }
 
 lib.on_init = function()
   global.transport_depots = global.transport_depots or script_data
   setup_lib_values()
+  refresh_update_rate()
 end
 
 lib.on_load = function()
@@ -397,7 +410,7 @@ lib.on_configuration_changed = function()
     end
   end
 
-  refresh_update_buckets()
+  refresh_update_rate()
 
 end
 
