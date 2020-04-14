@@ -183,13 +183,15 @@ end
 
 function transport_drone:retry_command()
 
+  local distance = 1.5
   if self.entity.ai_settings.path_resolution_modifier == -1 then
     self.entity.ai_settings.path_resolution_modifier = 0
+    distance = 0.5
   end
 
   if self.state == states.going_to_supply then
     if self.supply_depot.entity.valid then
-      self:go_to_depot(self.supply_depot, 1.5)
+      self:go_to_depot(self.supply_depot, distance)
     else
       self:return_to_requester()
     end
@@ -198,7 +200,7 @@ function transport_drone:retry_command()
 
   if self.state == states.delivering_fuel then
     if self.target_depot.entity.valid then
-      self:go_to_depot(self.target_depot, 1.5)
+      self:go_to_depot(self.target_depot, distance)
     else
       self:return_to_requester()
     end
@@ -213,7 +215,7 @@ function transport_drone:retry_command()
 
   if self.state == states.return_to_requester then
     if self.request_depot.entity.valid then
-      self:go_to_depot(self.request_depot, 1.5)
+      self:go_to_depot(self.request_depot, distance)
     else
       self:suicide()
     end
