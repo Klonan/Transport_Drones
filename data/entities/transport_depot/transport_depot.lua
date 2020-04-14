@@ -48,6 +48,7 @@ depot.icon_mipmaps = 0
 depot.collision_box = collision_box
 depot.selection_box = selection_box
 depot.max_health = 150
+depot.fast_replaceable_group = nil
 depot.radius_visualisation_specification =
 {
   sprite = caution_sprite,
