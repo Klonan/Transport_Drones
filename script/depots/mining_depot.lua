@@ -52,7 +52,6 @@ function mining_depot:get_to_be_taken(name)
 end
 
 function mining_depot:update_contents()
-  if not self.item then return end
   
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
