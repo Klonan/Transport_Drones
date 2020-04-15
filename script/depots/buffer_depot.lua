@@ -140,6 +140,8 @@ function buffer_depot:offer_item()
 end
 
 function buffer_depot:update_contents()
+
+  if not self.network_id then return end
   
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
@@ -254,9 +256,9 @@ end
 
 
 function buffer_depot:update()
+  self:check_request_change()
   self:update_contents()
   self:check_fuel_amount()
-  self:check_request_change()
   self:check_drone_validity()
   self:make_request()
   self:update_sticker()
