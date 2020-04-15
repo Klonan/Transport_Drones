@@ -55,8 +55,6 @@ function fuel_depot.new(entity)
   }
   setmetatable(depot, fuel_depot.metatable)
 
-  depot:add_to_network()
-
   return depot
 
 end
@@ -67,24 +65,13 @@ function fuel_depot:update()
   --game.print("AHOY!")
 end
 
-
-function fuel_depot:remove_from_network()
-
-  local network = self.road_network.get_network_by_id(self.network_id)
-
-  if not network then return end
-
-  local fuel = network.fuel
-
-  fuel[self.index] = nil
-
-  self.network_id = nil
-
+function fuel_depot:add_to_network()
+  self.network_id = self.road_network.add_depot(self, "fuel")
 end
 
-function fuel_depot:add_to_network()
-  --self:say("Adding to network") 
-  self.network_id = self.road_network.add_fuel_depot(self)
+function fuel_depot:remove_from_network()
+  self.road_network.remove_depot(self, "fuel")
+  self.network_id = nil
 end
 
 function fuel_depot:get_fuel_amount()

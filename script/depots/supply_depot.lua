@@ -37,22 +37,12 @@ function supply_depot.new(entity)
   }
   setmetatable(depot, supply_depot.metatable)
 
-  depot:add_to_network()
-
   return depot
   
 end
 
 function supply_depot:get_to_be_taken(name)
   return self.to_be_taken[name] or 0
-end
-
-function supply_depot:check_network()
-  local network = self.road_network.get_network_by_id(self.network_id)
-  if not network then
-    self:add_to_network()
-  end
-  return true
 end
 
 function supply_depot:update_contents()
@@ -94,8 +84,6 @@ now iron 5
 ]]
 
 function supply_depot:update()
-  --self:check_network()
-
   self:update_contents()
 
 end
@@ -120,34 +108,14 @@ function supply_depot:get_available_item_count(name)
   return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
 end
 
-function supply_depot:remove_from_network()
-
-  local network = self.road_network.get_network_by_id(self.network_id)
-  
-  if not network then return end
-
-  local supply = network.supply
-
-  supply[self.index] = nil
-
-  local item_supply = network.item_supply
-  for name, count in pairs (self.old_contents) do
-    if item_supply[name] then
-      item_supply[name][self.index] = nil
-    end
-  end
-  self.old_contents = {}
-
-  self.network_id = nil
-
-
-
+function supply_depot:add_to_network()
+  self.network_id = self.road_network.add_depot(self, "supply")
+  self:update_contents()
 end
 
-function supply_depot:add_to_network()
-  self.network_id = self.road_network.add_supply_depot(self)
-  self.old_contents = {}
-  self:update_contents()
+function supply_depot:remove_from_network()
+  self.road_network.remove_depot(self, "supply")
+  self.network_id = nil
 end
 
 function supply_depot:on_removed(event)

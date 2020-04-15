@@ -113,7 +113,7 @@ function request_depot:check_fuel_amount()
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
-  local fuel_depots = self.road_network.get_fuel_depots(self.network_id, self.node_position)
+  local fuel_depots = self.road_network.get_depots_by_distance(self.network_id, "fuel", self.node_position)
   if not (fuel_depots and fuel_depots[1]) then
     self:show_fuel_alert("No fuel depots on network for request depot")
     return
@@ -429,22 +429,12 @@ function request_depot:say(string)
 end
 
 function request_depot:add_to_network()
-  if not self.item then return end
-  --self:say("Adding to network")
-  self.network_id = self.road_network.add_request_depot(self, self.item)
+  self.network_id = self.road_network.add_depot(self, "request")
 end
 
 function request_depot:remove_from_network()
-  if not self.item then return end
-  local network = self.road_network.get_network_by_id(self.network_id)
-  
-  if not network then return end
-
-  local requesters = network.requesters
-  requesters[self.item][self.index] = nil
-
+  self.road_network.remove_depot(self, "request")
   self.network_id = nil
-
 end
 
 function request_depot:on_removed()

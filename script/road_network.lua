@@ -15,8 +15,8 @@ local new_id = function()
   local id = script_data.id_number
   script_data.networks[id] =
   {
-    id = id,
-    item_supply = {}
+    item_supply = {},
+    depots = {}
   }
   --print("New network "..id)
   return id
@@ -269,31 +269,10 @@ local clear_network = function(id)
   --print("Clearing "..id)
   local network = script_data.networks[id]
 
-  for k, name in pairs ({"supply", "mining", "fuel"}) do
-    local depots = network[name]
-    if depots then
-      for k, depot in pairs (depots) do
-        depot:remove_from_network()
-        depot:add_to_network()
-      end
-    end
-  end
-
-  if network.requesters then
-    for name, depots in pairs (network.requesters) do
-      for k, depot in pairs (depots) do
-        depot:remove_from_network()
-        depot:add_to_network()
-      end
-    end
-  end
-  
-  if network.buffers then
-    for name, depots in pairs (network.buffers) do
-      for k, depot in pairs (depots) do
-        depot:remove_from_network()
-        depot:add_to_network()
-      end
+  for category, depots in pairs (network.depots) do
+    for id, depot in pairs (depots) do
+      depot:remove_from_network()
+      depot:add_to_network()
     end
   end
 
@@ -443,76 +422,53 @@ road_network.get_network = function(surface, x, y)
   return get_network_by_id(node.id)
 end
 
-road_network.add_supply_depot = function(depot)
+road_network.add_depot = function(depot, category)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
   local node = get_node(surface, x, y)
 
   local network = get_network_by_id(node.id)
 
-  if not network.supply then network.supply = {} end
-  network.supply[depot.index] = depot
+  if not network.depots[category] then network.depots[category] = {} end
+  network.depots[category][depot.index] = depot
 
-  return network.id
+  return node.id
 end
 
-road_network.add_fuel_depot = function(depot)
-  local x, y = depot.node_position[1], depot.node_position[2]
-  local surface = depot.entity.surface.index
-  local node = get_node(surface, x, y)
-
-  local network = get_network_by_id(node.id)
-  
-  if not network.fuel then network.fuel = {} end
-  network.fuel[depot.index] = depot
-
-  return network.id
-end
-
-road_network.add_mining_depot = function(depot)
+road_network.remove_depot = function(depot, category)
   local x, y = depot.node_position[1], depot.node_position[2]
   local surface = depot.entity.surface.index
   local node = get_node(surface, x, y)
 
   local network = get_network_by_id(node.id)
 
-  if not network.mining then network.mining = {} end
-  network.mining[depot.index] = depot
-
-  return network.id
-end
-
-road_network.add_request_depot = function(depot, item_name)
-  local x, y = depot.node_position[1], depot.node_position[2]
-  local surface = depot.entity.surface.index
-  local node = get_node(surface, x, y)
-
-  local network = get_network_by_id(node.id)
-
-  if not network.requesters then network.requesters = {} end
-
-  local item_map = network.requesters[item_name]
-  if not item_map then
-    item_map = {}
-    network.requesters[item_name] = item_map
+  if depot.old_contents then
+    local item_supply = network.item_supply
+    for name, count in pairs (depot.old_contents) do
+      if item_supply[name] then
+        item_supply[name][depot.index] = nil
+      end
+    end
   end
 
-  item_map[depot.index] = depot
+  if network.depots[category] then
+    network.depots[category][depot.index] = nil
+  end
 
-  return network.id
 end
 
-local shuffle = util.shuffle_table
 local distance_squared = function(a, b)
   local dx = a[1] - b[1]
   local dy = a[2] - b[2]
   return (dx * dx) + (dy * dy)
 end
+
 local distance = function(a, b)
   local dx = a[1] - b[1]
   local dy = a[2] - b[2]
   return ((dx * dx) + (dy * dy)) ^ 0.5
 end
+
 local rect_distance = function(a, b)
   local dx = a[1] - b[1]
   local dy = a[2] - b[2]
@@ -520,100 +476,24 @@ local rect_distance = function(a, b)
 end
 local sort = table.sort
 
-road_network.get_request_depots = function(id, name, node_position)
-  local sort_function = function(depot_a, depot_b)
-    return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
-  end
-  --local profiler = game.create_profiler()
-  local network = get_network_by_id(id)
-  if not network.requesters then return end
-  local depots = network.requesters[name]
-  if not depots then return end
-  
-  local to_shuffle = {}
-  local i = 1
-  for k, v in pairs (depots) do
-    to_shuffle[i] = v
-    i = i + 1
-  end
-  --shuffle(to_shuffle)
-  sort(to_shuffle, sort_function)  
 
-  --profiler.stop()
-  --game.print({"", "Got depots ", profiler})
-  --log({"", "Got depots ", profiler})
-  return to_shuffle
-end
-
-road_network.add_buffer_depot = function(depot, item_name)
-  local x, y = depot.node_position[1], depot.node_position[2]
-  local surface = depot.entity.surface.index
-  local node = get_node(surface, x, y)
-
-  local network = get_network_by_id(node.id)
-
-  if not network.buffers then network.buffers = {} end
-
-  local item_map = network.buffers[item_name]
-  if not item_map then
-    item_map = {}
-    network.buffers[item_name] = item_map
-  end
-
-  item_map[depot.index] = depot
-
-  return network.id
-end
-
-road_network.get_buffer_depots = function(id, name, node_position)
-  local sort_function = function(depot_a, depot_b)
-    return distance(depot_a.node_position, node_position) < distance(depot_b.node_position, node_position)
-  end
-  --local profiler = game.create_profiler()
-  local network = get_network_by_id(id)
-  if not network.buffers then return end
-  local depots = network.buffers[name]
-  if not depots then return end
-  
-  local to_shuffle = {}
-  local i = 1
-  for k, v in pairs (depots) do
-    to_shuffle[i] = v
-    i = i + 1
-  end
-  --shuffle(to_shuffle)
-  sort(to_shuffle, sort_function)  
-
-  --profiler.stop()
-  --game.print({"", "Got depots ", profiler})
-  --log({"", "Got depots ", profiler})
-  return to_shuffle
-end
-
-road_network.get_buffer_depots_raw = function(id, name)
-  local network = get_network_by_id(id)
-  if not network.buffers then return end
-  local depots = network.buffers[name]
-  return depots
-end
-
-road_network.get_fuel_depots = function(id, node_position)
+road_network.get_depots_by_distance = function(id, category, node_position)
   local sort_function = function(depot_a, depot_b)
     return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
   end
   local network = get_network_by_id(id)
-  local depots = network.fuel
+  local depots = network[cetegory]
   if not depots then return end
   
-  local to_shuffle = {}
+  local to_sort = {}
   local i = 1
   for k, v in pairs (depots) do
-    to_shuffle[i] = v
+    to_sort[i] = v
     i = i + 1
   end
-  --shuffle(to_shuffle)
-  sort(to_shuffle, sort_function)  
-  return to_shuffle
+
+  sort(to_sort, sort_function)  
+  return to_sort
 end
 
 road_network.check_clear_lonely_node = function(surface, x, y)
@@ -648,12 +528,22 @@ road_network.on_load = function()
 end
 
 road_network.on_configuration_changed = function()
-  for k, network in pairs (script_data.networks) do
-    network.item_supply = network.item_supply or {}
+  for id, network in pairs (script_data.networks) do
+    --We reinit everything anyway, its simple enough.
+    local new_network =
+    {
+      item_supply = {},
+      depots = {}
+    }
+    script_data.networks[id] = new_network
   end
+
 end
 
 road_network.get_network_by_id = get_network_by_id
 road_network.get_node = get_node
+road_network.get_networks = function()
+  return script_data.networks
+end
 
 return road_network

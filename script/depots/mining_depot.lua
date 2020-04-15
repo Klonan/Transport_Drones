@@ -41,8 +41,6 @@ function mining_depot.new(entity)
   }
   setmetatable(depot, mining_depot.metatable)
 
-  depot:add_to_network()
-
   return depot
 
 end
@@ -109,32 +107,14 @@ function mining_depot:get_available_item_count(name)
   return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
 end
 
-function mining_depot:remove_from_network()
-
-  local network = self.road_network.get_network_by_id(self.network_id)
-
-  if not network then return end
-  
-  local mining = network.mining
-
-  local item_supply = network.item_supply
-  for name, count in pairs (self.old_contents) do
-    if item_supply[name] then
-      item_supply[name][self.index] = nil
-    end
-  end
-  self.old_contents = {}
-
-  mining[self.index] = nil
-  self.network_id = nil
-
+function mining_depot:add_to_network()
+  self.network_id = self.road_network.add_depot(self, "mining")
+  self:update_contents()
 end
 
-function mining_depot:add_to_network()
-  --self:say("Adding to network")
-  self.network_id = self.road_network.add_mining_depot(self)
-  self.old_contents = {}
-  self:update_contents()
+function mining_depot:remove_from_network()
+  self.road_network.remove_depot(self, "mining")
+  self.network_id = nil
 end
 
 function mining_depot:on_removed()

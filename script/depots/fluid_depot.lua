@@ -41,8 +41,6 @@ function fluid_depot.new(entity)
   }
   setmetatable(depot, fluid_depot.metatable)
 
-  depot:add_to_network()
-
   return depot
   
 end
@@ -137,33 +135,14 @@ function fluid_depot:get_available_item_count(name)
   return self.entity.get_fluid_count(name) - self:get_to_be_taken(name)
 end
 
-function fluid_depot:remove_from_network()
-
-  local network = self.road_network.get_network_by_id(self.network_id)
-
-  if not network then return end
-
-  local supply = network.supply
-
-  supply[self.index] = nil
-
-  local item_supply = network.item_supply
-  for name, count in pairs (self.old_contents) do
-    if item_supply[name] then
-      item_supply[name][self.index] = nil
-    end
-  end
-  self.old_contents = {}
-
-  self.network_id = nil
-
+function fluid_depot:add_to_network()
+  self.network_id = self.road_network.add_depot(self, "fluid")
+  self:update_contents()
 end
 
-function fluid_depot:add_to_network()
-  --self:say("Adding to network") 
-  self.network_id = self.road_network.add_supply_depot(self)
-  self.old_contents = {}
-  self:update_contents()
+function fluid_depot:remove_from_network()
+  self.road_network.remove_depot(self, "fluid")
+  self.network_id = nil
 end
 
 function fluid_depot:on_removed()

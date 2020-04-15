@@ -116,7 +116,7 @@ function buffer_depot:check_fuel_amount()
   local fuel_request_amount = (self:max_fuel_amount() - current_amount)
   if fuel_request_amount <= self.fuel_on_the_way then return end
 
-  local fuel_depots = self.road_network.get_fuel_depots(self.network_id, self.node_position)
+  local fuel_depots = self.road_network.get_depots_by_distance(self.network_id, "fuel", self.node_position)
   if not (fuel_depots and fuel_depots[1]) then
     self:show_fuel_alert("No fuel depots on network for request depot")
     return
@@ -296,16 +296,11 @@ function buffer_depot:check_request_change()
   self:set_request_mode()
 
   if self.item then
-    self:remove_from_network()
     self:suicide_all_drones()
   end
 
   self.item = requested_item
   
-  if not self.item then return end
-  
-  self:add_to_network()
-
 end
 
 function buffer_depot:get_requested_item()
@@ -518,33 +513,13 @@ function buffer_depot:say(string)
 end
 
 function buffer_depot:add_to_network()
-  if not self.item then return end
-  --self:say("Adding to network")
-  self.network_id = self.road_network.add_buffer_depot(self, self.item)
-  self.old_contents = {}
+  self.network_id = self.road_network.add_depot(self, "buffer")
   self:update_contents()
 end
 
 function buffer_depot:remove_from_network()
-  if not self.item then return end
-
-  local network = self.road_network.get_network_by_id(self.network_id)
-  
-  if not network then return end
-
-  local buffers = network.buffers
-  buffers[self.item][self.index] = nil
-
-  local item_supply = network.item_supply
-  for name, count in pairs (self.old_contents) do
-    if item_supply[name] then
-      item_supply[name][self.index] = nil
-    end
-  end
-  self.old_contents = {}
-
+  self.road_network.remove_depot(self, "buffer")
   self.network_id = nil
-
 end
 
 function buffer_depot:on_removed()

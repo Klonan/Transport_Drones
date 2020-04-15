@@ -175,7 +175,7 @@ local on_created_entity = function(event)
   local depot = depot_lib.new(entity)
   script_data.depots[depot.index] = depot
   add_depot_to_node(depot)
-
+  depot:add_to_network()
   add_to_update_bucket(depot.index)
 
 end
@@ -189,12 +189,13 @@ local on_entity_removed = function(event)
   local depot = get_depot(entity)
 
   if depot then
+    depot:remove_from_network()
     local surface = depot.entity.surface
     local index = depot.index
     local x, y = depot.node_position[1], depot.node_position[2]
+    remove_depot_from_node(surface.index, x, y, index)
     script_data.depots[index] = nil
     depot:on_removed(event)
-    remove_depot_from_node(surface.index, x, y, index)
   end
 
 end
