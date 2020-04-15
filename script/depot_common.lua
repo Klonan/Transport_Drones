@@ -358,12 +358,12 @@ lib.on_configuration_changed = function()
   end
 
   for k, depot in pairs (script_data.depots) do
-    add_depot_to_node(depot)
-    depot:remove_from_network()
-    depot:add_to_network()
     if depot.on_config_changed then
       depot:on_config_changed()
     end
+    add_depot_to_node(depot)
+    depot:remove_from_network()
+    depot:add_to_network()
   end
 
   if not script_data.reset_to_be_taken_again then

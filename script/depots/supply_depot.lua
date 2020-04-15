@@ -130,12 +130,24 @@ function supply_depot:remove_from_network()
 
   supply[self.index] = nil
 
+  local item_supply = network.item_supply
+  for name, count in pairs (self.old_contents) do
+    if item_supply[name] then
+      item_supply[name][self.index] = nil
+    end
+  end
+  self.old_contents = {}
+
   self.network_id = nil
+
+
 
 end
 
 function supply_depot:add_to_network()
   self.network_id = self.road_network.add_supply_depot(self)
+  self.old_contents = {}
+  self:update_contents()
 end
 
 function supply_depot:on_removed(event)

@@ -117,6 +117,14 @@ function mining_depot:remove_from_network()
   
   local mining = network.mining
 
+  local item_supply = network.item_supply
+  for name, count in pairs (self.old_contents) do
+    if item_supply[name] then
+      item_supply[name][self.index] = nil
+    end
+  end
+  self.old_contents = {}
+
   mining[self.index] = nil
   self.network_id = nil
 
@@ -125,6 +133,8 @@ end
 function mining_depot:add_to_network()
   --self:say("Adding to network")
   self.network_id = self.road_network.add_mining_depot(self)
+  self.old_contents = {}
+  self:update_contents()
 end
 
 function mining_depot:on_removed()

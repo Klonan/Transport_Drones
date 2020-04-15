@@ -521,16 +521,27 @@ function buffer_depot:add_to_network()
   if not self.item then return end
   --self:say("Adding to network")
   self.network_id = self.road_network.add_buffer_depot(self, self.item)
+  self.old_contents = {}
+  self:update_contents()
 end
 
 function buffer_depot:remove_from_network()
   if not self.item then return end
+
   local network = self.road_network.get_network_by_id(self.network_id)
   
   if not network then return end
 
   local buffers = network.buffers
   buffers[self.item][self.index] = nil
+
+  local item_supply = network.item_supply
+  for name, count in pairs (self.old_contents) do
+    if item_supply[name] then
+      item_supply[name][self.index] = nil
+    end
+  end
+  self.old_contents = {}
 
   self.network_id = nil
 
