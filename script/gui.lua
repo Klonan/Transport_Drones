@@ -76,8 +76,6 @@ local get_item_icon_and_locale = function(name)
 
 end
 
-
-
 local update_contents_table = function(contents_table, network)
   for name, counts in pairs (network.item_supply) do
     local item_locale = get_item_icon_and_locale(name)
@@ -150,12 +148,86 @@ local add_contents = function(gui, contents)
 end
 
 
-local map_size = 70
+local update_contents = function(gui, contents)
 
+  for name, count in pairs (contents) do
+    local item_locale = get_item_icon_and_locale(name)
+    if item_locale then
+      local button = gui[name]
+      if not button then
+        button = gui.add{type = "sprite-button", sprite = item_locale.icon, number = count, style = "slot_button", name = name}
+      else
+        button.number = count
+      end      
+    end
+  end
+
+  for k, element in pairs (gui.children) do
+    if not contents[element.name] then
+      element.destroy()
+    end
+  end
+  
+end
+
+
+local add_depot_map_button = function(depot, gui, size)
+  local button = gui.add{type = "button", name = "open_depot_map_"..depot.index}
+  button.style.width = size + 8
+  button.style.height = size + 8
+  button.style.horizontal_align = "center"
+  button.style.vertical_align = "center"
+  button.style.padding = {0,0,0,0}
+  local entity = depot.entity
+  local map = button.add
+  {
+    type = "minimap",
+    position = entity.position,
+    surface_index = entity.surface.index,
+    force = entity.force.name,
+    zoom = 1,
+    ignored_by_interaction = true
+  }
+  map.style.width = size
+  map.style.height = size
+end
+
+
+local update_supply_depot_gui = function(depot, gui)
+
+  local holding_table = gui.table
+  if not holding_table then
+    holding_table = gui.add{type = "table", column_count = 6, name = "table"}
+    local pusher = gui.add{type = "empty-widget"}
+    pusher.style.horizontally_stretchable = true
+  end
+  update_contents(holding_table, depot.old_contents)
+end
+
+local map_size = 70
+local update_supply_tab = function(depots, gui)
+  for index, depot in pairs (depots) do
+    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
+    local depot_frame = gui[index]
+    if not depot_frame then
+      depot_frame = gui.add{type = "flow", name = index}
+      depot_frame.style.horizontally_stretchable = true
+      add_depot_map_button(depot, depot_frame, map_size)
+    end
+    update_supply_depot_gui(depot, depot_frame)
+  end
+end
+
+local refresh_supply_tab = function(player)
+  local contents_tab = get_tab(player, "supply_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_supply_tab(network.depots.supply, contents_tab.depot_table)
+end
 
 local add_supply_tab = function(tabbed_pane, network)
-  local supply_tab = tabbed_pane.add{type = "tab", caption = "Supply depots", name = "supply_tab"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local supply_tab = tabbed_pane.add{type = "tab", caption = "Supply depots"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "supply_tab"}
   
   local depots = network.depots.supply
   
@@ -165,42 +237,10 @@ local add_supply_tab = function(tabbed_pane, network)
     return
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
 
-  for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = map_size + 8
-    button.style.height = map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = map_size
-    map.style.height = map_size
-    local contents = depot.old_contents
-    if next(contents) then
-      local table = depot_frame.add{type = "table", column_count = 6}
-      table.style.horizontally_stretchable = true
-      add_contents(table, contents)
-    else
-      --depot_frame.add{type = "label", caption = "No contents"}
-    end
-    local pusher = depot_frame.add{type = "empty-widget"}
-    pusher.style.horizontally_stretchable = true
-  end
+  update_supply_tab(depots, depot_table)
 
 
   tabbed_pane.add_tab(supply_tab, contents)
@@ -304,7 +344,7 @@ local add_mining_tab = function(tabbed_pane, network)
       table.style.horizontally_stretchable = true
       add_contents(table, contents)
     else
-      depot_frame.add{type = "label", caption = "No contents"}
+      --depot_frame.add{type = "label", caption = "No contents"}
     end
     local pusher = depot_frame.add{type = "empty-widget"}
     pusher.style.horizontally_stretchable = true
@@ -358,7 +398,7 @@ local add_requester_tab = function(tabbed_pane, network)
       table.style.horizontally_stretchable = true
       add_contents(table, contents)
     else
-      depot_frame.add{type = "label", caption = "No contents"}
+      --depot_frame.add{type = "label", caption = "No contents"}
     end
     local pusher = depot_frame.add{type = "empty-widget"}
     pusher.style.horizontally_stretchable = true
@@ -726,8 +766,10 @@ local on_gui_selection_state_changed = function(event)
 end
 
 local on_tick = function(event)
+  if game.tick % 10 ~= 0 then return end
   for k, player in pairs (game.players) do
     refresh_contents_tab(player)
+    refresh_supply_tab(player)
   end
 end
 
