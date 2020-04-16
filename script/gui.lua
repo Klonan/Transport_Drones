@@ -52,6 +52,23 @@ local get_selected_tab_index = function(player)
   if tab_pane then return tab_pane.selected_tab_index end
 end
 
+local get_filter_value = function(player)
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+  if not frame then return end
+  --game.print(serpent.line(frame.inner_frame.subheader_frame.depot_filter_button.elem_value))
+  return frame.inner_frame.subheader_frame.depot_filter_button.elem_value
+end
+
+local set_filter_value = function(player, value)
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+  if not frame then return end
+
+  frame.inner_frame.subheader_frame.depot_filter_button.elem_value = value
+
+end
+
 local cache = {}
 local get_item_icon_and_locale = function(name)
   if cache[name] then
@@ -78,8 +95,31 @@ local get_item_icon_and_locale = function(name)
 
 end
 
+local signal_cache = {}
+local get_signal_id = function(name)
+  if signal_cache[name] then
+    return signal_cache[name]
+  end
+
+  local items = game.item_prototypes
+  if items[name] then
+    local value = {type = "item", name = name}
+    signal_cache[name] = value
+    return value
+  end
+
+  local fluids = game.fluid_prototypes
+  if fluids[name] then
+    local value = {type = "fluid", name = name}
+    signal_cache[name] = value
+    return value
+  end
+
+end
+
 local floor = math.floor
-local update_contents_table = function(contents_table, network)
+local update_contents_table = function(contents_table, network, filter)
+
   for name, counts in pairs (network.item_supply) do
     local item_locale = get_item_icon_and_locale(name)
 
@@ -114,6 +154,7 @@ local update_contents_table = function(contents_table, network)
           flow.count.number = sum
           flow.count.tooltip = sum
         end
+        flow.visible = (not filter or filter.name == name)
       end
     end
   end
@@ -127,7 +168,7 @@ local refresh_contents_tab = function(player)
   local contents_tab = get_tab(player, "contents_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_contents_table(contents_tab.contents_table, network)
+  update_contents_table(contents_tab.contents_table, network, get_filter_value(player))
 end
 
 local add_contents_tab = function(tabbed_pane, network)
@@ -211,7 +252,7 @@ local add_depot_map_button = function(depot, gui, size)
     position = entity.position,
     surface_index = entity.surface.index,
     force = entity.force.name,
-    zoom = 1,
+    zoom = 2,
     ignored_by_interaction = true
   }
   map.style.width = size
@@ -219,7 +260,7 @@ local add_depot_map_button = function(depot, gui, size)
 end
 
 
-local update_supply_depot_gui = function(depot, gui)
+local update_supply_depot_gui = function(depot, gui, filter)
 
   local holding_table = gui.table
   if not holding_table then
@@ -228,10 +269,11 @@ local update_supply_depot_gui = function(depot, gui)
     pusher.style.horizontally_stretchable = true
   end
   update_contents(holding_table, depot.old_contents)
+  gui.visible = (not filter) or depot.old_contents[filter.name]
 end
 
 local map_size = 70
-local update_supply_tab = function(depots, gui)
+local update_supply_tab = function(depots, gui, filter)
 
   for index, depot in pairs (depots) do
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
@@ -241,7 +283,7 @@ local update_supply_tab = function(depots, gui)
       depot_frame.style.horizontally_stretchable = true
       add_depot_map_button(depot, depot_frame, map_size)
     end
-    update_supply_depot_gui(depot, depot_frame)
+    update_supply_depot_gui(depot, depot_frame, filter)
   end
 
   for k, gui in pairs (gui.children) do
@@ -257,7 +299,7 @@ local refresh_supply_tab = function(player)
   local contents_tab = get_tab(player, "supply_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_supply_tab(network.depots.supply, contents_tab.depot_table)
+  update_supply_tab(network.depots.supply, contents_tab.depot_table, get_filter_value(player))
 end
 
 local refresh_fluid_tab = function(player)
@@ -265,7 +307,7 @@ local refresh_fluid_tab = function(player)
   local contents_tab = get_tab(player, "fluid_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_supply_tab(network.depots.fluid, contents_tab.depot_table)
+  update_supply_tab(network.depots.fluid, contents_tab.depot_table, get_filter_value(player))
 end
 
 local refresh_mining_tab = function(player)
@@ -273,7 +315,7 @@ local refresh_mining_tab = function(player)
   local contents_tab = get_tab(player, "mining_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_supply_tab(network.depots.mining, contents_tab.depot_table)
+  update_supply_tab(network.depots.mining, contents_tab.depot_table, get_filter_value(player))
 end
 
 local add_supply_tab = function(tabbed_pane, network)
@@ -357,7 +399,7 @@ local update_fuel_depot_gui = function(depot, gui)
 end
 
   
-local fuel_map_size = 70
+local fuel_map_size = 90
 local update_fuel_tab = function(depots, gui)
   
   for index, depot in pairs (depots) do
@@ -407,7 +449,7 @@ local add_fuel_tab = function(tabbed_pane, network)
 end
 
 local floor = math.floor
-local update_request_depot_gui = function(depot, gui)
+local update_request_depot_gui = function(depot, gui, filter)
 
   local flow = gui.holding_flow
   if not flow then
@@ -462,10 +504,12 @@ local update_request_depot_gui = function(depot, gui)
     flow.add{type = "label", caption = "No request set"}    
 
   end
+
+  gui.visible = (not filter) or filter.name == item
 end
 
 local request_map_size = 90
-local update_request_tab = function(depots, gui)
+local update_request_tab = function(depots, gui, filter)
 
   for index, depot in pairs (depots) do
     local depot_frame = gui[index]
@@ -474,7 +518,7 @@ local update_request_tab = function(depots, gui)
       depot_frame.style.horizontally_stretchable = true
       add_depot_map_button(depot, depot_frame, request_map_size)
     end
-    update_request_depot_gui(depot, depot_frame)
+    update_request_depot_gui(depot, depot_frame, filter)
   end
     
   for k, gui in pairs (gui.children) do
@@ -491,7 +535,7 @@ local refresh_request_tab = function(player)
   local contents_tab = get_tab(player, "request_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_request_tab(network.depots.request, contents_tab.depot_table)
+  update_request_tab(network.depots.request, contents_tab.depot_table, get_filter_value(player))
 end
 
 local refresh_buffer_tab = function(player)
@@ -499,7 +543,7 @@ local refresh_buffer_tab = function(player)
   local contents_tab = get_tab(player, "buffer_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
-  update_request_tab(network.depots.buffer, contents_tab.depot_table)
+  update_request_tab(network.depots.buffer, contents_tab.depot_table, get_filter_value(player))
 end
 
 local add_request_tab = function(tabbed_pane, network)
@@ -550,6 +594,7 @@ local make_network_gui = function(inner, network)
   add_fuel_tab(tabbed_pane, network)
   add_request_tab(tabbed_pane, network)
   add_buffer_tab(tabbed_pane, network)
+  tabbed_pane.selected_tab_index = 1
   
 end
 
@@ -563,7 +608,13 @@ local refresh_network_gui = function(player, selected_index)
 
   if not network then return end
 
-  local inner = frame.add{type = "frame", style = "inside_deep_frame_for_tabs", name = "inner_frame"}
+  local inner = frame.add{type = "frame", style = "inside_deep_frame_for_tabs", name = "inner_frame", direction = "vertical"}
+  local subheader = inner.add{type = "flow", name = "subheader_frame"}
+  subheader.style.vertical_align = "center"
+  local pusher = subheader.add{type = "empty-widget"}
+  pusher.style.horizontally_stretchable = true
+  subheader.add{type = "label", caption = "Filter: "}
+  local filter = subheader.add{type = "choose-elem-button", name = "depot_filter_button", elem_type = "signal"}
 
   make_network_gui(inner, network)
 
@@ -580,6 +631,18 @@ local close_gui = function(player)
 end
 
 local refresh_gui = function(player)
+
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+  if not frame then return end
+
+  refresh_contents_tab(player)
+  refresh_supply_tab(player)
+  refresh_fluid_tab(player)
+  refresh_mining_tab(player)
+  refresh_fuel_tab(player)
+  refresh_request_tab(player)
+  refresh_buffer_tab(player)
 
 end
 
@@ -634,6 +697,13 @@ local open_gui = function(player, network_index)
 
 end
 
+local split = function(str)
+  local sep, fields = "/", {}
+  local pattern = string.format("([^%s]+)", sep)
+  string.gsub(str, pattern, function(c) fields[#fields+1] = c end)
+  return fields
+end
+
 local on_gui_click = function(event)
   local gui = event.element
   if not (gui and gui.valid) then return end
@@ -649,6 +719,16 @@ local on_gui_click = function(event)
       close_gui(player)
     end
     return
+  end
+
+  if gui.type == "sprite-button" then
+    local sprite = gui.sprite
+    if sprite and sprite ~= "" then
+      local result = split(sprite)
+      local signal = {type = result[1], name = result[2]}
+      set_filter_value(player, signal)
+      refresh_gui(player)
+    end
   end
 
 end
@@ -670,14 +750,26 @@ end
 local on_tick = function(event)
   if game.tick % 60 ~= 0 then return end
   for k, player in pairs (game.players) do
-    refresh_contents_tab(player)
-    refresh_supply_tab(player)
-    refresh_fluid_tab(player)
-    refresh_mining_tab(player)
-    refresh_fuel_tab(player)
-    refresh_request_tab(player)
-    refresh_buffer_tab(player)
+    refresh_gui(player)
   end
+end
+
+local on_gui_elem_changed = function(event)
+  
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
+
+  refresh_gui(player)
+
+end
+
+local on_gui_selected_tab_changed = function(event)
+  
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
+
+  refresh_gui(player)
+
 end
 
 
@@ -696,6 +788,8 @@ lib.events =
   [defines.events.on_tick] = on_tick,
   [defines.events.on_gui_click] = on_gui_click,
   [defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
+  [defines.events.on_gui_selected_tab_changed] = on_gui_selected_tab_changed,
+  [defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 }
 
 return lib
