@@ -391,4 +391,6 @@ lib.get_depot = function(entity)
   return script_data.depots[tostring(entity.unit_number)]
 end
 
+lib.get_depot_by_index = get_depot_by_index
+
 return lib

@@ -1,4 +1,5 @@
 local road_network = require("script/road_network")
+local depot_common = require("script/depot_common")
 
 local network_size = function(network)
   
@@ -114,7 +115,7 @@ local add_supply_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = map_size + 8
     button.style.height = map_size + 8
     button.style.horizontal_align = "center"
@@ -168,7 +169,7 @@ local add_fluid_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = map_size + 8
     button.style.height = map_size + 8
     button.style.horizontal_align = "center"
@@ -222,7 +223,7 @@ local add_mining_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = map_size + 8
     button.style.height = map_size + 8
     button.style.horizontal_align = "center"
@@ -276,7 +277,7 @@ local add_requester_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = map_size + 8
     button.style.height = map_size + 8
     button.style.horizontal_align = "center"
@@ -329,7 +330,7 @@ local add_fuel_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = fuel_map_size + 8
     button.style.height = fuel_map_size + 8
     button.style.horizontal_align = "center"
@@ -379,7 +380,7 @@ local add_request_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = request_map_size + 8
     button.style.height = request_map_size + 8
     button.style.horizontal_align = "center"
@@ -470,7 +471,7 @@ local add_buffer_tab = function(tabbed_pane, network)
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = depot_table.add{type = "flow"}
     depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button"}
+    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
     button.style.width = request_map_size + 8
     button.style.height = request_map_size + 8
     button.style.horizontal_align = "center"
@@ -550,8 +551,6 @@ local make_network_gui = function(inner, network)
   add_request_tab(tabbed_pane, network)
   add_buffer_tab(tabbed_pane, network)
   
-
-  
 end
 
 local refresh_network_gui = function(player, selected_index)
@@ -575,11 +574,30 @@ local refresh_network_gui = function(player, selected_index)
 
 end
 
-local open_gui = function(player)
+local close_gui = function(player)
+  
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+
+  if frame then
+    frame.destroy()
+  end
+end
+
+local refresh_gui = function(player)
+
+end
+
+local open_gui = function(player, network_index)
   local gui = player.gui.screen
 
-  local frame = gui.add{type = "frame", direction = "vertical", name = "road_network_frame"}
-  frame.style.maximal_height = 1000
+  local frame = gui.road_network_frame
+  if frame then
+    frame.clear()
+  else
+    frame = gui.add{type = "frame", direction = "vertical", name = "road_network_frame"}
+  end
+  frame.style.maximal_height = player.display_resolution.height * 0.9
 
   local title_flow = frame.add{type = "flow"}
 
@@ -610,11 +628,47 @@ local open_gui = function(player)
   end
 
   if count == 0 then return end
+
+  selected = network_index or selected
+
   drop_down.selected_index = selected
 
   refresh_network_gui(player, selected)
 
   frame.auto_center = true
+
+end
+
+local on_gui_click = function(event)
+  local gui = event.element
+  if not (gui and gui.valid) then return end
+  
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
+
+  if gui.name:find("open_depot_map_") then
+    local depot_index = gui.name:sub(("open_depot_map_"):len() + 1)
+    local depot = depot_common.get_depot_by_index(depot_index)
+    if depot then
+      player.zoom_to_world(depot.entity.position, 1)
+      close_gui(player)
+    end
+    return
+  end
+
+end
+
+local on_gui_selection_state_changed = function(event)
+  local gui = event.element
+  if not (gui and gui.valid) then return end
+  
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
+  
+  if gui.name == "road_network_drop_down" then
+    open_gui(player, gui.selected_index)
+    return
+  end
 
 end
 
@@ -631,7 +685,8 @@ local lib = {}
 
 lib.events =
 {
-  [defines.events.on_gui_click] = on_gui_click
+  [defines.events.on_gui_click] = on_gui_click,
+  [defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 }
 
 return lib
