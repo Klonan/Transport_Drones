@@ -14,6 +14,42 @@ local network_size = function(network)
   return sum
 end
 
+local get_network_by_dropdown_index = function(selected_index)
+
+  local networks = road_network.get_networks()
+
+  local index, network
+  for k = 1, selected_index do
+    index, network = next(networks, index)
+  end
+
+  return network
+end
+
+local get_selected_network = function(player)
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+  if not frame then return end
+  local index = frame.title_flow.road_network_drop_down.selected_index
+  return get_network_by_dropdown_index(index)
+end
+
+local get_tab_pane = function(player)
+  local gui = player.gui.screen
+  local frame = gui.road_network_frame
+  if not frame then return end
+  return frame.inner_frame.tab_pane
+end
+
+local get_tab = function(player, tab_name)
+  local pane = get_tab_pane(player)
+  if not pane then return end
+  game.print("HI")
+  return pane[tab_name]
+end
+
+
+
 local cache = {}
 local get_item_icon_and_locale = function(name)
   if cache[name] then
@@ -40,39 +76,57 @@ local get_item_icon_and_locale = function(name)
 
 end
 
-local add_contents_tab = function(tabbed_pane, network)
-  local contents_tab = tabbed_pane.add{type = "tab", caption = "Contents"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
-  contents.style.maximal_width = 1900
-  --contents.style.width = 1900
-  --contents.style.horizontally_stretchable = true
-  --contents.style.horizontally_squashable = false
-  local contents_table = contents.add{type = "table", column_count = 4, style = "bordered_table"}
-  contents_table.style.column_alignments[1] = "center"
-  contents_table.style.column_alignments[2] = "center"
-  contents_table.style.column_alignments[3] = "center"
-  contents_table.style.column_alignments[4] = "center"
-  --contents_table.style.horizontally_stretchable = false
-  --contents_table.style.horizontally_squashable = false
-  local items = game.item_prototypes
-  local fluids = game.fluid_prototypes
+
+
+local update_contents_table = function(contents_table, network)
   for name, counts in pairs (network.item_supply) do
     local item_locale = get_item_icon_and_locale(name)
+
     if item_locale then
+
       local sum = 0
       for depot_id, count in pairs (counts) do
         sum = sum + count
       end
-      if sum > 0 then
-        local flow = contents_table.add{type = "flow"}
-        flow.add{type = "sprite-button", sprite = item_locale.icon, number = sum, style = "slot_button"}
-        local label = flow.add{type = "label", caption = item_locale.locale}
-        --label.style.width = 128
+
+      local flow = contents_table[name]
+      
+      if not flow then
+        flow = contents_table.add{type = "flow", name = name}
+        flow.add{type = "sprite-button", sprite = item_locale.icon, number = sum, style = "slot_button", name = "count"}
         flow.style.vertical_align = "center"
         flow.style.horizontally_stretchable = true
+        local label = flow.add{type = "label", caption = item_locale.locale}
+      else
+        flow.count.number = sum
       end
     end
   end
+  for k, gui in pairs (contents_table.children) do
+    if not network.item_supply[gui.name] then gui.destroy() end
+  end
+end
+
+local refresh_contents_tab = function(player)
+  local contents_tab = get_tab(player, "contents_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_contents_table(contents_tab.contents_table, network)
+end
+
+local add_contents_tab = function(tabbed_pane, network)
+  local contents_tab = tabbed_pane.add{type = "tab", caption = "Contents"}
+  local contents = tabbed_pane.add{type = "scroll-pane",  name = "contents_tab"}
+  contents.style.maximal_width = 1900
+
+  local contents_table = contents.add{type = "table", column_count = 4, style = "bordered_table", name = "contents_table"}
+  contents_table.style.column_alignments[1] = "center"
+  contents_table.style.column_alignments[2] = "center"
+  contents_table.style.column_alignments[3] = "center"
+  contents_table.style.column_alignments[4] = "center"
+
+  update_contents_table(contents_table, network)
+
   tabbed_pane.add_tab(contents_tab, contents)
 end
 
@@ -95,9 +149,12 @@ local add_contents = function(gui, contents)
   
 end
 
+
 local map_size = 70
+
+
 local add_supply_tab = function(tabbed_pane, network)
-  local supply_tab = tabbed_pane.add{type = "tab", caption = "Supply depots"}
+  local supply_tab = tabbed_pane.add{type = "tab", caption = "Supply depots", name = "supply_tab"}
   local contents = tabbed_pane.add{type = "scroll-pane"}
   
   local depots = network.depots.supply
@@ -542,7 +599,8 @@ local add_buffer_tab = function(tabbed_pane, network)
 end
 
 local make_network_gui = function(inner, network)
-  local tabbed_pane = inner.add{type = "tabbed-pane"}
+  
+  local tabbed_pane = inner.add{type = "tabbed-pane", name = "tab_pane"}
   add_contents_tab(tabbed_pane, network)
   add_supply_tab(tabbed_pane, network)
   add_fluid_tab(tabbed_pane, network)
@@ -559,16 +617,11 @@ local refresh_network_gui = function(player, selected_index)
   local frame = gui.road_network_frame
   if not frame then return end
 
-  local networks = road_network.get_networks()
-
-  local index, network
-  for k = 1, selected_index do
-    index, network = next(networks, index)
-  end
+  local network = get_network_by_dropdown_index(selected_index)
 
   if not network then return end
 
-  local inner = frame.add{type = "frame", style = "inside_deep_frame_for_tabs"}
+  local inner = frame.add{type = "frame", style = "inside_deep_frame_for_tabs", name = "inner_frame"}
 
   make_network_gui(inner, network)
 
@@ -599,7 +652,7 @@ local open_gui = function(player, network_index)
   end
   frame.style.maximal_height = player.display_resolution.height * 0.9
 
-  local title_flow = frame.add{type = "flow"}
+  local title_flow = frame.add{type = "flow", name = "title_flow"}
 
   local title = title_flow.add{type = "label", caption = "Road networks", style = "frame_title"}
   title.drag_target = frame
@@ -672,6 +725,12 @@ local on_gui_selection_state_changed = function(event)
 
 end
 
+local on_tick = function(event)
+  for k, player in pairs (game.players) do
+    refresh_contents_tab(player)
+  end
+end
+
 
 
 commands.add_command("toggle-transport-depot-gui", "idk",
@@ -685,6 +744,7 @@ local lib = {}
 
 lib.events =
 {
+  [defines.events.on_tick] = on_tick,
   [defines.events.on_gui_click] = on_gui_click,
   [defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 }
