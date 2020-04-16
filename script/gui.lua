@@ -44,11 +44,13 @@ end
 local get_tab = function(player, tab_name)
   local pane = get_tab_pane(player)
   if not pane then return end
-  game.print("HI")
   return pane[tab_name]
 end
 
-
+local get_selected_tab_index = function(player)
+  local tab_pane = get_tab_pane(player)
+  if tab_pane then return tab_pane.selected_tab_index end
+end
 
 local cache = {}
 local get_item_icon_and_locale = function(name)
@@ -76,6 +78,7 @@ local get_item_icon_and_locale = function(name)
 
 end
 
+local floor = math.floor
 local update_contents_table = function(contents_table, network)
   for name, counts in pairs (network.item_supply) do
     local item_locale = get_item_icon_and_locale(name)
@@ -87,16 +90,30 @@ local update_contents_table = function(contents_table, network)
         sum = sum + count
       end
 
-      local flow = contents_table[name]
-      
-      if not flow then
-        flow = contents_table.add{type = "flow", name = name}
-        flow.add{type = "sprite-button", sprite = item_locale.icon, number = sum, style = "slot_button", name = "count"}
-        flow.style.vertical_align = "center"
-        flow.style.horizontally_stretchable = true
-        local label = flow.add{type = "label", caption = item_locale.locale}
-      else
-        flow.count.number = sum
+      sum = floor(sum)
+
+      if sum > 0 then
+
+        local flow = contents_table[name]
+        
+        if not flow then
+          flow = contents_table.add{type = "flow", name = name}
+          flow.add
+          {
+            type = "sprite-button",
+            sprite = item_locale.icon,
+            number = sum,
+            style = "slot_button",
+            name = "count",
+            tooltip = sum
+          }
+          flow.style.vertical_align = "center"
+          flow.style.horizontally_stretchable = true
+          local label = flow.add{type = "label", caption = item_locale.locale}
+        else
+          flow.count.number = sum
+          flow.count.tooltip = sum
+        end
       end
     end
   end
@@ -106,6 +123,7 @@ local update_contents_table = function(contents_table, network)
 end
 
 local refresh_contents_tab = function(player)
+  if get_selected_tab_index(player) ~= 1 then return end
   local contents_tab = get_tab(player, "contents_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
@@ -147,7 +165,6 @@ local add_contents = function(gui, contents)
   
 end
 
-
 local update_contents = function(gui, contents)
 
   for name, count in pairs (contents) do
@@ -155,9 +172,18 @@ local update_contents = function(gui, contents)
     if item_locale then
       local button = gui[name]
       if not button then
-        button = gui.add{type = "sprite-button", sprite = item_locale.icon, number = count, style = "slot_button", name = name}
+        button = gui.add
+        {
+          type = "sprite-button",
+          sprite = item_locale.icon,
+          number = count,
+          style = "slot_button",
+          name = name,
+          tooltip = count
+        }
       else
         button.number = count
+        button.tooltip = count
       end      
     end
   end
@@ -206,6 +232,7 @@ end
 
 local map_size = 70
 local update_supply_tab = function(depots, gui)
+
   for index, depot in pairs (depots) do
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = gui[index]
@@ -216,13 +243,37 @@ local update_supply_tab = function(depots, gui)
     end
     update_supply_depot_gui(depot, depot_frame)
   end
+
+  for k, gui in pairs (gui.children) do
+    if not depots[gui.name] then
+      gui.destroy()
+    end
+  end
+
 end
 
 local refresh_supply_tab = function(player)
+  if get_selected_tab_index(player) ~= 2 then return end
   local contents_tab = get_tab(player, "supply_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
   update_supply_tab(network.depots.supply, contents_tab.depot_table)
+end
+
+local refresh_fluid_tab = function(player)
+  if get_selected_tab_index(player) ~= 3 then return end
+  local contents_tab = get_tab(player, "fluid_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_supply_tab(network.depots.fluid, contents_tab.depot_table)
+end
+
+local refresh_mining_tab = function(player)
+  if get_selected_tab_index(player) ~= 4 then return end
+  local contents_tab = get_tab(player, "mining_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_supply_tab(network.depots.mining, contents_tab.depot_table)
 end
 
 local add_supply_tab = function(tabbed_pane, network)
@@ -242,14 +293,12 @@ local add_supply_tab = function(tabbed_pane, network)
 
   update_supply_tab(depots, depot_table)
 
-
   tabbed_pane.add_tab(supply_tab, contents)
 end
 
-local map_size = 70
 local add_fluid_tab = function(tabbed_pane, network)
   local fluid_tab = tabbed_pane.add{type = "tab", caption = "Fluid depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "fluid_tab"}
 
   local depots = network.depots.fluid
 
@@ -259,43 +308,10 @@ local add_fluid_tab = function(tabbed_pane, network)
     return
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
 
-  for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = map_size + 8
-    button.style.height = map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = map_size
-    map.style.height = map_size
-    local contents = depot.old_contents
-    if next(contents) then
-      local table = depot_frame.add{type = "table", column_count = 6}
-      table.style.horizontally_stretchable = true
-      add_contents(table, contents)
-    else
-      --depot_frame.add{type = "label", caption = "No contents"}
-    end
-    local pusher = depot_frame.add{type = "empty-widget"}
-    pusher.style.horizontally_stretchable = true
-  end
-
+  update_supply_tab(depots, depot_table)
 
   tabbed_pane.add_tab(fluid_tab, contents)
 end
@@ -303,7 +319,7 @@ end
 local map_size = 70
 local add_mining_tab = function(tabbed_pane, network)
   local mining_tab = tabbed_pane.add{type = "tab", caption = "Mining depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "mining_tab"}
   
   local depots = network.depots.mining
 
@@ -313,104 +329,66 @@ local add_mining_tab = function(tabbed_pane, network)
     return
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
 
-  for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = map_size + 8
-    button.style.height = map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = map_size
-    map.style.height = map_size
-    local contents = depot.old_contents
-    if next(contents) then
-      local table = depot_frame.add{type = "table", column_count = 6}
-      table.style.horizontally_stretchable = true
-      add_contents(table, contents)
-    else
-      --depot_frame.add{type = "label", caption = "No contents"}
-    end
-    local pusher = depot_frame.add{type = "empty-widget"}
-    pusher.style.horizontally_stretchable = true
-  end
-
+  update_supply_tab(depots, depot_table)
 
   tabbed_pane.add_tab(mining_tab, contents)
 end
 
-local map_size = 70
-local add_requester_tab = function(tabbed_pane, network)
-  local requester_tab = tabbed_pane.add{type = "tab", caption = "Request depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
-  
-  local depots = network.depots.request
-  
-  if not depots then
-    requester_tab.enabled = false
-    tabbed_pane.add_tab(requester_tab, contents)
-    return
+local update_fuel_depot_gui = function(depot, gui)
+
+  --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
+  local flow = gui.table
+
+  if not flow then
+    flow = gui.add{type = "table", column_count = 1, style = "bordered_table", name = "table"}
+    flow.style.horizontally_stretchable = true
+  else
+    flow.clear()
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
-  depot_table.style.horizontally_stretchable = true
+  local label = flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
+  label.style.horizontally_stretchable = true
+  flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
+  flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
 
+end
+
+  
+local fuel_map_size = 70
+local update_fuel_tab = function(depots, gui)
+  
   for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = map_size + 8
-    button.style.height = map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = map_size
-    map.style.height = map_size
-    local contents = depot.old_contents
-    if next(contents) then
-      local table = depot_frame.add{type = "table", column_count = 6}
-      table.style.horizontally_stretchable = true
-      add_contents(table, contents)
-    else
-      --depot_frame.add{type = "label", caption = "No contents"}
+    local depot_frame = gui[index]
+    if not depot_frame then
+      depot_frame = gui.add{type = "flow", name = index}
+      depot_frame.style.horizontally_stretchable = true
+      add_depot_map_button(depot, depot_frame, fuel_map_size)
     end
-    local pusher = depot_frame.add{type = "empty-widget"}
-    pusher.style.horizontally_stretchable = true
+    update_fuel_depot_gui(depot, depot_frame)
   end
+    
+  for k, gui in pairs (gui.children) do
+    if not depots[gui.name] then
+      gui.destroy()
+    end
+  end
+end
 
-  tabbed_pane.add_tab(mining_tab, contents)
+local refresh_fuel_tab = function(player)
+  if get_selected_tab_index(player) ~= 5 then return end
+  local contents_tab = get_tab(player, "fuel_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_fuel_tab(network.depots.fuel, contents_tab.depot_table)
 end
 
 local fuel_map_size = 90
 local add_fuel_tab = function(tabbed_pane, network)
   local fuel_tab = tabbed_pane.add{type = "tab", caption = "Fuel depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "fuel_tab"}
   
   local depots = network.depots.fuel
   
@@ -420,48 +398,113 @@ local add_fuel_tab = function(tabbed_pane, network)
     return
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
 
-  for index, depot in pairs (network.depots.fuel) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = fuel_map_size + 8
-    button.style.height = fuel_map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = fuel_map_size
-    map.style.height = fuel_map_size
-    local flow = depot_frame.add{type = "table", column_count = 1, style = "bordered_table"}
-    local label = flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
-    label.style.horizontally_stretchable = true
-    flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
-    flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
-    flow.style.horizontally_stretchable = true
-  end
-
+  update_fuel_tab(depots, depot_table)
 
   tabbed_pane.add_tab(fuel_tab, contents)
 end
 
-local request_map_size = 90
 local floor = math.floor
+local update_request_depot_gui = function(depot, gui)
+
+  local flow = gui.holding_flow
+  if not flow then
+    flow = gui.add{type = "flow", name = "holding_flow"}
+    flow.style.horizontally_stretchable = true
+  else
+    flow.clear()
+  end
+
+  local status_flow = flow.add{type = "table", column_count = 1, style = "bordered_table"}
+  local label = status_flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
+  label.style.horizontally_stretchable = true
+  status_flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
+  status_flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
+  
+  
+  local item = depot.item
+  if item then
+    local item_locale = get_item_icon_and_locale(item)
+    if item_locale then
+      local request_flow = flow.add{type = "table", column_count = 1, style = "bordered_table"}
+      local current_item_flow = request_flow.add{type = "flow"}
+      current_item_flow.style.vertical_align = "center"
+      local current_count = floor(depot:get_current_amount())
+      current_item_flow.add
+      {
+        type = "sprite-button",
+        sprite = item_locale.icon,
+        number = current_count,
+        tooltip = {"", item_locale.locale, ": ", current_count},
+        style = "slot_button"
+      }
+      current_item_flow.add{type = "label", caption = "Current"}    
+      local requested_item_flow = request_flow.add{type = "flow"}
+      requested_item_flow.style.vertical_align = "center"
+      local request_count = depot:get_request_size() * depot:get_drone_item_count()
+      requested_item_flow.add
+      {
+        type = "sprite-button",
+        sprite = item_locale.icon,
+        number = request_count,
+        tooltip = {"", item_locale.locale, ": ", request_count},
+        style = "slot_button"
+      }
+      requested_item_flow.add{type = "label", caption = "Requested"}    
+      --flow.add{type = "sprite-button", sprite = icon, number = count, style = "slot_button"}
+      --local label = flow.add{type = "label", caption = locale}
+      --label.style.width = 128
+      --flow.style.vertical_align = "center"
+    end
+  else
+    flow.add{type = "label", caption = "No request set"}    
+
+  end
+end
+
+local request_map_size = 90
+local update_request_tab = function(depots, gui)
+
+  for index, depot in pairs (depots) do
+    local depot_frame = gui[index]
+    if not depot_frame then
+      depot_frame = gui.add{type = "flow", name = index}
+      depot_frame.style.horizontally_stretchable = true
+      add_depot_map_button(depot, depot_frame, request_map_size)
+    end
+    update_request_depot_gui(depot, depot_frame)
+  end
+    
+  for k, gui in pairs (gui.children) do
+    if not depots[gui.name] then
+      gui.destroy()
+    end
+  end
+
+end
+
+
+local refresh_request_tab = function(player)
+  if get_selected_tab_index(player) ~= 6 then return end
+  local contents_tab = get_tab(player, "request_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_request_tab(network.depots.request, contents_tab.depot_table)
+end
+
+local refresh_buffer_tab = function(player)
+  if get_selected_tab_index(player) ~= 7 then return end
+  local contents_tab = get_tab(player, "buffer_tab")
+  if not contents_tab then return end
+  local network = get_selected_network(player)
+  update_request_tab(network.depots.buffer, contents_tab.depot_table)
+end
+
 local add_request_tab = function(tabbed_pane, network)
   local request_tab = tabbed_pane.add{type = "tab", caption = "Request depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "request_tab"}
   
   local depots = network.depots.request
   if not depots then
@@ -470,89 +513,18 @@ local add_request_tab = function(tabbed_pane, network)
     return
   end
 
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
-
-  for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = request_map_size + 8
-    button.style.height = request_map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = request_map_size
-    map.style.height = request_map_size
-    local flow = depot_frame.add{type = "table", column_count = 1, style = "bordered_table"}
-    local label = flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
-    label.style.horizontally_stretchable = true
-    flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
-    flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
-    flow.style.horizontally_stretchable = true
-    
-    
-    local item = depot.item
-    if item then
-      local item_locale = get_item_icon_and_locale(item)
-      if item_locale then
-        local request_flow = depot_frame.add{type = "table", column_count = 1, style = "bordered_table"}
-        local current_item_flow = request_flow.add{type = "flow"}
-        current_item_flow.style.vertical_align = "center"
-        local current_count = floor(depot:get_current_amount())
-        current_item_flow.add
-        {
-          type = "sprite-button",
-          sprite = item_locale.icon,
-          number = current_count,
-          tooltip = {"", item_locale.locale, ": ", current_count},
-          style = "slot_button"
-        }
-        current_item_flow.add{type = "label", caption = "Current"}    
-        local requested_item_flow = request_flow.add{type = "flow"}
-        requested_item_flow.style.vertical_align = "center"
-        local request_count = depot:get_request_size() * depot:get_drone_item_count()
-        requested_item_flow.add
-        {
-          type = "sprite-button",
-          sprite = item_locale.icon,
-          number = request_count,
-          tooltip = {"", item_locale.locale, ": ", request_count},
-          style = "slot_button"
-        }
-        requested_item_flow.add{type = "label", caption = "Requested"}    
-        --flow.add{type = "sprite-button", sprite = icon, number = count, style = "slot_button"}
-        --local label = flow.add{type = "label", caption = locale}
-        --label.style.width = 128
-        --flow.style.vertical_align = "center"
-      end
-    else
-      depot_frame.add{type = "label", caption = "No request set"}    
-
-    end
-  end
-
+  update_request_tab(depots, depot_table)
 
   tabbed_pane.add_tab(request_tab, contents)
 end
-
 
 local buffer_map_size = 90
 local floor = math.floor
 local add_buffer_tab = function(tabbed_pane, network)
   local buffer_tab = tabbed_pane.add{type = "tab", caption = "Buffer depots"}
-  local contents = tabbed_pane.add{type = "scroll-pane"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "buffer_tab"}
   
   local depots = network.depots.buffer
   if not depots then
@@ -560,80 +532,10 @@ local add_buffer_tab = function(tabbed_pane, network)
     tabbed_pane.add_tab(buffer_tab, contents)
     return
   end
-  
-  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table"}
+
+  local depot_table = contents.add{type = "table", column_count = 2, style = "bordered_table", name = "depot_table"}
   depot_table.style.horizontally_stretchable = true
-
-  for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = depot_table.add{type = "flow"}
-    depot_frame.style.horizontally_stretchable = true
-    local button = depot_frame.add{type = "button", name = "open_depot_map_"..index}
-    button.style.width = request_map_size + 8
-    button.style.height = request_map_size + 8
-    button.style.horizontal_align = "center"
-    button.style.vertical_align = "center"
-    button.style.padding = {0,0,0,0}
-    local entity = depot.entity
-    local map = button.add
-    {
-      type = "minimap",
-      position = entity.position,
-      surface_index = entity.surface.index,
-      force = entity.force.name,
-      zoom = 1,
-      ignored_by_interaction = true
-    }
-    map.style.width = request_map_size
-    map.style.height = request_map_size
-    local flow = depot_frame.add{type = "table", column_count = 1, style = "bordered_table"}
-    local label = flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
-    label.style.horizontally_stretchable = true
-    flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
-    flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
-    flow.style.horizontally_stretchable = true
-    
-    
-    local item = depot.item
-    if item then
-      local item_locale = get_item_icon_and_locale(item)
-      if item_locale then
-        local request_flow = depot_frame.add{type = "table", column_count = 1, style = "bordered_table"}
-        local current_item_flow = request_flow.add{type = "flow"}
-        current_item_flow.style.vertical_align = "center"
-        local current_count = floor(depot:get_current_amount())
-        current_item_flow.add
-        {
-          type = "sprite-button",
-          sprite = item_locale.icon,
-          number = current_count,
-          tooltip = {"", item_locale.locale, ": ", current_count},
-          style = "slot_button"
-        }
-        current_item_flow.add{type = "label", caption = "Current"}    
-        local requested_item_flow = request_flow.add{type = "flow"}
-        requested_item_flow.style.vertical_align = "center"
-        local request_count = depot:get_request_size() * depot:get_drone_item_count()
-        requested_item_flow.add
-        {
-          type = "sprite-button",
-          sprite = item_locale.icon,
-          number = request_count,
-          tooltip = {"", item_locale.locale, ": ", request_count},
-          style = "slot_button"
-        }
-        requested_item_flow.add{type = "label", caption = "Requested"}    
-        --flow.add{type = "sprite-button", sprite = icon, number = count, style = "slot_button"}
-        --local label = flow.add{type = "label", caption = locale}
-        --label.style.width = 128
-        --flow.style.vertical_align = "center"
-      end
-    else
-      depot_frame.add{type = "label", caption = "No request set"}    
-
-    end
-  end
-
+  update_request_tab(depots, depot_table)
 
   tabbed_pane.add_tab(buffer_tab, contents)
 end
@@ -766,10 +668,15 @@ local on_gui_selection_state_changed = function(event)
 end
 
 local on_tick = function(event)
-  if game.tick % 10 ~= 0 then return end
+  if game.tick % 60 ~= 0 then return end
   for k, player in pairs (game.players) do
     refresh_contents_tab(player)
     refresh_supply_tab(player)
+    refresh_fluid_tab(player)
+    refresh_mining_tab(player)
+    refresh_fuel_tab(player)
+    refresh_request_tab(player)
+    refresh_buffer_tab(player)
   end
 end
 
