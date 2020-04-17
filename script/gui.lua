@@ -124,35 +124,37 @@ local update_contents_table = function(contents_table, network, filter)
     local item_locale = get_item_icon_and_locale(name)
 
     if item_locale then
-
-      local sum = 0
-      for depot_id, count in pairs (counts) do
-        sum = sum + count
-      end
-
-      sum = floor(sum)
-
+      local visible = (not filter or filter.name == name)
       local flow = contents_table[name]
-      
-      if not flow then
-        flow = contents_table.add{type = "flow", name = name}
-        flow.add
-        {
-          type = "sprite-button",
-          sprite = item_locale.icon,
-          number = sum,
-          style = "slot_button",
-          name = "count",
-          tooltip = sum
-        }
-        flow.style.vertical_align = "center"
-        flow.style.horizontally_stretchable = true
-        local label = flow.add{type = "label", caption = item_locale.locale}
-      else
-        flow.count.number = sum
-        flow.count.tooltip = sum
+      if visible then
+        local sum = 0
+        for depot_id, count in pairs (counts) do
+          sum = sum + count
+        end
+
+        sum = floor(sum)
+
+        
+        if not flow then
+          flow = contents_table.add{type = "flow", name = name}
+          flow.add
+          {
+            type = "sprite-button",
+            sprite = item_locale.icon,
+            number = sum,
+            style = "slot_button",
+            name = "count",
+            tooltip = sum
+          }
+          flow.style.vertical_align = "center"
+          flow.style.horizontally_stretchable = true
+          local label = flow.add{type = "label", caption = item_locale.locale}
+        else
+          flow.count.number = sum
+          flow.count.tooltip = sum
+        end
       end
-      flow.visible = (not filter or filter.name == name)
+      if flow then flow.visible = visible end
     end
   end
   for k, gui in pairs (contents_table.children) do
@@ -253,8 +255,11 @@ local update_supply_depot_gui = function(depot, gui, filter)
   if not holding_table then
     holding_table = gui.add{type = "table", column_count = 5, name = "table"}
   end
-  update_contents(holding_table, depot.old_contents)
-  gui.visible = (not filter) or depot.old_contents[filter.name]
+  local visible = (not filter) or depot.old_contents[filter.name]
+  if visible then
+    update_contents(holding_table, depot.old_contents)
+  end
+  gui.visible = visible
 end
 
 local map_size = 64 * 3
@@ -444,9 +449,14 @@ local update_request_depot_gui = function(depot, gui, filter)
     flow.clear()
   end
 
+  local item = depot.item
+  local visible = (not filter) or filter.name == item
+  gui.visible = visible
+
+  if not visible then return end
+
   local status_flow = flow.add{type = "table", column_count = 1, style = "bordered_table"}
   
-  local item = depot.item
   if item then
     local item_locale = get_item_icon_and_locale(item)
     if item_locale then
@@ -491,7 +501,6 @@ local update_request_depot_gui = function(depot, gui, filter)
   status_flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
   
 
-  gui.visible = (not filter) or filter.name == item
 end
 
 local request_map_size = 64 * 3
