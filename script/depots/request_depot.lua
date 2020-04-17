@@ -138,7 +138,7 @@ function request_depot:get_minimum_request_size()
   if current_amount < stack_size and drone_count == 0 then 
     return 1
   end
-  local request_size = self:request_size()
+  local request_size = self:get_request_size()
   if current_amount < request_size then
     return stack_size
   end

@@ -226,7 +226,7 @@ end
 
 function transport_drone:process_failed_command()
 
-  if (self.failed_command_count or 0) < 4 then
+  if (self.failed_command_count or 0) < 2 then
     self.failed_command_count = (self.failed_command_count or 0) + 1
     self:retry_command()
     return
