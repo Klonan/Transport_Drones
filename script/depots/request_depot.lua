@@ -438,7 +438,6 @@ function request_depot:remove_from_network()
 end
 
 function request_depot:on_removed()
-  self:remove_from_network()
   self:suicide_all_drones()
   self.corpse.destroy()
 end

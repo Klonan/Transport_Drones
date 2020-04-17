@@ -146,7 +146,6 @@ function fluid_depot:remove_from_network()
 end
 
 function fluid_depot:on_removed()
-  self:remove_from_network()
   self.corpse.destroy()
 end
 

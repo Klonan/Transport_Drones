@@ -523,7 +523,6 @@ function buffer_depot:remove_from_network()
 end
 
 function buffer_depot:on_removed()
-  self:remove_from_network()
   self:suicide_all_drones()
   self.corpse.destroy()
 end

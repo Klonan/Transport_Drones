@@ -120,7 +120,6 @@ end
 
 function supply_depot:on_removed(event)
 
-  self:remove_from_network()
   self.corpse.destroy()
   self.assembler.destructible = true
   

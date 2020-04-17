@@ -174,8 +174,6 @@ function fuel_depot:remove_fuel(amount)
 end
 
 function fuel_depot:on_removed()
-  self:remove_from_network()
-  --self:suicide_all_drones()
   self.corpse.destroy()
 end
 

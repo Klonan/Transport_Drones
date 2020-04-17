@@ -118,7 +118,6 @@ function mining_depot:remove_from_network()
 end
 
 function mining_depot:on_removed()
-  self:remove_from_network()
   self.corpse.destroy()
 end
 
