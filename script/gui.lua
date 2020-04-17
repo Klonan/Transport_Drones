@@ -26,17 +26,20 @@ local get_network_by_dropdown_index = function(selected_index)
   return network
 end
 
-local get_selected_network = function(player)
+local get_frame = function(player)
   local gui = player.gui.screen
-  local frame = gui.road_network_frame
+  return gui.road_network_frame
+end
+
+local get_selected_network = function(player)
+  local frame = get_frame(player)
   if not frame then return end
   local index = frame.title_flow.road_network_drop_down.selected_index
   return get_network_by_dropdown_index(index)
 end
 
 local get_tab_pane = function(player)
-  local gui = player.gui.screen
-  local frame = gui.road_network_frame
+  local frame = get_frame(player)
   if not frame then return end
   return frame.inner_frame.tab_pane
 end
@@ -53,16 +56,14 @@ local get_selected_tab_index = function(player)
 end
 
 local get_filter_value = function(player)
-  local gui = player.gui.screen
-  local frame = gui.road_network_frame
+  local frame = get_frame(player)
   if not frame then return end
   --game.print(serpent.line(frame.inner_frame.subheader_frame.depot_filter_button.elem_value))
   return frame.inner_frame.subheader_frame.depot_filter_button.elem_value
 end
 
 local set_filter_value = function(player, value)
-  local gui = player.gui.screen
-  local frame = gui.road_network_frame
+  local frame = get_frame(player)
   if not frame then return end
 
   frame.inner_frame.subheader_frame.depot_filter_button.elem_value = value
@@ -171,7 +172,7 @@ local refresh_contents_tab = function(player)
 end
 
 local add_contents_tab = function(tabbed_pane, network)
-  local contents_tab = tabbed_pane.add{type = "tab", caption = "Contents"}
+  local contents_tab = tabbed_pane.add{type = "tab", caption = {"contents"}}
   local contents = tabbed_pane.add{type = "scroll-pane",  name = "contents_tab"}
   contents.style.maximal_width = 1900
 
@@ -311,7 +312,7 @@ local refresh_mining_tab = function(player)
 end
 
 local add_supply_tab = function(tabbed_pane, network)
-  local supply_tab = tabbed_pane.add{type = "tab", caption = "Supply depots"}
+  local supply_tab = tabbed_pane.add{type = "tab", caption = {"supply-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "supply_tab"}
   
   local depots = network.depots.supply
@@ -331,7 +332,7 @@ local add_supply_tab = function(tabbed_pane, network)
 end
 
 local add_fluid_tab = function(tabbed_pane, network)
-  local fluid_tab = tabbed_pane.add{type = "tab", caption = "Fluid depots"}
+  local fluid_tab = tabbed_pane.add{type = "tab", caption = {"fluid-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "fluid_tab"}
 
   local depots = network.depots.fluid
@@ -351,7 +352,7 @@ local add_fluid_tab = function(tabbed_pane, network)
 end
 
 local add_mining_tab = function(tabbed_pane, network)
-  local mining_tab = tabbed_pane.add{type = "tab", caption = "Mining depots"}
+  local mining_tab = tabbed_pane.add{type = "tab", caption = {"mining-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "mining_tab"}
   
   local depots = network.depots.mining
@@ -382,10 +383,10 @@ local update_fuel_depot_gui = function(depot, gui)
     flow.clear()
   end
 
-  local label = flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
+  local label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}}
   label.style.horizontally_stretchable = true
-  flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
-  flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
+  flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}}
+  flow.add{type = "label", caption = {"available-fuel", math.floor(depot:get_fuel_amount())}}
 
 end
 
@@ -419,7 +420,7 @@ local refresh_fuel_tab = function(player)
 end
 
 local add_fuel_tab = function(tabbed_pane, network)
-  local fuel_tab = tabbed_pane.add{type = "tab", caption = "Fuel depots"}
+  local fuel_tab = tabbed_pane.add{type = "tab", caption = {"fuel-depots-tab"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "fuel_tab"}
   
   local depots = network.depots.fuel
@@ -472,7 +473,7 @@ local update_request_depot_gui = function(depot, gui, filter)
         tooltip = {"", item_locale.locale, ": ", current_count},
         style = "slot_button"
       }
-      current_item_flow.add{type = "label", caption = "Current"}    
+      current_item_flow.add{type = "label", caption = {"current"}}    
       local requested_item_flow = status_flow.add{type = "flow"}
       requested_item_flow.style.vertical_align = "center"
       local request_count = depot:get_request_size() * depot:get_drone_item_count()
@@ -484,21 +485,21 @@ local update_request_depot_gui = function(depot, gui, filter)
         tooltip = {"", item_locale.locale, ": ", request_count},
         style = "slot_button"
       }
-      requested_item_flow.add{type = "label", caption = "Requested"}    
+      requested_item_flow.add{type = "label", caption = {"requested"}}    
       --flow.add{type = "sprite-button", sprite = icon, number = count, style = "slot_button"}
       --local label = flow.add{type = "label", caption = locale}
       --label.style.width = 128
       --flow.style.vertical_align = "center"
     end
   else
-    status_flow.add{type = "label", caption = "No request set"}    
+    status_flow.add{type = "label", caption = {"no-request-set"}}    
 
   end
   
-  local label = status_flow.add{type = "label", caption = "Active Drones: "..depot:get_active_drone_count()}
+  local label = status_flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}}
   label.style.horizontally_stretchable = true
-  status_flow.add{type = "label", caption = "Available Drones: "..depot:get_drone_item_count()}
-  status_flow.add{type = "label", caption = "Available Fuel: "..math.floor(depot:get_fuel_amount())}
+  status_flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}}
+  status_flow.add{type = "label", caption = {"available-fuel", math.floor(depot:get_fuel_amount())}}
   
 
 end
@@ -542,7 +543,7 @@ local refresh_buffer_tab = function(player)
 end
 
 local add_request_tab = function(tabbed_pane, network)
-  local request_tab = tabbed_pane.add{type = "tab", caption = "Request depots"}
+  local request_tab = tabbed_pane.add{type = "tab", caption = {"request-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "request_tab"}
   
   local depots = network.depots.request
@@ -562,7 +563,7 @@ end
 local buffer_map_size = 64 * 3
 local floor = math.floor
 local add_buffer_tab = function(tabbed_pane, network)
-  local buffer_tab = tabbed_pane.add{type = "tab", caption = "Buffer depots"}
+  local buffer_tab = tabbed_pane.add{type = "tab", caption = {"buffer-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "buffer_tab"}
   
   local depots = network.depots.buffer
@@ -594,9 +595,8 @@ local make_network_gui = function(inner, network)
 end
 
 local refresh_network_gui = function(player, selected_index)
-  local gui = player.gui.screen
 
-  local frame = gui.road_network_frame
+  local frame = get_frame(player)
   if not frame then return end
 
   local network = get_network_by_dropdown_index(selected_index)
@@ -608,7 +608,7 @@ local refresh_network_gui = function(player, selected_index)
   subheader.style.vertical_align = "center"
   local pusher = subheader.add{type = "empty-widget"}
   pusher.style.horizontally_stretchable = true
-  subheader.add{type = "label", caption = "Filter: "}
+  subheader.add{type = "label", caption = {"filter"}}
   local filter = subheader.add{type = "choose-elem-button", name = "depot_filter_button", elem_type = "signal"}
 
   make_network_gui(inner, network)
@@ -627,8 +627,7 @@ end
 
 local refresh_gui = function(player)
 
-  local gui = player.gui.screen
-  local frame = gui.road_network_frame
+  local frame = get_frame(player)
   if not frame then return end
 
   refresh_contents_tab(player)
@@ -641,6 +640,7 @@ local refresh_gui = function(player)
 
 end
 
+local title_caption = {"road-networks"}
 local open_gui = function(player, network_index)
   local gui = player.gui.screen
 
@@ -654,7 +654,7 @@ local open_gui = function(player, network_index)
 
   local title_flow = frame.add{type = "flow", name = "title_flow"}
 
-  local title = title_flow.add{type = "label", caption = "Road networks", style = "frame_title"}
+  local title = title_flow.add{type = "label", caption = title_caption, style = "frame_title"}
   title.drag_target = frame
 
   local pusher = title_flow.add{type = "empty-widget", style = "draggable_space_header"}
@@ -673,7 +673,7 @@ local open_gui = function(player, network_index)
     count = count + 1
     if not selected then selected = count end
     local size = network_size(network)
-    drop_down.add_item("Network #"..count.." - "..size.." depots")
+    drop_down.add_item({"road-network-size", count, size})
     if size > big then
       big = size
       selected = count
@@ -777,7 +777,24 @@ local on_gui_closed = function(event)
   end
 end
 
+local toggle_gui = function(event)
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
 
+  local frame = get_frame(player)
+  if frame then
+    frame.destroy()
+    return
+  end
+
+  open_gui(player)
+
+end
+
+local on_lua_shortcut = function(event)
+  if event.prototype_name ~= "transport-drones-gui" then return end
+  toggle_gui(event)
+end
 
 commands.add_command("toggle-transport-depot-gui", "idk",
 function(command)
@@ -795,7 +812,9 @@ lib.events =
   [defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
   [defines.events.on_gui_selected_tab_changed] = on_gui_selected_tab_changed,
   [defines.events.on_gui_elem_changed] = on_gui_elem_changed,
-  [defines.events.on_gui_closed] = on_gui_closed
+  [defines.events.on_gui_closed] = on_gui_closed,
+  ["toggle-road-network-gui"] = toggle_gui,
+  [defines.events.on_lua_shortcut] = on_lua_shortcut
 }
 
 return lib
