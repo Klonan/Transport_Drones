@@ -169,31 +169,30 @@ function request_depot:make_request()
   if not supply_depots then return end
 
   local request_size = self:get_request_size()
-  local minimum_size = self:get_minimum_request_size()
   local stack_size = self:get_stack_size()
-
+  
   local node_position = self.node_position
   local heuristic = function(depot, count)
     local amount = min(count, request_size)
-    if amount < minimum_size then
-      return big
-    end
     return distance(depot.node_position, node_position) - ((amount / request_size) * item_heuristic_bonus)
   end
   
+  local minimum_size = self:get_minimum_request_size()
   local best_buffer
   local best_index
   local lowest_score = big
   local get_depot = self.get_depot
     
   for depot_index, count in pairs (supply_depots) do
-    local depot = get_depot(depot_index)
-    if depot then
-      local score = heuristic(depot, count)
-      if score < lowest_score then
-        best_buffer = depot
-        lowest_score = score
-        best_index = depot_index
+    if count >= minimum_size then
+      local depot = get_depot(depot_index)
+      if depot then
+        local score = heuristic(depot, count)
+        if score < lowest_score then
+          best_buffer = depot
+          lowest_score = score
+          best_index = depot_index
+        end
       end
     end
   end
