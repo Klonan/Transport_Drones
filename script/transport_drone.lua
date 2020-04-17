@@ -72,46 +72,16 @@ end
 
 
 local player_leave_drone = function(player)
-  player.exit_cutscene()
 
   local drone = script_data.riding_players[player.index]
   if not drone then return end
 
-  player.teleport(drone.entity.position)
-  if player.character then
-    player.character.active = true
-  end
-  drone.riding_player = nil
   script_data.riding_players[player.index] = nil
   drone:update_speed()
 
 end
 
 local player_enter_drone = function(player, drone)
-
-  local character = player.character
-  if character then
-    character.active = false
-    character.teleport({1000000, 1000000})
-  end
-
-  local alt_mode = player.game_view_settings.show_entity_info
-
-  player.set_controller
-  {
-    type = defines.controllers.cutscene,
-    waypoints =
-    {
-      {
-        target = drone.entity,
-        time_to_wait = 2 ^ 31,
-        transition_time = 0,
-      }
-    },
-    final_transition_time = 2 ^ 21
-  }
-
-  player.game_view_settings.show_entity_info = alt_mode
 
   script_data.riding_players[player.index] = drone
   drone.riding_player = player.index
@@ -651,7 +621,7 @@ end
 local follow_drone_hotkey = function(event)
   local player = game.get_player(event.player_index)
 
-  if player.controller_type == defines.controllers.cutscene then
+  if script_data.riding_players[player.index] then
     player_leave_drone(player)
     return
   end
@@ -689,6 +659,29 @@ local follow_drone_hotkey = function(event)
 
 end
 
+local floor = math.floor
+local to_direction = function(orientation)
+  local direction = floor(8 * (orientation + (1 / 16)))
+  if direction >= 8 then direction = 0 end
+  return direction
+end
+local on_tick = function(event)
+  if not next(script_data.riding_players) then return end
+  local players = game.players
+  for player_index, drone in pairs (script_data.riding_players) do
+    local player = players[player_index]
+    if player and player.valid then
+      if drone.entity and drone.entity.valid then
+        player.teleport(drone.entity.position)
+        if player.character then
+          --player.character.walking_state = {walking = false, direction = to_direction(drone.entity.orientation)}
+          player.character.direction = to_direction(drone.entity.orientation)
+        end
+      end
+    end
+  end
+end
+
 transport_drone.events =
 {
   --[defines.events.on_built_entity] = on_built_entity,
@@ -703,8 +696,9 @@ transport_drone.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
 
   [defines.events.on_ai_command_completed] = on_ai_command_completed,
-
-  ["follow-drone"] = follow_drone_hotkey
+  
+  ["follow-drone"] = follow_drone_hotkey,
+  [defines.events.on_tick] = on_tick,
 }
 
 transport_drone.on_load = function()
