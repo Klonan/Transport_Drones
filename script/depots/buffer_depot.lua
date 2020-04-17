@@ -389,10 +389,16 @@ end
 
 function buffer_depot:get_minimum_request_size()
   local stack_size = self:get_stack_size()
-  if self:get_current_amount() < stack_size then 
+  local drone_count = self:get_active_drone_count()
+  local current_amount = self:get_current_amount()
+  if current_amount < stack_size and drone_count == 0 then 
     return 1
   end
-  return stack_size
+  local request_size = self:request_size()
+  if current_amount < request_size then
+    return stack_size
+  end
+  return request_size
 end
 
 function buffer_depot:should_order(plus_one)
