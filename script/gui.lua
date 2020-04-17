@@ -689,6 +689,7 @@ local open_gui = function(player, network_index)
   refresh_network_gui(player, selected)
 
   frame.auto_center = true
+  player.opened = frame
 
 end
 
@@ -767,6 +768,15 @@ local on_gui_selected_tab_changed = function(event)
 
 end
 
+local on_gui_closed = function(event)
+  local element = event.element
+  if not (element and element.valid) then return end
+  if element.name == "road_network_frame" then
+    element.destroy()
+    return
+  end
+end
+
 
 
 commands.add_command("toggle-transport-depot-gui", "idk",
@@ -785,6 +795,7 @@ lib.events =
   [defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
   [defines.events.on_gui_selected_tab_changed] = on_gui_selected_tab_changed,
   [defines.events.on_gui_elem_changed] = on_gui_elem_changed,
+  [defines.events.on_gui_closed] = on_gui_closed
 }
 
 return lib
