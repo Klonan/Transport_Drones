@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.0
+Date: 2020-04-18
+  Changes:
+    - Added a GUI to see road network status. Contents, depots, etc.
+    - Internally refactored how depots are added to road networks.
+    - Change how 'riding' drones works, now you are just teleported each tick. This is to prevent issue like construction robots flying off the map.
+    - Road network data will now be reset and recalculated each time the config changes.
+    - Minimum request count determination is changed slightly. This should help prevent the situation of many drones going to pick up tiny amounts of items.
+---------------------------------------------------------------------------------------------------
 Version: 0.4.1
 Date: 2020-04-15
   Changes:
