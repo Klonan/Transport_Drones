@@ -326,6 +326,7 @@ road_network.add_node = function(surface, x, y)
               local larger_id = smaller_id == neighbor.id and other_neighbor.id or neighbor.id
               set_node_ids(smaller_node_set, larger_id) 
               new_node_id = larger_id
+              clear_network(smaller_id)
             end
           end
 
@@ -476,6 +477,50 @@ local rect_distance = function(a, b)
 end
 local sort = table.sort
 
+local prune_networks = function()
+  local valid = {}
+  for index, surface_map in pairs(script_data.node_map) do
+    for x, y_map in pairs (surface_map) do
+      for y, id in pairs (y_map) do
+        if not valid[id] then
+          valid[id] = true
+        end
+      end
+    end
+  end
+
+  for id, network in pairs (script_data.networks) do
+    if not valid[id] then
+      clear_network(id)
+    end
+  end
+
+end
+
+local floor = math.floor
+local reset = function()
+
+  local profiler = game.create_profiler()
+
+  script_data.node_map = {}
+  script_data.networks = {}
+  script_data.id_number = 0
+
+  local add_node = road_network.add_node
+
+  for surface_index, surface in pairs (game.surfaces) do
+    local index = surface.index
+    local tiles = surface.find_tiles_filtered{name = "transport-drone-road"}
+    for k, tile in pairs (tiles) do
+      local tile_position = tile.position
+      add_node(index, tile_position.x, tile_position.y)
+    end
+  end
+
+  game.print({"", "Reset road network", profiler})
+
+end
+
 
 road_network.get_depots_by_distance = function(id, category, node_position)
   local sort_function = function(depot_a, depot_b)
@@ -528,15 +573,8 @@ road_network.on_load = function()
 end
 
 road_network.on_configuration_changed = function()
-  for id, network in pairs (script_data.networks) do
-    --We reinit everything anyway, its simple enough.
-    local new_network =
-    {
-      item_supply = {},
-      depots = {}
-    }
-    script_data.networks[id] = new_network
-  end
+
+  reset()
 
 end
 
