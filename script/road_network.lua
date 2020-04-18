@@ -325,7 +325,7 @@ road_network.add_node = function(surface, x, y)
             if neighbor.id ~= other_neighbor.id then
               local smaller_node_set = accumulate_smaller_node(surface, fx, fy, nx, ny)
               local smaller_id = next(smaller_node_set).id
-              local larger_id = smaller_id == neighbor.id and other_neighbor.id or neighbor.id
+              local larger_id = (smaller_id == neighbor.id and other_neighbor.id) or neighbor.id
               set_node_ids(smaller_node_set, larger_id) 
               new_node_id = larger_id
               clear_network(smaller_id)

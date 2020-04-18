@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.1
+Date: 2020-04-18
+  Changes:
+    - Fix GUI size with large display scales.
+    - Fix error clearing networks when after merging networks.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: 2020-04-18
   Changes:
