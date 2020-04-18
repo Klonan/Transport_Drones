@@ -517,7 +517,7 @@ local reset = function()
     end
   end
 
-  game.print({"", "Reset road network", profiler})
+  game.print({"", "Reset road network - ", profiler})
 
 end
 
