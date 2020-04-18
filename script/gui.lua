@@ -685,6 +685,11 @@ local refresh_gui = function(player, force)
   local frame = get_frame(player)
   if not frame then return end
 
+  local network = get_selected_network(player)
+  if not network then
+    close_gui(player)
+  end
+
   refresh_contents_tab(player, force)
   refresh_supply_tab(player, force)
   refresh_fluid_tab(player, force)
