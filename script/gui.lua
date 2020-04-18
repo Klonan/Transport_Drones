@@ -163,8 +163,8 @@ local update_contents_table = function(contents_table, network, filter)
   end
 end
 
-local refresh_contents_tab = function(player)
-  if get_selected_tab_index(player) ~= 1 then return end
+local refresh_contents_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 1 then return end
   local contents_tab = get_tab(player, "contents_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
@@ -287,24 +287,24 @@ local update_supply_tab = function(depots, gui, filter)
 
 end
 
-local refresh_supply_tab = function(player)
-  if get_selected_tab_index(player) ~= 2 then return end
+local refresh_supply_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 2 then return end
   local contents_tab = get_tab(player, "supply_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
   update_supply_tab(network.depots.supply, contents_tab.depot_table, get_filter_value(player))
 end
 
-local refresh_fluid_tab = function(player)
-  if get_selected_tab_index(player) ~= 3 then return end
+local refresh_fluid_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 3 then return end
   local contents_tab = get_tab(player, "fluid_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
   update_supply_tab(network.depots.fluid, contents_tab.depot_table, get_filter_value(player))
 end
 
-local refresh_mining_tab = function(player)
-  if get_selected_tab_index(player) ~= 4 then return end
+local refresh_mining_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 4 then return end
   local contents_tab = get_tab(player, "mining_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
@@ -425,8 +425,8 @@ local update_fuel_tab = function(depots, gui)
   end
 end
 
-local refresh_fuel_tab = function(player)
-  if get_selected_tab_index(player) ~= 5 then return end
+local refresh_fuel_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 5 then return end
   local contents_tab = get_tab(player, "fuel_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
@@ -460,8 +460,6 @@ local update_request_depot_gui = function(depot, gui, filter)
   if not flow then
     flow = gui.add{type = "table", column_count = 1, style = "bordered_table", name = "holding_flow"}
     flow.style.horizontally_stretchable = true
-  else
-    --flow.clear()
   end
 
   local item = depot.item
@@ -583,16 +581,16 @@ local update_request_tab = function(depots, gui, filter)
 end
 
 
-local refresh_request_tab = function(player)
-  if get_selected_tab_index(player) ~= 6 then return end
+local refresh_request_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 6 then return end
   local contents_tab = get_tab(player, "request_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
   update_request_tab(network.depots.request, contents_tab.depot_table, get_filter_value(player))
 end
 
-local refresh_buffer_tab = function(player)
-  if get_selected_tab_index(player) ~= 7 then return end
+local refresh_buffer_tab = function(player, force)
+  if not force and get_selected_tab_index(player) ~= 7 then return end
   local contents_tab = get_tab(player, "buffer_tab")
   if not contents_tab then return end
   local network = get_selected_network(player)
@@ -682,18 +680,18 @@ local close_gui = function(player)
   end
 end
 
-local refresh_gui = function(player)
+local refresh_gui = function(player, force)
 
   local frame = get_frame(player)
   if not frame then return end
 
-  refresh_contents_tab(player)
-  refresh_supply_tab(player)
-  refresh_fluid_tab(player)
-  refresh_mining_tab(player)
-  refresh_fuel_tab(player)
-  refresh_request_tab(player)
-  refresh_buffer_tab(player)
+  refresh_contents_tab(player, force)
+  refresh_supply_tab(player, force)
+  refresh_fluid_tab(player, force)
+  refresh_mining_tab(player, force)
+  refresh_fuel_tab(player, force)
+  refresh_request_tab(player, force)
+  refresh_buffer_tab(player, force)
 
 end
 
@@ -720,6 +718,8 @@ local open_gui = function(player, network_index)
   pusher.drag_target = frame
 
   local drop_down = title_flow.add{type = "drop-down", name = "road_network_drop_down"}
+
+  title_flow.add{type = "sprite-button", style = "close_button", sprite = "utility/close_white", name = "close_road_network_gui"}
   
   local networks = road_network.get_networks()
   
@@ -746,7 +746,7 @@ local open_gui = function(player, network_index)
   refresh_network_gui(player, selected)
 
   frame.auto_center = true
-  player.opened = frame
+  --player.opened = frame
 
 end
 
@@ -764,6 +764,9 @@ local on_gui_click = function(event)
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
 
+  if not get_frame(player) then return end
+  if gui.get_mod() ~= "Transport_Drones" then return end
+
   if gui.name:find("open_depot_map_") then
     local depot_index = gui.name:sub(("open_depot_map_"):len() + 1)
     local depot = depot_common.get_depot_by_index(depot_index)
@@ -773,6 +776,11 @@ local on_gui_click = function(event)
     end
     return
   end
+  
+  if gui.name == "close_road_network_gui" then
+    close_gui(player)
+    return
+  end
 
   if gui.type == "sprite-button" then
     local sprite = gui.sprite
@@ -780,7 +788,8 @@ local on_gui_click = function(event)
       local result = split(sprite)
       local signal = {type = result[1], name = result[2]}
       set_filter_value(player, signal)
-      refresh_gui(player)
+      refresh_gui(player, true)
+      return
     end
   end
 
@@ -812,7 +821,7 @@ local on_gui_elem_changed = function(event)
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
 
-  refresh_gui(player)
+  refresh_gui(player, true)
 
 end
 
