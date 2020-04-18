@@ -305,44 +305,37 @@ road_network.add_node = function(surface, x, y)
   local new_node_id
   local rx, ry
   local checked = {}
-  for k, offset in pairs(neighbor_offsets) do
 
-    checked[k] = true
-    
+  for k, offset in pairs (neighbor_offsets) do
     local fx, fy = x + offset[1], y + offset[2]
     local neighbor = get_node(surface, fx, fy)
-    
     if neighbor then
-
       if not new_node_id then
         new_node_id = neighbor.id
         rx, ry = fx, fy
-      end
-
-      for j, offset in pairs(neighbor_offsets) do
-        if not checked[j] then
-
-          local nx, ny = x + offset[1], y + offset[2]
-          local other_neighbor = get_node(surface, nx, ny)
-
-          if other_neighbor then
-            if new_node_id ~= other_neighbor.id then
-              local smaller_node_set = accumulate_smaller_node(surface, rx, ry, nx, ny)
-              local smaller_id = next(smaller_node_set).id
-              if smaller_id == new_node_id then
-                new_node_id = other_neighbor.id
-                rx = nx
-                ry = ny
-              end
-              set_node_ids(smaller_node_set, new_node_id) 
-              clear_network(smaller_id)
-            end
-          end
-
+      elseif neighbor.id ~= new_node_id then
+        local smaller_node_set = accumulate_smaller_node(surface, rx, ry, fx, fy)
+        local smaller_id = next(smaller_node_set).id
+        if smaller_id == new_node_id then
+          new_node_id = neighbor.id
+          rx, ry = fx, fy
         end
       end
     end
-  end  
+  end
+
+  for k, offset in pairs (neighbor_offsets) do
+    local fx, fy = x + offset[1], y + offset[2]
+    local neighbor = get_node(surface, fx, fy)
+    if neighbor then
+      local neighbor_id = neighbor.id
+      if neighbor_id ~= new_node_id then
+        local nodes = accumulate_nodes(surface, fx, fy)
+        set_node_ids(nodes, new_node_id)
+        clear_network(neighbor_id)
+      end
+    end
+  end
 
   local surface_map = script_data.node_map[surface]
   if not surface_map then
