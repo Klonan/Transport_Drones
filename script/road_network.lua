@@ -269,6 +269,8 @@ local clear_network = function(id)
   --print("Clearing "..id)
   local network = script_data.networks[id]
 
+  if not network then return end
+
   for category, depots in pairs (network.depots) do
     for id, depot in pairs (depots) do
       depot:remove_from_network()
