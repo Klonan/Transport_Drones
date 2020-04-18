@@ -379,15 +379,29 @@ local update_fuel_depot_gui = function(depot, gui)
   if not flow then
     flow = gui.add{type = "table", column_count = 1, style = "bordered_table", name = "table"}
     flow.style.horizontally_stretchable = true
+  end
+  
+  local active_drone_label = flow.active_drone_label
+  if not active_drone_label then
+    active_drone_label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}, name = "active_drone_label"}
+    active_drone_label.style.horizontally_stretchable = true
   else
-    flow.clear()
+    active_drone_label.caption = {"active-drones", depot:get_active_drone_count()}
   end
 
-  local label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}}
-  label.style.horizontally_stretchable = true
-  flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}}
-  flow.add{type = "label", caption = {"available-fuel", math.floor(depot:get_fuel_amount())}}
+  local available_drone_label = flow.available_drone_label
+  if not available_drone_label then
+    available_drone_label = flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}, name = "available_drone_label"}
+  else
+    available_drone_label.caption = {"available-drones", depot:get_drone_item_count()}
+  end
 
+  local fuel_label = flow.fuel_label
+  if not fuel_label then
+    fuel_label = flow.add{type = "label", caption = {"available-fuel", floor(depot:get_fuel_amount())}, name = "fuel_label"}
+  else
+    fuel_label.caption = {"available-fuel", floor(depot:get_fuel_amount())}
+  end
 end
 
   
@@ -444,10 +458,10 @@ local update_request_depot_gui = function(depot, gui, filter)
 
   local flow = gui.holding_flow
   if not flow then
-    flow = gui.add{type = "flow", name = "holding_flow", direction = "vertical"}
+    flow = gui.add{type = "table", column_count = 1, style = "bordered_table", name = "holding_flow"}
     flow.style.horizontally_stretchable = true
   else
-    flow.clear()
+    --flow.clear()
   end
 
   local item = depot.item
@@ -456,51 +470,94 @@ local update_request_depot_gui = function(depot, gui, filter)
 
   if not visible then return end
 
-  local status_flow = flow.add{type = "table", column_count = 1, style = "bordered_table"}
-  
-  if item then
-    local item_locale = get_item_icon_and_locale(item)
-    if item_locale then
-      --local request_flow = flow.add{type = "table", column_count = 1, style = "bordered_table"}
-      local current_item_flow = status_flow.add{type = "flow"}
-      current_item_flow.style.vertical_align = "center"
-      local current_count = floor(depot:get_current_amount())
-      current_item_flow.add
-      {
-        type = "sprite-button",
-        sprite = item_locale.icon,
-        number = current_count,
-        tooltip = {"", item_locale.locale, ": ", current_count},
-        style = "slot_button"
-      }
-      current_item_flow.add{type = "label", caption = {"current"}}    
-      local requested_item_flow = status_flow.add{type = "flow"}
-      requested_item_flow.style.vertical_align = "center"
-      local request_count = depot:get_request_size() * depot:get_drone_item_count()
-      requested_item_flow.add
-      {
-        type = "sprite-button",
-        sprite = item_locale.icon,
-        number = request_count,
-        tooltip = {"", item_locale.locale, ": ", request_count},
-        style = "slot_button"
-      }
-      requested_item_flow.add{type = "label", caption = {"requested"}}    
-      --flow.add{type = "sprite-button", sprite = icon, number = count, style = "slot_button"}
-      --local label = flow.add{type = "label", caption = locale}
-      --label.style.width = 128
-      --flow.style.vertical_align = "center"
+  if not item then
+    if flow.current_item_flow then
+      flow.clear()
+      flow.add{type = "label", caption = {"no-request-set"}, name = "no_request_label"}
     end
-  else
-    status_flow.add{type = "label", caption = {"no-request-set"}}    
+  end
 
+  if item then
+    if flow.no_request_label then
+      flow.clear()
+    end
+
+    local item_locale = get_item_icon_and_locale(item)
+
+    if item_locale then
+
+      local current_item_flow = flow.current_item_flow
+      if not current_item_flow then
+        current_item_flow = flow.add{type = "flow", name = "current_item_flow"}
+        current_item_flow.style.vertical_align = "center"
+      end
+      
+      local count = current_item_flow.count
+      local current_count = floor(depot:get_current_amount())
+      if not count then
+        count = current_item_flow.add
+        {
+          type = "sprite-button",
+          sprite = item_locale.icon,
+          number = current_count,
+          tooltip = current_count,
+          style = "slot_button",
+          name = "count"
+        }
+        current_item_flow.add{type = "label", caption = {"current"}}    
+      else
+        count.tooltip = current_count
+        count.number = current_count
+      end
+
+      local requested_item_flow = flow.requested_item_flow
+      if not requested_item_flow then
+        requested_item_flow = flow.add{type = "flow", name = "requested_item_flow"}
+        requested_item_flow.style.vertical_align = "center"
+      end
+   
+      local request_count = requested_item_flow.count
+      local requested_count = depot:get_request_size() * depot:get_drone_item_count()
+      if not request_count then
+        request_count = requested_item_flow.add
+        {
+          type = "sprite-button",
+          sprite = item_locale.icon,
+          number = current_count,
+          tooltip = requested_count,
+          style = "slot_button",
+          name = "count"
+        }
+        requested_item_flow.add{type = "label", caption = {"requested"}}    
+      else
+        request_count.tooltip = requested_count
+        request_count.number = requested_count
+      end
+      
+    end
   end
   
-  local label = status_flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}}
-  label.style.horizontally_stretchable = true
-  status_flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}}
-  status_flow.add{type = "label", caption = {"available-fuel", math.floor(depot:get_fuel_amount())}}
-  
+  local active_drone_label = flow.active_drone_label
+  if not active_drone_label then
+    active_drone_label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}, name = "active_drone_label"}
+    active_drone_label.style.horizontally_stretchable = true
+  else
+    active_drone_label.caption = {"active-drones", depot:get_active_drone_count()}
+  end
+
+  local available_drone_label = flow.available_drone_label
+  if not available_drone_label then
+    available_drone_label = flow.add{type = "label", caption = {"available-drones", depot:get_drone_item_count()}, name = "available_drone_label"}
+  else
+    available_drone_label.caption = {"available-drones", depot:get_drone_item_count()}
+  end
+
+  local fuel_label = flow.fuel_label
+  if not fuel_label then
+    fuel_label = flow.add{type = "label", caption = {"available-fuel", floor(depot:get_fuel_amount())}, name = "fuel_label"}
+  else
+    fuel_label.caption = {"available-fuel", floor(depot:get_fuel_amount())}
+  end
 
 end
 
