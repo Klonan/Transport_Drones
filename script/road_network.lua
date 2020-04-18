@@ -482,7 +482,7 @@ road_network.get_depots_by_distance = function(id, category, node_position)
     return distance_squared(depot_a.node_position, node_position) < distance_squared(depot_b.node_position, node_position)
   end
   local network = get_network_by_id(id)
-  local depots = network[category]
+  local depots = network.depots[category]
   if not depots then return end
   
   local to_sort = {}
