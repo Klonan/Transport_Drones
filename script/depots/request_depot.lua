@@ -372,7 +372,7 @@ function request_depot:dispatch_drone(depot, count)
   self:update_sticker()
 end
 
-function request_depot:take_item(name, count)
+function request_depot:take_item(name, count, temperature)
   if not count then error("NO COUMT?") end
   if game.item_prototypes[name] then
     self.entity.get_output_inventory().insert({name = name, count = count})
@@ -385,6 +385,9 @@ function request_depot:take_item(name, count)
       box = {name = name, amount = 0}
     end
     box.amount = box.amount + count
+    if temperature then
+      box.temperature = temperature
+    end
     self:set_output_fluidbox(box)
     return
   end  

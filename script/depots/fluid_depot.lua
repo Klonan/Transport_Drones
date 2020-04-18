@@ -53,6 +53,11 @@ function fluid_depot:get_output_fluidbox()
   return self.entity.fluidbox[1]
 end
 
+function fluid_depot:get_temperature()
+  local box = self:get_output_fluidbox()
+  return box and box.temperature
+end
+
 function fluid_depot:set_output_fluidbox(box)
   self.entity.fluidbox[1] = box
 end
