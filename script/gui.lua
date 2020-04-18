@@ -697,6 +697,11 @@ end
 
 local title_caption = {"road-networks"}
 local open_gui = function(player, network_index)
+  local networks = road_network.get_networks()
+  if not next(networks) then
+    player.print({"no-networks"})
+    return
+  end
   local gui = player.gui.screen
 
   local frame = gui.road_network_frame
@@ -721,7 +726,6 @@ local open_gui = function(player, network_index)
 
   title_flow.add{type = "sprite-button", style = "close_button", sprite = "utility/close_white", name = "close_road_network_gui"}
   
-  local networks = road_network.get_networks()
   
   local selected
   local big = 0
