@@ -269,7 +269,7 @@ local clear_network = function(id)
   --print("Clearing "..id)
   local network = script_data.networks[id]
 
-  if not network then return end
+  --if not network then return end
 
   for category, depots in pairs (network.depots) do
     for id, depot in pairs (depots) do
@@ -303,6 +303,7 @@ road_network.add_node = function(surface, x, y)
   end
 
   local new_node_id
+  local rx, ry
   local checked = {}
   for k, offset in pairs(neighbor_offsets) do
 
@@ -313,7 +314,10 @@ road_network.add_node = function(surface, x, y)
     
     if neighbor then
 
-      if not new_node_id then new_node_id = neighbor.id end
+      if not new_node_id then
+        new_node_id = neighbor.id
+        rx, ry = fx, fy
+      end
 
       for j, offset in pairs(neighbor_offsets) do
         if not checked[j] then
@@ -322,12 +326,15 @@ road_network.add_node = function(surface, x, y)
           local other_neighbor = get_node(surface, nx, ny)
 
           if other_neighbor then
-            if neighbor.id ~= other_neighbor.id then
-              local smaller_node_set = accumulate_smaller_node(surface, fx, fy, nx, ny)
+            if new_node_id ~= other_neighbor.id then
+              local smaller_node_set = accumulate_smaller_node(surface, rx, ry, nx, ny)
               local smaller_id = next(smaller_node_set).id
-              local larger_id = (smaller_id == neighbor.id and other_neighbor.id) or neighbor.id
-              set_node_ids(smaller_node_set, larger_id) 
-              new_node_id = larger_id
+              if smaller_id == new_node_id then
+                new_node_id = other_neighbor.id
+                rx = nx
+                ry = ny
+              end
+              set_node_ids(smaller_node_set, new_node_id) 
               clear_network(smaller_id)
             end
           end
