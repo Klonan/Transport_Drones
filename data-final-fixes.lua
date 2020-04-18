@@ -4,6 +4,7 @@ require("data/make_request_recipes")
 
 local rail_collision_mask = {"floor-layer", "water-tile", "item-layer"}
 local gate_collision_mask = {"item-layer", "player-layer", "train-layer", "water-tile"}
+local opened_gate_collision_mask = {"item-layer", "water-tile", "floor-layer"}
 
 for k, rail in pairs (data.raw["straight-rail"]) do
   if rail.collision_mask then
@@ -30,5 +31,10 @@ for k, gate in pairs (data.raw.gate) do
     util.remove_from_list(gate.collision_mask, "object-layer")
   else
     gate.collision_mask = gate_collision_mask
+  end
+  if gate.opened_collision_mask then
+    util.remove_from_list(gate.opened_collision_mask, "object-layer")
+  else
+    gate.opened_collision_mask = opened_gate_collision_mask
   end
 end

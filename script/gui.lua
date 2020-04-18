@@ -265,6 +265,8 @@ end
 local map_size = 64 * 3
 local update_supply_tab = function(depots, gui, filter)
 
+  if not depots then return end
+
   for index, depot in pairs (depots) do
     --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
     local depot_frame = gui[index]
@@ -406,6 +408,8 @@ end
   
 local fuel_map_size = 64 * 3
 local update_fuel_tab = function(depots, gui)
+  
+  if not depots then return end
   
   for index, depot in pairs (depots) do
     local depot_frame = gui[index]
@@ -560,6 +564,8 @@ end
 
 local request_map_size = 64 * 3
 local update_request_tab = function(depots, gui, filter)
+
+  if not depots then return end
 
   for index, depot in pairs (depots) do
     local depot_frame = gui[index]

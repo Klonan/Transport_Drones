@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.2
+Date: 2020-04-18
+  Changes:
+    - Fix GUI refresh error when you don't have any of a category of depot. 
+    - Fix trying to place road over opened gates.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.1
 Date: 2020-04-18
   Changes:
