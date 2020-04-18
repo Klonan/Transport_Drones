@@ -133,24 +133,25 @@ local update_contents_table = function(contents_table, network, filter)
 
         sum = floor(sum)
 
-        
-        if not flow then
-          flow = contents_table.add{type = "flow", name = name}
-          flow.add
-          {
-            type = "sprite-button",
-            sprite = item_locale.icon,
-            number = sum,
-            style = "slot_button",
-            name = "count",
-            tooltip = sum
-          }
-          flow.style.vertical_align = "center"
-          flow.style.horizontally_stretchable = true
-          local label = flow.add{type = "label", caption = item_locale.locale}
-        else
-          flow.count.number = sum
-          flow.count.tooltip = sum
+        if sum > 0 then
+          if not flow then
+            flow = contents_table.add{type = "flow", name = name}
+            flow.add
+            {
+              type = "sprite-button",
+              sprite = item_locale.icon,
+              number = sum,
+              style = "slot_button",
+              name = "count",
+              tooltip = sum
+            }
+            flow.style.vertical_align = "center"
+            flow.style.horizontally_stretchable = true
+            local label = flow.add{type = "label", caption = item_locale.locale}
+          else
+            flow.count.number = sum
+            flow.count.tooltip = sum
+          end
         end
       end
       if flow then flow.visible = visible end
