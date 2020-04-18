@@ -713,7 +713,8 @@ local open_gui = function(player, network_index)
   else
     frame = gui.add{type = "frame", direction = "vertical", name = "road_network_frame"}
   end
-  frame.style.maximal_height = player.display_resolution.height * 0.9
+  frame.style.maximal_height = (player.display_resolution.height * 0.9) / player.display_scale
+  frame.style.maximal_width = (player.display_resolution.width * 0.9) / player.display_scale
 
   local title_flow = frame.add{type = "flow", name = "title_flow"}
 
