@@ -3,8 +3,6 @@ local depot_common = require("script/depot_common")
 
 local network_size = function(network)
   
-  --This is a meh way to do it.
-
   local sum = 0
   
   for category, depots in pairs (network.depots) do
