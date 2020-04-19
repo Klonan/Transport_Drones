@@ -898,7 +898,7 @@ local toggle_gui = function(event)
 
   local nearby_network_index
 
-  local nearby_road_tile = player.surface.find_tiles_filtered{name = "transport-drone-road", limit = 1, posiiton = player.position, radius = 32}[1]
+  local nearby_road_tile = player.surface.find_tiles_filtered{name = "transport-drone-road", limit = 1, position = player.position, radius = 32}[1]
   
   if nearby_road_tile then
       local node = road_network.get_node(player.surface.index, nearby_road_tile.position.x, nearby_road_tile.position.y)
