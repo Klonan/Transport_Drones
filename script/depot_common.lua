@@ -261,7 +261,7 @@ local update_depots = function(tick)
     local depot_index = update_list[k]
     if not depot_index then return end
     local depot = depots[depot_index]
-    if not depot then
+    if not (depot and depot.entity.valid) then
       local last = #update_list
       if k == last then
         update_list[k] = nil

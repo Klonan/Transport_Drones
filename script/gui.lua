@@ -268,16 +268,18 @@ local update_supply_tab = function(depots, gui, filter)
   if not depots then return end
 
   for index, depot in pairs (depots) do
-    --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
-    local depot_frame = gui[index]
-    if not depot_frame then
-      depot_frame = gui.add{type = "flow", name = index, direction = "vertical"}
-      depot_frame.style.horizontally_stretchable = true
-      --depot_frame.style.vertically_stretchable = true
-      depot_frame.style.vertical_align = "top"
-      add_depot_map_button(depot, depot_frame, map_size)
+    if depot.entity.valid then
+      --local depot_frame = depot_table.add{type = "frame", style = "bordered_frame"}
+      local depot_frame = gui[index]
+      if not depot_frame then
+        depot_frame = gui.add{type = "flow", name = index, direction = "vertical"}
+        depot_frame.style.horizontally_stretchable = true
+        --depot_frame.style.vertically_stretchable = true
+        depot_frame.style.vertical_align = "top"
+        add_depot_map_button(depot, depot_frame, map_size)
+      end
+      update_supply_depot_gui(depot, depot_frame, filter)
     end
-    update_supply_depot_gui(depot, depot_frame, filter)
   end
 
   for k, gui in pairs (gui.children) do
@@ -412,13 +414,15 @@ local update_fuel_tab = function(depots, gui)
   if not depots then return end
   
   for index, depot in pairs (depots) do
-    local depot_frame = gui[index]
-    if not depot_frame then
-      depot_frame = gui.add{type = "flow", name = index}
-      depot_frame.style.horizontally_stretchable = true
-      add_depot_map_button(depot, depot_frame, fuel_map_size)
+    if depot.entity.valid then
+      local depot_frame = gui[index]
+      if not depot_frame then
+        depot_frame = gui.add{type = "flow", name = index}
+        depot_frame.style.horizontally_stretchable = true
+        add_depot_map_button(depot, depot_frame, fuel_map_size)
+      end
+      update_fuel_depot_gui(depot, depot_frame)
     end
-    update_fuel_depot_gui(depot, depot_frame)
   end
     
   for k, gui in pairs (gui.children) do
@@ -568,13 +572,15 @@ local update_request_tab = function(depots, gui, filter)
   if not depots then return end
 
   for index, depot in pairs (depots) do
-    local depot_frame = gui[index]
-    if not depot_frame then
-      depot_frame = gui.add{type = "flow", name = index}
-      depot_frame.style.horizontally_stretchable = true
-      add_depot_map_button(depot, depot_frame, request_map_size)
+    if depot.entity.valid then
+      local depot_frame = gui[index]
+      if not depot_frame then
+        depot_frame = gui.add{type = "flow", name = index}
+        depot_frame.style.horizontally_stretchable = true
+        add_depot_map_button(depot, depot_frame, request_map_size)
+      end
+      update_request_depot_gui(depot, depot_frame, filter)
     end
-    update_request_depot_gui(depot, depot_frame, filter)
   end
     
   for k, gui in pairs (gui.children) do
