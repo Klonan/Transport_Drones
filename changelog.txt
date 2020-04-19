@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.4
+Date: 2020-04-19
+  Changes:
+    - Some safety checks for invalid depots when opening the GUI.
+    - The GUI will try to determine a nearby network, and will show that if it can.
+    - When the GUI is opened, the contents page will be sorted from high to low, it won't be sorted during the refresh/update logic.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.3
 Date: 2020-04-18
   Changes:

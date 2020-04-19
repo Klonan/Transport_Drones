@@ -117,9 +117,31 @@ local get_signal_id = function(name)
 end
 
 local floor = math.floor
-local update_contents_table = function(contents_table, network, filter)
+local update_contents_table = function(contents_table, network, filter, sort)
 
-  for name, counts in pairs (network.item_supply) do
+  local supply = network.item_supply
+  
+  if sort then
+    local sorted_supply = {}
+    local k = 1
+    for name, counts in pairs(supply) do
+      local sum = 0
+      for depot_id, count in pairs (counts) do
+        sum = sum + count
+      end
+      sorted_supply[k] = {name, sum, counts}
+      k = k + 1
+    end
+    table.sort(sorted_supply, function(a, b) return a[2] > b[2] end)
+    supply  = {}
+    for k = 1, #sorted_supply do
+      local entry = sorted_supply[k]
+      supply[entry[1]] = entry[3]
+    end
+  end
+
+
+  for name, counts in pairs (supply) do
     local item_locale = get_item_icon_and_locale(name)
 
     if item_locale then
@@ -181,7 +203,7 @@ local add_contents_tab = function(tabbed_pane, network)
   contents_table.style.column_alignments[3] = "center"
   contents_table.style.column_alignments[4] = "center"
 
-  update_contents_table(contents_table, network)
+  update_contents_table(contents_table, network, nil, true)
 
   tabbed_pane.add_tab(contents_tab, contents)
 end
@@ -874,7 +896,26 @@ local toggle_gui = function(event)
     return
   end
 
-  open_gui(player)
+  local nearby_network_index
+
+  local nearby_road_tile = player.surface.find_tiles_filtered{name = "transport-drone-road", limit = 1, posiiton = player.position, radius = 32}[1]
+  
+  if nearby_road_tile then
+      local node = road_network.get_node(player.surface.index, nearby_road_tile.position.x, nearby_road_tile.position.y)
+      if node then 
+        local network_id = node.id
+        local count = 1
+        for id, network in pairs (road_network.get_networks()) do
+          if id == network_id then
+            nearby_network_index = count
+            break
+          end
+          count = count + 1
+        end
+      end
+  end
+
+  open_gui(player, nearby_network_index)
 
 end
 
