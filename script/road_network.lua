@@ -249,10 +249,11 @@ local set_node_ids = function(nodes, id)
   --print("Setting nodes "..id)
 
   for node, bool in pairs (nodes) do
-    node.id = id
     --local node_position = debug_get_node_postion(node)
     --game.surfaces[node_position.surface].create_entity{name = "flying-text", position = {node_position.x, node_position.y}, text = id}
-
+    
+    node.id = id
+    
     if node.depots then
       for k, depot in pairs (node.depots) do
         depot:remove_from_network()
@@ -439,11 +440,16 @@ road_network.add_depot = function(depot, category)
 end
 
 road_network.remove_depot = function(depot, category)
-  local x, y = depot.node_position[1], depot.node_position[2]
-  local surface = depot.entity.surface.index
-  local node = get_node(surface, x, y)
+  --local x, y = depot.node_position[1], depot.node_position[2]
+  --local surface = depot.entity.surface.index
+  --local node = get_node(surface, x, y)
+  --local network = get_network_by_id(node.id)
+  
+  local network_id = depot.network_id
+  if not network_id then return end
 
-  local network = get_network_by_id(node.id)
+  local network = get_network_by_id(network_id)
+  if not network then return end
 
   if depot.old_contents then
     local item_supply = network.item_supply
