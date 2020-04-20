@@ -403,7 +403,7 @@ function transport_drone:process_return_to_requester()
   end
 
   if self.held_item then
-    local temperature = self.supply_depot and self.supply_depot.get_temperature and self.supply_depot:get_temperature()
+    local temperature = self.supply_depot and self.supply_depot.entity.valid and self.supply_depot.get_temperature and self.supply_depot:get_temperature()
     self.request_depot:take_item(self.held_item, self.held_count, temperature)
     self.held_item = nil
   end
