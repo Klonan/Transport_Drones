@@ -118,7 +118,7 @@ function buffer_depot:check_fuel_amount()
 
   local fuel_depots = self.road_network.get_depots_by_distance(self.network_id, "fuel", self.node_position)
   if not (fuel_depots and fuel_depots[1]) then
-    self:show_fuel_alert("No fuel depots on network for request depot")
+    self:show_fuel_alert({"no-fuel-depot-on-network"})
     return
   end
 
@@ -130,7 +130,7 @@ function buffer_depot:check_fuel_amount()
     end
   end
 
-  self:show_fuel_alert("No fuel in network for request depot")
+  self:show_fuel_alert({"no-fuel-in-network"})
 
 end
 
