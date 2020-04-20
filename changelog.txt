@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.6
+Date: 2020-04-20
+  Changes:
+    - Fix error related to remove depots from the wrong networks.
+    - Fix extra new networks being created when mining road tiles.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.5
 Date: 2020-04-20
   Changes:
