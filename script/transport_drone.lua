@@ -77,6 +77,7 @@ local player_leave_drone = function(player)
   if not drone then return end
 
   script_data.riding_players[player.index] = nil
+  drone.riding_player = nil
   drone:update_speed()
 
 end
@@ -666,6 +667,23 @@ local to_direction = function(orientation)
   if direction >= 8 then direction = 0 end
   return direction
 end
+
+
+local get_orientation = function(source_position, target_position)
+
+  -- Angle in rads
+  local angle = util.angle(target_position, source_position)
+
+  -- Convert to orientation
+  local orientation =  (angle / (2 * math.pi)) - 0.25
+  if orientation < 0 then orientation = orientation + 1 end
+
+  return orientation
+
+end
+
+local smoothing = 0.1
+
 local on_tick = function(event)
   if not next(script_data.riding_players) then return end
   local players = game.players
@@ -673,10 +691,18 @@ local on_tick = function(event)
     local player = players[player_index]
     if player and player.valid then
       if drone.entity and drone.entity.valid then
-        player.teleport(drone.entity.position)
+        
+        local player_position = player.position
+        local position = drone.entity.position
+        local shift = drone.entity.prototype.sticker_box.left_top
+        local target_position = {x = position.x + shift.x, y = position.y + shift.y}
+        local dx, dy = (target_position.x - player_position.x) * smoothing, (target_position.y - player_position.y) * smoothing
+
+        local final_position = {player_position.x + dx, player_position.y + dy}
+        player.teleport(final_position)
         if player.character then
           --player.character.walking_state = {walking = false, direction = to_direction(drone.entity.orientation)}
-          player.character.direction = to_direction(drone.entity.orientation)
+          player.character.direction = to_direction(get_orientation(player_position, final_position))
         end
       end
     end
