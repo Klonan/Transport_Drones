@@ -392,6 +392,9 @@ road_network.remove_node = function(surface, x, y)
 
   -- we could be splitting neighbors.
   -- Check every neighbor against every other neighbor
+
+  local node_id = node.id
+
   local checked = {}
   for k, offset in pairs(neighbor_offsets) do
 
@@ -401,14 +404,16 @@ road_network.remove_node = function(surface, x, y)
     local neighbor = get_node(surface, fx, fy)
     
     if neighbor then
-      for j, offset in pairs(neighbor_offsets) do
-        if not checked[j] then
-          local nx, ny = x + offset[1], y + offset[2]
-          local other_neighbor = get_node(surface, nx, ny)
-          if other_neighbor then
-            if not symmetric_connection_check(surface, fx, fy, nx, ny) then
-              local smaller_node_set = accumulate_smaller_node(surface, fx, fy, nx, ny)
-              set_node_ids(smaller_node_set, new_id()) 
+      if neighbor.id == node_id then
+        for j, offset in pairs(neighbor_offsets) do
+          if not checked[j] then
+            local nx, ny = x + offset[1], y + offset[2]
+            local other_neighbor = get_node(surface, nx, ny)
+            if other_neighbor and other_neighbor.id == neighbor.id then
+              if not symmetric_connection_check(surface, fx, fy, nx, ny) then
+                local smaller_node_set = accumulate_smaller_node(surface, fx, fy, nx, ny)
+                set_node_ids(smaller_node_set, new_id())
+              end
             end
           end
         end
