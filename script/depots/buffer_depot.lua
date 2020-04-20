@@ -369,8 +369,10 @@ function buffer_depot:set_output_fluidbox(box)
 end
 
 function buffer_depot:get_temperature()
-  local box = self:get_output_fluidbox()
-  return box and box.temperature
+  if #self.entity.fluidbox == 2 then
+    local box = self:get_output_fluidbox()
+    return box and box.temperature
+  end
 end
 
 function buffer_depot:get_current_amount()
