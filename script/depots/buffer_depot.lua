@@ -368,6 +368,11 @@ function buffer_depot:set_output_fluidbox(box)
   self.entity.fluidbox[2] = box
 end
 
+function buffer_depot:get_temperature()
+  local box = self:get_output_fluidbox()
+  return box and box.temperature
+end
+
 function buffer_depot:get_current_amount()
 
   if not self.item then return 0 end
