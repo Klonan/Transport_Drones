@@ -262,6 +262,7 @@ local update_depots = function(tick)
     if not depot_index then return end
     local depot = depots[depot_index]
     if not (depot and depot.entity.valid) then
+      depots[depot_index] = nil
       local last = #update_list
       if k == last then
         update_list[k] = nil
@@ -346,7 +347,10 @@ lib.on_load = function()
   script_data = global.transport_depots or script_data
   setup_lib_values()
   for k, depot in pairs (script_data.depots) do
-    load_depot(depot)
+    if depot.entity.valid then
+      --Not sure if I should remove it here, as it will cry "oh modifying global during on load wtf"
+      load_depot(depot)
+    end
   end
 end
 
@@ -359,12 +363,16 @@ lib.on_configuration_changed = function()
   end
 
   for k, depot in pairs (script_data.depots) do
-    if depot.on_config_changed then
-      depot:on_config_changed()
+    if not depot.entity.valid then
+      script_data.depots[k] = nil
+    else
+      if depot.on_config_changed then
+        depot:on_config_changed()
+      end
+      add_depot_to_node(depot)
+      depot:remove_from_network()
+      depot:add_to_network()
     end
-    add_depot_to_node(depot)
-    depot:remove_from_network()
-    depot:add_to_network()
   end
 
   if not script_data.reset_to_be_taken_again then
