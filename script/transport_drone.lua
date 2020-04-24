@@ -557,7 +557,7 @@ function transport_drone:go_to_depot(depot, radius)
     destination_entity = depot.corpse,
     distraction = defines.distraction.none,
     radius = radius or 0.5,
-    pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = false}
+    pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
   }
 end
 

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.9
+Date: 2020-04-24
+  Changes:
+    - Added the 'consider-tile-transitions' mask to the transport drones. This should help them path a bit smoother.
+    - Changed how riding drones works. Now its more like riding behind them with a bungee cord.
+    - Enabled diagonal neighbors in the road network.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.8
 Date: 2020-04-22
   Changes:

@@ -51,7 +51,7 @@ local make_unit = function(k)
     },
     healing_per_tick = 0.1,
     --minable = {result = name, mining_time = 2},
-    collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
+    collision_box = {{-0, -0}, {0.01, 0.01}},
     selection_box = selection_box,
     sticker_box = {shift, shift},
     collision_mask = shared.drone_collision_mask,

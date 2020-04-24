@@ -32,6 +32,12 @@ local neighbor_offsets =
   {1, 0},
   {0, -1},
   {0, 1},
+  
+  {-1, -1},
+  {1, -1},
+  {1, 1},
+  {-1, 1},
+
 }
 
 local get_node = function(surface, x, y)
