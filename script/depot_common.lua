@@ -72,7 +72,7 @@ local get_corpse_position = function(entity, corpse_offsets)
 
 end
 
-local attempt_to_place_node = function(entity, depot_lib, event)
+local attempt_to_place_node = function(entity, depot_lib)
   local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
   
@@ -121,6 +121,15 @@ end
 
 local add_depot_to_node = function(depot)
   local node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+  if not node then
+    if not attempt_to_place_node(depot.entity, depot) then
+      script_data.depots[depot.index] = nil
+      depot:on_removed()
+      depot.entity.destroy()
+      return
+    end
+    node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+  end
   node.depots = node.depots or {}
   node.depots[depot.index] = depot
 end
@@ -165,7 +174,7 @@ local on_created_entity = function(event)
     return
   end
 
-  if not attempt_to_place_node(entity, depot_lib, event) then
+  if not attempt_to_place_node(entity, depot_lib) then
     --refund
     refund_build(event, entity.prototype)
     entity.destroy({raise_destroy = true})
