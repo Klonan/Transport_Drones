@@ -1,3 +1,5 @@
+local shared = require("shared")
+
 local script_data =
 {
   networks = {},
@@ -517,6 +519,28 @@ local prune_networks = function()
 end
 
 local floor = math.floor
+
+local get_tiles = function()
+  local mask = shared.tile_collision_mask
+  local tiles = {}
+  for name, tile in pairs (game.tile_prototypes) do
+    local tile_mask = tile.collision_mask
+    if table_size(tile_mask) == table_size(mask) then
+      local good = true
+      for k, layer in pairs (mask) do
+        if not tile_mask[layer] then
+          good = false
+          break
+        end
+      end
+      if good then
+        table.insert(tiles, name)
+      end
+    end
+  end
+  return tiles
+end
+
 local reset = function()
 
   local profiler = game.create_profiler()
@@ -529,7 +553,7 @@ local reset = function()
 
   for surface_index, surface in pairs (game.surfaces) do
     local index = surface.index
-    local tiles = surface.find_tiles_filtered{name = "transport-drone-road"}
+    local tiles = surface.find_tiles_filtered{name = get_tiles()}
     for k, tile in pairs (tiles) do
       local tile_position = tile.position
       add_node(index, tile_position.x, tile_position.y)
