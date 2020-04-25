@@ -521,13 +521,13 @@ end
 local floor = math.floor
 
 local get_tiles = function()
-  local mask = shared.tile_collision_mask
+  local mask = game.tile_prototypes["transport-drone-road"].collision_mask
   local tiles = {}
   for name, tile in pairs (game.tile_prototypes) do
     local tile_mask = tile.collision_mask
     if table_size(tile_mask) == table_size(mask) then
       local good = true
-      for k, layer in pairs (mask) do
+      for layer, bool in pairs (mask) do
         if not tile_mask[layer] then
           good = false
           break
@@ -551,9 +551,15 @@ local reset = function()
 
   local add_node = road_network.add_node
 
+
+  local tile_names = get_tiles()
+  if not next(tile_names) then
+    error("NO ROAD TILES? Something if fishy! Aborting loading to prevent save corruption.")
+  end
+
   for surface_index, surface in pairs (game.surfaces) do
     local index = surface.index
-    local tiles = surface.find_tiles_filtered{name = get_tiles()}
+    local tiles = surface.find_tiles_filtered{name = tile_names}
     for k, tile in pairs (tiles) do
       local tile_position = tile.position
       add_node(index, tile_position.x, tile_position.y)
