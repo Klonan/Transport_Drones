@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.5.12
+Version: 0.5.13
 Date: 2020-04-28
   Changes:
     - Added settings for fluid capacity, fuel type, fuel capacity, fuel consumption, and pollution.
