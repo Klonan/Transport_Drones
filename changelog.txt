@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.12
+Date: 2020-04-28
+  Changes:
+    - Added settings for fluid capacity, fuel type, fuel capacity, fuel consumption, and pollution.
+---------------------------------------------------------------------------------------------------
+Version: 0.5.12
 Date: 2020-04-25
   Changes:
     - Fix road network loading issue if another mod alters the road tile collision mask.
