@@ -789,7 +789,7 @@ local open_gui = function(player, network_index)
   refresh_network_gui(player, selected)
 
   if not frame.auto_center then frame.auto_center = true end
-  --player.opened = frame
+  player.opened = frame
 
 end
 
