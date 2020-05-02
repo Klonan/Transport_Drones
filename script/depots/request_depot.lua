@@ -131,9 +131,10 @@ function request_depot:check_fuel_amount()
 
 end
 
-function request_depot:get_minimum_request_size()
+function request_depot:get_minimum_request_size(minus_one)
   local stack_size = self:get_stack_size()
   local drone_count = self:get_active_drone_count()
+  if minus_one then drone_count = drone_count - 1 end
   local current_amount = self:get_current_amount()
   if current_amount < stack_size and drone_count == 0 then 
     return 1

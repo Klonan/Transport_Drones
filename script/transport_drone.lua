@@ -489,7 +489,7 @@ function transport_drone:process_reorder()
   end
 
   local item_count = min(self.request_depot:get_request_size(), self.supply_depot:get_available_item_count(self.request_depot.item))
-  if item_count <= self.request_depot:get_minimum_request_size() then 
+  if item_count <= self.request_depot:get_minimum_request_size(true) then 
     self:remove_from_depot()
     return
   end

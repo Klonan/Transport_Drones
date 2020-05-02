@@ -394,9 +394,10 @@ function buffer_depot:get_available_stack_amount()
   return self:get_available_item_count(self.item) / self:get_stack_size()
 end
 
-function buffer_depot:get_minimum_request_size()
+function buffer_depot:get_minimum_request_size(minus_one)
   local stack_size = self:get_stack_size()
   local drone_count = self:get_active_drone_count()
+  if minus_one then drone_count = drone_count - 1 end
   local current_amount = self:get_current_amount()
   if current_amount < stack_size and drone_count == 0 then 
     return 1
