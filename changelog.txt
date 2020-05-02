@@ -5,6 +5,8 @@ Date: 2020-05-02
     - Fixed localisation of item requests of equipment and other things.
     - Added settings for fluid capacity, fuel type, fuel capacity, fuel consumption, and pollution.
     - Attempt to fix compatibility with Space exploration rails.
+    - Buffed fluid depots from 10k storage to 20k storage.
+    - Another method of fluid temperature handling.
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.12
 Date: 2020-04-25

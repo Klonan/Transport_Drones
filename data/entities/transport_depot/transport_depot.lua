@@ -480,7 +480,7 @@ fluid_supply_depot.fluid_boxes =
   },
   {
     production_type = "input",
-    base_area = 100,
+    base_area = 200,
     base_level = -1,
     height = 1,
     pipe_connections = {{ type="input-output", position = {0, 2} }},

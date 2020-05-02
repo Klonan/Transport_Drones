@@ -252,6 +252,7 @@ function transport_drone:process_pickup()
     if given_count > 0 then
       self.held_item = self.request_depot.item
       self.held_count = given_count
+      self.held_temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
       self:update_sticker()
     end
 
@@ -404,8 +405,7 @@ function transport_drone:process_return_to_requester()
   end
 
   if self.held_item then
-    local temperature = self.supply_depot and self.supply_depot.entity.valid and self.supply_depot.get_temperature and self.supply_depot:get_temperature()
-    self.request_depot:take_item(self.held_item, self.held_count, temperature)
+    self.request_depot:take_item(self.held_item, self.held_count, self.held_temperature)
     self.held_item = nil
   end
 
