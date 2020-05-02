@@ -420,49 +420,22 @@ local fuel_recipe_category =
 
 data:extend{fuel_recipe_category}
 
-local fuel_recipe = 
-{
-  type = "recipe",
-  name = "fuel-depots",
-  localised_name = {"fuel-depots"},
-  flags = {"hidden"},
-  icon = util.path("data/entities/transport_depot/fuel-recipe-icon.png"),
-  icon_size = 64,
-  --category = "transport",
-  enabled = true,
-  ingredients =
-  {
-    {type = "item", name = "transport-drone", amount = 100},
-    {type = "fluid", name = shared.fuel_fluid, amount = 5000}
-  },
-  overload_multipler = 50,
-  energy_required = 5,
-  results =
-  {
-    {type = "fluid", name = shared.fuel_fluid, amount = 10}
-  },
-  subgroup = "other",
-  category = "fuel-depot",
-  hidden = true
-}
-
 local fuel_signal = 
 {
   type = "virtual-signal",
   name = "fuel-signal",
-  icon = fuel_recipe.icon,
-  icon_size = fuel_recipe.icon_size, 
+  icon = util.path("data/entities/transport_depot/fuel-recipe-icon.png"),
+  icon_size = 64,
   subgroup = "virtual-signal",
   order = "oh-yea-baby"
 }
 
-fuel_depot.fixed_recipe = fuel_recipe.name
-fuel_depot.crafting_categories = {fuel_recipe.category}
+fuel_depot.fixed_recipe = "fuel-depots"
+fuel_depot.crafting_categories = {"fuel-depot"}
 fuel_depot.minable.result = "fuel-depot"
 fuel_depot.placeable_by = {item = "fuel-depot", count = 1},
 
 data:extend(fuel_depot_items)
-data:extend{fuel_recipe}
 data:extend{fuel_signal}
 
 local invisble_corpse =

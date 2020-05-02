@@ -1,3 +1,26 @@
+local fuel = settings.startup["fuel-fluid"].value
+if not data.raw.fluid[fuel] then
+  log("Bad name for fuel fluid. reverting to something else...")
+
+  fuel = "petroleum-gas"
+  if not data.raw.fluid[fuel] then
+    fuel = nil
+    for k, fluid in pairs (data.raw.fluid) do
+      if fluid.fuel_value then
+        fuel = fluid.name
+        break
+      end
+    end
+  end
+
+  if not fuel then
+    local index, fluid = next(data.raw.fluid)
+    if fluid then
+      fuel = fluid.name
+    end
+  end
+end
+
 local category = "transport-drone-request"
 local util = require("tf_util/tf_util")
 local shared = require("shared")
@@ -29,7 +52,7 @@ local make_recipe = function(item)
     ingredients =
     {
       {type = "item", name = "transport-drone", amount = 1},
-      {type = "fluid", name = shared.fuel_fluid, amount = 5000}
+      {type = "fluid", name = fuel, amount = 5000}
     },
     results =
     {
@@ -102,7 +125,7 @@ local make_fluid_request_recipe = function(fluid)
     ingredients =
     {
       {type = "item", name = "transport-drone", amount = 1},
-      {type = "fluid", name = shared.fuel_fluid, amount = 5000}
+      {type = "fluid", name = fuel, amount = 5000}
     },
     results =
     {
@@ -126,3 +149,31 @@ for k, fluid in pairs (data.raw.fluid) do
   make_fluid_depot_recipe(fluid)
   make_fluid_request_recipe(fluid)
 end
+
+local fuel_recipe = 
+{
+  type = "recipe",
+  name = "fuel-depots",
+  localised_name = {"fuel-depots"},
+  flags = {"hidden"},
+  icon = util.path("data/entities/transport_depot/fuel-recipe-icon.png"),
+  icon_size = 64,
+  --category = "transport",
+  enabled = true,
+  ingredients =
+  {
+    {type = "item", name = "transport-drone", amount = 100},
+    {type = "fluid", name = fuel, amount = 5000}
+  },
+  overload_multipler = 50,
+  energy_required = 5,
+  results =
+  {
+    {type = "fluid", name = fuel, amount = 10}
+  },
+  subgroup = "other",
+  category = "fuel-depot",
+  hidden = true
+}
+
+data:extend{fuel_recipe}
