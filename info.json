@@ -6,7 +6,7 @@
   "contact": "",
   "homepage": "",
   "description": "Adds transport drones and transport depots",
-  "dependencies": ["base >= 0.18.21", 
+  "dependencies": ["base >= 0.18.22", 
     "(?)deadlock_stacked_recipes",
     "(?)Krastorio2",
     "(?)apm_recycling",
