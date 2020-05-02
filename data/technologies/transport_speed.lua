@@ -91,7 +91,7 @@ local infinite =
       {"utility-science-pack", 1},
       {"space-science-pack", 1},
     },
-    time = 30
+    time = 60
   },
   order = name,
   max_level = "infinite"
