@@ -449,23 +449,42 @@ function buffer_depot:give_item(requested_name, requested_count)
   end
 end
 
-function buffer_depot:take_item(name, count)
-  if game.item_prototypes[name] then
+local valid_item_cache = {}
+local is_valid_item = function(item_name)
+  if valid_item_cache[item_name] then return true end
+  
+  valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
+  return valid_item_cache[item_name]
+end
+
+local valid_fluid_cache = {}
+local is_valid_fluid = function(fluid_name)
+  if valid_fluid_cache[fluid_name] then return true end
+  
+  valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
+  return valid_fluid_cache[fluid_name]
+end
+
+function buffer_depot:take_item(name, count, temperature)
+  if not count then error("NO COUMT?") end
+
+  if self.mode == request_mode.item and is_valid_item(name) then
     self.entity.get_output_inventory().insert({name = name, count = count})
     return
   end
 
-  if game.fluid_prototypes[name] then
+  if self.mode == request_mode.fluid and is_valid_fluid(name) then
     local box = self:get_output_fluidbox()
     if not box then
       box = {name = name, amount = 0}
     end
     box.amount = box.amount + count
+    if temperature then
+      box.temperature = temperature
+    end
     self:set_output_fluidbox(box)
     return
-  end
-
-  
+  end  
 
 end
 
