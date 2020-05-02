@@ -5,11 +5,10 @@ end
 
 require("data/make_request_recipes")
 
--- ruin gates and rails
+-- ruin rails
 
+local rail_addition_mask = "layer-15"
 local rail_collision_mask = {"floor-layer", "water-tile", "item-layer"}
-local gate_collision_mask = {"item-layer", "player-layer", "train-layer", "water-tile"}
-local opened_gate_collision_mask = {"item-layer", "water-tile", "floor-layer"}
 
 for k, rail in pairs (data.raw["straight-rail"]) do
   if rail.collision_mask then
@@ -17,7 +16,7 @@ for k, rail in pairs (data.raw["straight-rail"]) do
   else
     rail.collision_mask = rail_collision_mask
   end
-  table.insert(rail.collision_mask, "layer-14")
+  table.insert(rail.collision_mask, rail_addition_mask)
   rail.selection_priority = 45
 end
 
@@ -27,9 +26,14 @@ for k, rail in pairs (data.raw["curved-rail"]) do
   else
     rail.collision_mask = rail_collision_mask
   end
-  table.insert(rail.collision_mask, "layer-14")
+  table.insert(rail.collision_mask, rail_addition_mask)
   rail.selection_priority = 45
 end
+
+-- ruin gates
+
+local gate_collision_mask = {"item-layer", "player-layer", "train-layer", "water-tile"}
+local opened_gate_collision_mask = {"item-layer", "water-tile", "floor-layer"}
 
 for k, gate in pairs (data.raw.gate) do
   if gate.collision_mask then
