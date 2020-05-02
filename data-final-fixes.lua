@@ -1,3 +1,8 @@
+local fuel = settings.startup["fuel-fluid"].value
+if not data.raw.fluid[fuel] then
+  error("\n\n[font=heading-1]Bad fluid name for transport drones fuel: "..fuel.."\n\nFix your mod settings!\n\n[/font]")
+end
+
 require("data/make_request_recipes")
 
 -- ruin gates and rails
