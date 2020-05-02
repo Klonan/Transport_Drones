@@ -107,7 +107,7 @@ transport_drone.new = function(request_depot)
   setmetatable(drone, transport_drone.metatable)
   add_drone(drone)
 
-  entity.ai_settings.path_resolution_modifier = -1
+  entity.ai_settings.path_resolution_modifier = 0
   
   return drone
 end
@@ -155,9 +155,18 @@ end
 function transport_drone:retry_command()
 
   local distance = 1.5
-  if self.entity.ai_settings.path_resolution_modifier == -1 then
-    self.entity.ai_settings.path_resolution_modifier = 0
-    distance = 0.5
+
+  local surface = self.entity.surface
+  if not surface.can_place_entity
+  {
+    name = self.entity.name,
+    position = self.entity.position,
+    build_check_type=defines.build_check_type.manual
+  } then
+    local position = self.entity.surface.find_non_colliding_position(self.entity.name, self.entity.position, 5, 0.25, false) 
+    if position then
+      self.entity.teleport(position)
+    end
   end
 
   if self.state == states.going_to_supply then
@@ -199,6 +208,7 @@ function transport_drone:process_failed_command()
 
   if (self.failed_command_count or 0) < 2 then
     self.failed_command_count = (self.failed_command_count or 0) + 1
+    self:say("R")
     self:retry_command()
     return
   end
