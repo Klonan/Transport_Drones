@@ -318,6 +318,16 @@ local on_runtime_mod_setting_changed = function(event)
   refresh_update_rate()
 end
 
+local picker_dolly_blacklist = function()
+
+  if remote.interfaces["PickerDollies"] then
+    for name, depot_lib in pairs (depot_libs) do
+      remote.call("PickerDollies", "add_blacklist_name", name, false)
+    end
+  end
+
+end
+
 local lib = {}
 
 lib.events = 
@@ -341,6 +351,7 @@ lib.on_init = function()
   global.transport_depots = global.transport_depots or script_data
   setup_lib_values()
   refresh_update_rate()
+  picker_dolly_blacklist()
 end
 
 lib.on_load = function()
@@ -395,6 +406,7 @@ lib.on_configuration_changed = function()
 
   refresh_update_rate()
 
+  picker_dolly_blacklist()
 end
 
 lib.get_depot = function(entity)
