@@ -23,7 +23,6 @@ local make_recipe = function(item)
   {
     type = "recipe",
     name = "request-"..item.name,
-    localised_name = {"request-item", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
     icon = item.dark_background_icon or item.icon,
     icon_size = item.icon_size,
     icons = item.icons,
@@ -43,7 +42,7 @@ local make_recipe = function(item)
     subgroup = get_subgroup(item),
     overload_multiplier = math.min(200, 60000 / (item.stack_size or 1)),
     hide_from_player_crafting = true,
-    main_product = "",
+    main_product = item.name,
     allow_decomposition = false,
     allow_as_intermediate = false,
     allow_intermediates = true
@@ -66,7 +65,6 @@ local make_fluid_depot_recipe = function(fluid)
     {
       type = "recipe",
       name = "fluid-depot-"..fluid.name,
-      --localised_name = {"", "Request ", item.localised_name or item.place_result and {"entity-name."..item.place_result} or {"item-name."..item.name}},
       icon = fluid.icon,
       icon_size = fluid.icon_size,
       icons = fluid.icons,
@@ -85,7 +83,7 @@ local make_fluid_depot_recipe = function(fluid)
       main_product = "",
       allow_decomposition = false,
       allow_as_intermediate = false,
-      allow_intermediates = true,
+      allow_intermediates = false,
       enabled = true,
       energy_required = 2 ^ 50
     }
@@ -98,7 +96,6 @@ local make_fluid_request_recipe = function(fluid)
   {
     type = "recipe",
     name = "request-"..fluid.name,
-    localised_name = {"request-item", fluid.localised_name or {"fluid-name."..fluid.name}},
     icon = fluid.icon,
     icon_size = fluid.icon_size,
     icons = fluid.icons,
@@ -116,10 +113,11 @@ local make_fluid_request_recipe = function(fluid)
     subgroup = fluid.subgroup or "fluid",
     overload_multiplier = 200,
     hide_from_player_crafting = true,
-    main_product = "",
+    main_product = fluid.name,
     allow_decomposition = false,
     allow_as_intermediate = false,
-    allow_intermediates = true
+    allow_intermediates = false,
+    energy_required = 2 ^ 50
   }
   data:extend{recipe}
 end
