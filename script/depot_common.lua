@@ -322,7 +322,7 @@ local picker_dolly_blacklist = function()
 
   if remote.interfaces["PickerDollies"] then
     for name, depot_lib in pairs (depot_libs) do
-      remote.call("PickerDollies", "add_blacklist_name", name, false)
+      remote.call("PickerDollies", "add_blacklist_name", name)
     end
   end
 
