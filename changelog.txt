@@ -1,3 +1,8 @@
+Version: 0.5.14
+Date: 2020-05-03
+  Changes:
+    - Changed fluid per drone settings minimum to 0. Setting it to 0 will basically mean you don't need any fuel.
+---------------------------------------------------------------------------------------------------
 Version: 0.5.13
 Date: 2020-05-02
   Changes:

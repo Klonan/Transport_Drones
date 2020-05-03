@@ -24,7 +24,7 @@ local settings =
     localised_name = "Transport drone fuel per drone",
     setting_type = "startup",
     default_value = 50,
-    minimum_value = 1,
+    minimum_value = 0,
     maximum_value = 10000
   },  
   
