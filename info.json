@@ -1,6 +1,6 @@
 {
   "name": "Transport_Drones",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "title": "Transport Drones",
   "author": "Klonan",
   "contact": "",
@@ -11,6 +11,8 @@
     "(?)Krastorio2",
     "(?)apm_recycling",
     "(?)PickerDollies",
+    "(?)SeaBlock",
+    "(?)SpeaceBlock",
     "(?)alien-biomes"
   ],
   "factorio_version": "0.18"
