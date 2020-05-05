@@ -603,13 +603,17 @@ road_network.check_clear_lonely_node = function(surface, x, y)
 
   local surface = game.surfaces[surface]
   local position = {x, y}
-  surface.set_tiles
-  {
+
+  local hidden = surface.get_hidden_tile(position)
+  if hidden then
+    surface.set_tiles
     {
-      name = surface.get_hidden_tile(position),
-      position = position
+      {
+        name = hidden,
+        position = position
+      }
     }
-  }
+  end
 
 end
 

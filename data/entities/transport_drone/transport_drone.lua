@@ -26,6 +26,8 @@ local make_unit = function(k)
     }
   }
 
+  local darkness = 0.3  + math.random() / 5
+
   local unit =
   {
     type = "unit",
@@ -108,7 +110,7 @@ local make_unit = function(k)
     light =
     {
       {
-        minimum_darkness = 0.3,
+        minimum_darkness = darkness,
         intensity = 0.4,
         size = 10,
         color = {r=1.0, g=1.0, b=1.0},
@@ -116,7 +118,7 @@ local make_unit = function(k)
       },
       {
         type = "oriented",
-        minimum_darkness = 0.3,
+        minimum_darkness = darkness,
         picture =
         {
           filename = "__core__/graphics/light-cone.png",
