@@ -120,7 +120,7 @@ function fuel_depot:handle_fuel_request(depot)
 
   amount = math.min((amount - fuel_amount_per_drone), self:get_drone_fluid_capacity())
   
-  local drone = fuel_depot.transport_drone.new(self)
+  local drone = fuel_depot.transport_drone.new(self, get_fuel_fluid())
 
   self:remove_fuel(amount)
   self:remove_fuel(fuel_amount_per_drone)

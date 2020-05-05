@@ -64,9 +64,15 @@ local get_drone_speed = function(force_index)
 end
 
 local variation_count = shared.variation_count
-
+local ore_variation_count = shared.ore_variation_count
 local random = math.random
-local get_drone_name = function()
+
+local get_drone_name = function(item_name)
+  if item_name then
+    if game.entity_prototypes["transport-drone-"..item_name.."-1"] then
+      return "transport-drone-"..item_name.."-"..random(ore_variation_count)
+    end
+  end
   return "transport-drone-"..random(variation_count)
 end
 
@@ -91,9 +97,9 @@ local player_enter_drone = function(player, drone)
 end
 
 
-transport_drone.new = function(request_depot)
+transport_drone.new = function(request_depot, drone_name)
 
-  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(), position = request_depot.corpse.position, force = request_depot.entity.force}
+  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(drone_name), position = request_depot.corpse.position, force = request_depot.entity.force}
   
   local drone =
   {
@@ -255,6 +261,8 @@ function transport_drone:process_pickup()
 
   local to_take = min(available_count, self.request_depot:get_request_size())
 
+  local sprite_switch = false
+
   if to_take > 0 then
 
     local given_count = self.supply_depot:give_item(self.request_depot.item, to_take)
@@ -264,13 +272,14 @@ function transport_drone:process_pickup()
       self.held_count = given_count
       self.held_temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
       self:update_sticker()
+      sprite_switch = true
     end
 
   end
 
   self:add_slow_sticker()
   self:update_speed()
-  self:return_to_requester()
+  self:return_to_requester(sprite_switch)
   
 end
 
@@ -284,7 +293,7 @@ function transport_drone:process_deliver_fuel()
   
 end
 
-function transport_drone:return_to_requester()
+function transport_drone:return_to_requester(sprite_switch)
 
   if self.state == states.going_to_supply then
     if self.supply_depot and self.request_depot.item then
@@ -309,7 +318,7 @@ function transport_drone:return_to_requester()
   self.state = states.return_to_requester
   
 
-  self:go_to_depot(self.request_depot)
+  self:go_to_depot(self.request_depot, nil, sprite_switch)
 
 end
 
@@ -560,15 +569,48 @@ function transport_drone:go_to_entity(entity, radius)
 end
 
 local random = math.random
-function transport_drone:go_to_depot(depot, radius)
+function transport_drone:go_to_depot(depot, radius, sprite_switch)
+  if not sprite_switch then
+    self.entity.set_command
+    {
+      type = defines.command.go_to_location,
+      destination_entity = depot.corpse,
+      distraction = defines.distraction.none,
+      radius = radius or 0.5,
+      pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
+    }
+    return
+  end
+
+  local proxy = self.entity.surface.create_entity
+  {
+    name = "sprite-switch-proxy",
+    position = self.entity.position,
+    force = "neutral"
+  }
+
   self.entity.set_command
   {
-    type = defines.command.go_to_location,
-    destination_entity = depot.corpse,
+    type = defines.command.compound,
     distraction = defines.distraction.none,
-    radius = radius or 0.5,
-    pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
+    structure_type = defines.compound_command.return_last,
+    commands = 
+    {
+      {
+        type = defines.command.attack,
+        target = proxy,
+        distraction = defines.distraction.none
+      },
+      {
+        type = defines.command.go_to_location,
+        destination_entity = depot.corpse,
+        distraction = defines.distraction.none,
+        radius = radius or 0.5,
+        pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
+      }
+    }
   }
+
 end
 
 function transport_drone:clear_drone_data()

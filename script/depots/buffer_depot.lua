@@ -180,7 +180,7 @@ end
 local min = math.min
 function buffer_depot:dispatch_drone(depot, count)
   
-  local drone = self.transport_drone.new(self)
+  local drone = self.transport_drone.new(self, self.item)
   drone:pickup_from_supply(depot, count)
   self:remove_fuel(fuel_amount_per_drone)
 
