@@ -109,9 +109,9 @@ local full_truck = function(shift)
   
 end
 
-
+local ore_variant = 0
 local ore_truck = function(shift, tint)
-
+  ore_variant = ore_variant + 1
   return
   {
     layers = 
@@ -159,6 +159,19 @@ local ore_truck = function(shift, tint)
       },
       {
         filename = util.path("data/entities/transport_drone/truck_mk1_trailer_ore_mask.png"),
+        frame_count = 1,
+        direction_count = 36,
+        repeat_count = 5,
+        line_length = 5,
+        width = 192,
+        height = 192,
+        shift = shift,
+        apply_runtime_tint = false,
+        tint = tint,
+        scale = 0.5
+      },
+      {
+        filename = util.path("data/entities/transport_drone/truck_mk1_trailer_ore_mask_var"..(ore_variant % 5)..".png"),
         frame_count = 1,
         direction_count = 36,
         repeat_count = 5,
