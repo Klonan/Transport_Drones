@@ -13,23 +13,15 @@ local empty_truck = function(shift)
     layers = 
     {
       {
-        --filename = util.path("data/entities/transport_drone/truck_mk1_empty.png"),
-        filenames =
-        {
-          util.path("data/entities/transport_drone/truck_mk1_empty-0.png"),
-          util.path("data/entities/transport_drone/truck_mk1_empty-1.png"),
-          util.path("data/entities/transport_drone/truck_mk1_empty-2.png"),
-          util.path("data/entities/transport_drone/truck_mk1_empty-3.png"),
-        },
-        frame_count = 5,
+        filename = util.path("data/entities/transport_drone/truck_mk1_trailer_empty.png"),
+        frame_count = 1,
         direction_count = 36,
         line_length = 5,
-        lines_per_file = 10,
+        repeat_count = 5,
         width = 192,
         height = 192,
         shift = shift,
-        scale = 0.5,
-        slice = 5
+        scale = 0.5
       },
       {
         filename = util.path("data/entities/transport_drone/truck_mk1_player_mask.png"),
@@ -42,6 +34,24 @@ local empty_truck = function(shift)
         shift = shift,
         apply_runtime_tint = true,
         scale = 0.5
+      },
+      {
+        filenames =
+        {
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-0.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-1.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-2.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-3.png"),
+        },
+        frame_count = 5,
+        direction_count = 36,
+        line_length = 5,
+        lines_per_file = 10,
+        width = 192,
+        height = 192,
+        shift = shift,
+        scale = 0.5,
+        slice = 5
       }
     }
   }
@@ -54,23 +64,15 @@ local full_truck = function(shift)
     layers = 
     {
       {
-        --filename = util.path("data/entities/transport_drone/truck_mk1_empty.png"),
-        filenames =
-        {
-          util.path("data/entities/transport_drone/truck_mk1_cargo-0.png"),
-          util.path("data/entities/transport_drone/truck_mk1_cargo-1.png"),
-          util.path("data/entities/transport_drone/truck_mk1_cargo-2.png"),
-          util.path("data/entities/transport_drone/truck_mk1_cargo-3.png"),
-        },
-        frame_count = 5,
+        filename = util.path("data/entities/transport_drone/truck_mk1_trailer_boxes.png"),
+        frame_count = 1,
         direction_count = 36,
         line_length = 5,
-        lines_per_file = 10,
+        repeat_count = 5,
         width = 192,
         height = 192,
         shift = shift,
-        scale = 0.5,
-        slice = 5
+        scale = 0.5
       },
       {
         filename = util.path("data/entities/transport_drone/truck_mk1_player_mask.png"),
@@ -83,6 +85,24 @@ local full_truck = function(shift)
         shift = shift,
         apply_runtime_tint = true,
         scale = 0.5
+      },
+      {
+        filenames =
+        {
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-0.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-1.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-2.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-3.png"),
+        },
+        frame_count = 5,
+        direction_count = 36,
+        line_length = 5,
+        lines_per_file = 10,
+        width = 192,
+        height = 192,
+        shift = shift,
+        scale = 0.5,
+        slice = 5
       }
     }
   }
@@ -97,23 +117,15 @@ local ore_truck = function(shift, tint)
     layers = 
     {
       {
-        --filename = util.path("data/entities/transport_drone/truck_mk1_empty.png"),
-        filenames =
-        {
-          util.path("data/entities/transport_drone/truck_mk1_ore-0.png"),
-          util.path("data/entities/transport_drone/truck_mk1_ore-1.png"),
-          util.path("data/entities/transport_drone/truck_mk1_ore-2.png"),
-          util.path("data/entities/transport_drone/truck_mk1_ore-3.png"),
-        },
-        frame_count = 5,
+        filename = util.path("data/entities/transport_drone/truck_mk1_trailer_empty.png"),
+        frame_count = 1,
         direction_count = 36,
         line_length = 5,
-        lines_per_file = 10,
+        repeat_count = 5,
         width = 192,
         height = 192,
         shift = shift,
-        scale = 0.5,
-        slice = 5
+        scale = 0.5
       },
       {
         filename = util.path("data/entities/transport_drone/truck_mk1_player_mask.png"),
@@ -128,7 +140,25 @@ local ore_truck = function(shift, tint)
         scale = 0.5
       },
       {
-        filename = util.path("data/entities/transport_drone/truck_mk1_ore_mask.png"),
+        filenames =
+        {
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-0.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-1.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-2.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-3.png"),
+        },
+        frame_count = 5,
+        direction_count = 36,
+        line_length = 5,
+        lines_per_file = 10,
+        width = 192,
+        height = 192,
+        shift = shift,
+        scale = 0.5,
+        slice = 5
+      },
+      {
+        filename = util.path("data/entities/transport_drone/truck_mk1_trailer_ore_mask.png"),
         frame_count = 1,
         direction_count = 36,
         repeat_count = 5,
@@ -152,23 +182,15 @@ local fluid_truck = function(shift, tint)
     layers = 
     {
       {
-        --filename = util.path("data/entities/transport_drone/truck_mk1_empty.png"),
-        filenames =
-        {
-          util.path("data/entities/transport_drone/truck_mk1_tanker-0.png"),
-          util.path("data/entities/transport_drone/truck_mk1_tanker-1.png"),
-          util.path("data/entities/transport_drone/truck_mk1_tanker-2.png"),
-          util.path("data/entities/transport_drone/truck_mk1_tanker-3.png"),
-        },
-        frame_count = 5,
+        filename = util.path("data/entities/transport_drone/truck_mk1_tanker.png"),
+        frame_count = 1,
         direction_count = 36,
         line_length = 5,
-        lines_per_file = 10,
+        repeat_count = 5,
         width = 192,
         height = 192,
         shift = shift,
-        scale = 0.5,
-        slice = 5
+        scale = 0.5
       },
       {
         filename = util.path("data/entities/transport_drone/truck_mk1_player_mask.png"),
@@ -183,6 +205,24 @@ local fluid_truck = function(shift, tint)
         scale = 0.5
       },
       {
+        filenames =
+        {
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-0.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-1.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-2.png"),
+          util.path("data/entities/transport_drone/truck_mk1_boiler_anim-3.png"),
+        },
+        frame_count = 5,
+        direction_count = 36,
+        line_length = 5,
+        lines_per_file = 10,
+        width = 192,
+        height = 192,
+        shift = shift,
+        scale = 0.5,
+        slice = 5
+      },
+      {
         filename = util.path("data/entities/transport_drone/truck_mk1_tanker_fluid_mask.png"),
         frame_count = 1,
         direction_count = 36,
@@ -194,7 +234,7 @@ local fluid_truck = function(shift, tint)
         apply_runtime_tint = false,
         tint = tint,
         scale = 0.5
-      },
+      }
     }
   }
   
@@ -419,10 +459,10 @@ local make_ore_truck = function(resource, item_name)
 
   local map_color = resource.map_color
   local r, g, b = map_color[1] or map_color.r, map_color[2] or map_color.g, map_color[3] or map_color.b
-  r = r * 0.5
-  g = g * 0.5
-  b = b * 0.5
-  local color = {r, g, b, 0.8}
+  r = (r + 0.5) / 1.5
+  g = (g + 0.5) / 1.5
+  b = (b + 0.5) / 1.5
+  local color = {r, g, b, 1}
   
   for k = 1, shared.ore_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
@@ -574,7 +614,11 @@ end
 
 local make_fluid_truck = function(fluid)
 
-  local color = fluid.base_color
+  local r, g, b = fluid.base_color[1] or fluid.base_color.r, fluid.base_color[2] or fluid.base_color.g, fluid.base_color[3] or fluid.base_color.b
+  r = (r + 0.8) / 2
+  g = (g + 0.8) / 2
+  b = (b + 0.8) / 2
+  local color = {r, g, b, 1}
   
   for k = 1, shared.ore_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
@@ -706,7 +750,7 @@ local make_fluid_truck = function(fluid)
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },
-      run_animation = fluid_truck(shift, {0,0,0}),
+      run_animation = fluid_truck(shift, {0,0,0, 0.5}),
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
