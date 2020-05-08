@@ -2,9 +2,14 @@
 
 ![](thumbnail.png)
 
+(I made a discord if anybody is interested in discussing my mods [Invite link](https://discordapp.com/invite/ktg8h7t) )
+
 --------------------------------------
 
 Adds a new 'Transport system' to the game.
+Graphics by bubbles from the Factorio discord.
+
+Mod tutorial by Nilaus: https://youtu.be/FaQMThNH43g
 
 ![1](https://i.imgur.com/Ms02wTV.png)
 ![fuel](https://i.imgur.com/xlCF5tU.jpg)

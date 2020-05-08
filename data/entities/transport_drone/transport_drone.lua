@@ -130,7 +130,7 @@ local ore_truck = function(shift, tint)
         scale = 0.5
       },
       {
-        filename = util.path("data/entities/transport_drone/ore_mask_variation_"..((ore_variant * 17) % 5)..".png"),
+        filename = util.path("data/entities/transport_drone/ore_mask_variation_"..((ore_variant + math.random(4)) % 5)..".png"),
         frame_count = 1,
         direction_count = 36,
         repeat_count = 1,
@@ -143,7 +143,7 @@ local ore_truck = function(shift, tint)
         scale = 0.5
       },
       {
-        filename = util.path("data/entities/transport_drone/ore_mask_variation_"..((ore_variant * 11) % 5)..".png"),
+        filename = util.path("data/entities/transport_drone/ore_mask_variation_"..((ore_variant) % 5)..".png"),
         frame_count = 1,
         direction_count = 36,
         repeat_count = 1,

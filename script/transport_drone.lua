@@ -428,15 +428,15 @@ function transport_drone:process_return_to_requester()
     self.held_item = nil
   end
 
-  self:update_sticker()
+  --self:update_sticker()
   self:refund_fuel()
 
-  if self.supply_depot then
-    self:wait_for_reorder()
-    return
-  end
+  --if self.supply_depot then
+  --  self:wait_for_reorder()
+  --  return
+  --end
 
-  self:remove_from_depot()
+  self:remove_from_depot()  
 
 end
 
@@ -734,7 +734,7 @@ local get_orientation = function(source_position, target_position)
 
 end
 
-local smoothing = 0.1
+local smoothing = 0.20
 
 local on_tick = function(event)
   if not next(script_data.riding_players) then return end
