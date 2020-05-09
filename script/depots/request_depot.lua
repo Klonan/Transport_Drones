@@ -131,12 +131,12 @@ function request_depot:check_fuel_amount()
 
 end
 
-function request_depot:get_minimum_request_size(minus_one)
+function request_depot:get_minimum_request_size()
+
   local stack_size = self:get_stack_size()
-  local drone_count = self:get_active_drone_count()
-  if minus_one then drone_count = drone_count - 1 end
+
   local current_amount = self:get_current_amount()
-  if current_amount < stack_size and drone_count == 0 then 
+  if current_amount < stack_size and self:get_active_drone_count() == 0 then 
     return 1
   end
   local request_size = self:get_request_size()
@@ -349,15 +349,15 @@ function request_depot:get_current_amount()
   end
 end
 
-function request_depot:should_order(plus_one)
+function request_depot:get_storage_size()
+  return self:get_drone_item_count() * self:get_request_size()
+end
+
+function request_depot:should_order()
   if self:get_fuel_amount() < fuel_amount_per_drone then
     return
   end
-  local stack_size = self:get_request_size()
-  local current_count = self:get_current_amount()
-  local max_count = self:get_drone_item_count()
-  local drone_spawn_count = max_count - math.floor(current_count / stack_size)
-  return drone_spawn_count + (plus_one and 1 or 0) > self:get_active_drone_count()
+  return self:get_current_amount() < self:get_storage_size()
 end
 
 local min = math.min
