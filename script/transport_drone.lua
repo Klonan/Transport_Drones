@@ -585,46 +585,48 @@ end
 
 local random = math.random
 local drone_path_flags = {prefer_straight_paths = true, use_cache = false, no_break = true}
+local insert = table.insert
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
-  if not sprite_switch then
-    self.entity.set_command
+
+  local commands = {}
+
+  if sprite_switch then
+    local proxy = self.entity.surface.create_entity
     {
-      type = defines.command.go_to_location,
-      destination_entity = depot.corpse,
-      distraction = defines.distraction.none,
-      radius = radius or 0.5,
-      pathfind_flags = drone_path_flags
+      name = "sprite-switch-proxy",
+      position = self.entity.position,
+      force = "neutral"
     }
-    return
+    insert(commands,
+    {
+      type = defines.command.attack,
+      target = proxy,
+      distraction = defines.distraction.none
+    })
   end
 
-  local proxy = self.entity.surface.create_entity
+  insert(commands,
   {
-    name = "sprite-switch-proxy",
-    position = self.entity.position,
-    force = "neutral"
-  }
+    type = defines.command.go_to_location,
+    destination_entity = depot.corpse,
+    distraction = defines.distraction.none,
+    radius = radius or 0.5,
+    pathfind_flags = drone_path_flags
+  })
+
+  insert(commands,
+  {
+    type = defines.command.stop,
+    distraction = defines.distraction.none,
+    ticks_to_wait = 15
+  })
 
   self.entity.set_command
   {
     type = defines.command.compound,
     distraction = defines.distraction.none,
     structure_type = defines.compound_command.return_last,
-    commands = 
-    {
-      {
-        type = defines.command.attack,
-        target = proxy,
-        distraction = defines.distraction.none
-      },
-      {
-        type = defines.command.go_to_location,
-        destination_entity = depot.corpse,
-        distraction = defines.distraction.none,
-        radius = radius or 0.5,
-        pathfind_flags = drone_path_flags
-      }
-    }
+    commands = commands
   }
 
 end
