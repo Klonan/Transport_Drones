@@ -1,3 +1,5 @@
+local util = require "__Transport_Drones__/data/tf_util/tf_util"
+
 local fuel = settings.startup["fuel-fluid"].value
 if not data.raw.fluid[fuel] then
   log("Bad name for fuel fluid. reverting to something else...")
