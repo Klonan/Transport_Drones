@@ -1,3 +1,4 @@
+require("data/entities/transport_drone/transport_drone")
 require("data/make_request_recipes")
 
 -- ruin rails

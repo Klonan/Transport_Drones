@@ -1,3 +1,26 @@
+local fuel = settings.startup["fuel-fluid"].value
+if not data.raw.fluid[fuel] then
+  log("Bad name for fuel fluid. reverting to something else...")
+
+  fuel = "petroleum-gas"
+  if not data.raw.fluid[fuel] then
+    fuel = nil
+    for k, fluid in pairs (data.raw.fluid) do
+      if fluid.fuel_value then
+        fuel = fluid.name
+        break
+      end
+    end
+  end
+
+  if not fuel then
+    local index, fluid = next(data.raw.fluid)
+    if fluid then
+      fuel = fluid.name
+    end
+  end
+end
+
 local shared = require("shared")
 
 local name = "transport-drone"
@@ -443,7 +466,7 @@ local make_ore_truck = function(resource, item_name)
   b = (b + 0.5) / 1.5
   local color = {r, g, b, 1}
   
-  for k = 1, shared.ore_variation_count do
+  for k = 1, shared.special_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
 
     local selection_box =
@@ -599,7 +622,7 @@ local make_fluid_truck = function(fluid)
   b = (b + 0.8) / 2
   local color = {r, g, b, 1}
   
-  for k = 1, shared.ore_variation_count do
+  for k = 1, shared.special_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
 
     local selection_box =
@@ -760,4 +783,155 @@ local sprite_switch_hack_proxy =
   max_health = 1
 }
 
+local make_fuel_truck = function(fluid)
+
+  local r, g, b = fluid.base_color[1] or fluid.base_color.r, fluid.base_color[2] or fluid.base_color.g, fluid.base_color[3] or fluid.base_color.b
+  r = (r + 0.8) / 2
+  g = (g + 0.8) / 2
+  b = (b + 0.8) / 2
+  local color = {r, g, b, 1}
+  
+  for k = 1, shared.special_variation_count do
+    local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
+
+    local selection_box =
+    {
+      {
+        -0.3 + shift[1],
+        -0.3 + shift[2],
+      },
+      {
+        0.3 + shift[1],
+        0.3 + shift[2],
+      }
+    }
+  
+    local darkness = 0.3  + math.random() / 5
+  
+    local unit =
+    {
+      type = "unit",
+      name = name.."-fuel-truck-"..k,
+      localised_name = {name},
+      icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
+      icon_size = 113,
+      icon_mipmaps = 0,
+      flags = transport_drone_flags,
+      map_color = {b = 0.5, g = 1},
+      enemy_map_color = {r = 1},
+      max_health = 50,
+      radar_range = 1,
+      order="i-d",
+      subgroup = "transport",
+      resistances = 
+      {
+        {
+          type = "acid",
+          decrease = 0,
+          percent = 90
+        }
+      },
+      healing_per_tick = 0.1,
+      --minable = {result = name, mining_time = 2},
+      collision_box = {{-0.01, -0.01}, {0.01, 0.01}},
+      selection_box = selection_box,
+      sticker_box = {shift, shift},
+      collision_mask = shared.drone_collision_mask,
+      max_pursue_distance = 64,
+      min_persue_time = (60 * 15),
+      --sticker_box = {{-0.2, -0.2}, {0.2, 0.2}},
+      distraction_cooldown = (15),
+      move_while_shooting = true,
+      can_open_gates = true,
+      ai_settings =
+      {
+        do_separation = false
+      },
+      attack_parameters =
+      {
+        type = "projectile",
+        ammo_category = "bullet",
+        warmup = 0,
+        cooldown = 2 ^ 30,
+        range = 0.5,
+        ammo_type =
+        {
+          category = util.ammo_category("transport-drone"),
+          target_type = "entity",
+          action =
+          {
+            type = "direct",
+            action_delivery =
+            {
+              {
+                type = "instant",
+                target_effects =
+                {
+                  {
+                    type = "damage",
+                    damage = {amount = 10 , type = util.damage_type("physical")}
+                  }
+                }
+              }
+            }
+          }
+        },
+        animation = fluid_truck(shift, {0,0,0, 0.5}),
+      },
+      vision_distance = 40,
+      has_belt_immunity = true,
+      not_controllable = true,
+      movement_speed = 0.15,
+      distance_per_frame = 0.15,
+      pollution_to_join_attack = 1000,
+      rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
+      --corpse = name.." Corpse",
+      dying_explosion = "explosion",
+      light =
+      {
+        {
+          minimum_darkness = darkness,
+          intensity = 0.4,
+          size = 10,
+          color = {r=1.0, g=1.0, b=1.0},
+          shift = shift
+        },
+        {
+          type = "oriented",
+          minimum_darkness = darkness,
+          picture =
+          {
+            filename = "__core__/graphics/light-cone.png",
+            priority = "extra-high",
+            flags = { "light" },
+            scale = 2,
+            width = 200,
+            height = 200
+          },
+          shift = {shift[1], shift[2] -3.5},
+          size = 0.5,
+          intensity = 0.6,
+          color = {r=1.0, g=1.0, b=1.0}
+        }
+      },
+      vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
+      working_sound =
+      {
+        sound = sprite_base.working_sound.sound,
+        max_sounds_per_type = 5,
+        audible_distance_modifier = 0.7
+      },
+      run_animation = fluid_truck(shift, color),
+      emissions_per_second = shared.drone_pollution_per_second
+    }
+    data:extend{unit}
+
+  end
+end
+
+for k = 1, shared.special_variation_count do
+  make_fuel_truck(data.raw.fluid[fuel])
+end
+
 data:extend{sprite_switch_hack_proxy}
+

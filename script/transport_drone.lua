@@ -64,13 +64,24 @@ local get_drone_speed = function(force_index)
 end
 
 local variation_count = shared.variation_count
-local ore_variation_count = shared.ore_variation_count
+local special_variation_count = shared.special_variation_count
 local random = math.random
+
+local is_drone_cache = {}
+local is_special_drone = function(name)
+  local bool = is_drone_cache[name]
+  if bool ~= nil then
+    return bool
+  end
+  bool = game.entity_prototypes["transport-drone-"..name.."-1"] ~= nil
+  is_drone_cache[name] = bool
+  return bool
+end
 
 local get_drone_name = function(item_name)
   if item_name then
-    if game.entity_prototypes["transport-drone-"..item_name.."-1"] then
-      return "transport-drone-"..item_name.."-"..random(ore_variation_count)
+    if is_special_drone(item_name) then
+      return "transport-drone-"..item_name.."-"..random(special_variation_count)
     end
   end
   return "transport-drone-"..random(variation_count)
@@ -122,6 +133,10 @@ function transport_drone:update_speed()
   local speed = get_drone_speed(self.entity.force.index)
   if self.riding_player then
     speed = speed * 1.5
+  elseif self.fuel_amount then
+    speed = speed * 0.6
+  elseif self.held_item then
+    speed = speed * 0.75
   end
   self.entity.speed = speed
 end
@@ -288,8 +303,8 @@ function transport_drone:process_deliver_fuel()
   self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
 
   self:add_slow_sticker()
+  self:return_to_requester(true)
   self:update_speed()
-  self:return_to_requester()
   
 end
 
@@ -569,6 +584,7 @@ function transport_drone:go_to_entity(entity, radius)
 end
 
 local random = math.random
+local drone_path_flags = {prefer_straight_paths = true, use_cache = false, no_break = true}
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
   if not sprite_switch then
     self.entity.set_command
@@ -577,7 +593,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
       destination_entity = depot.corpse,
       distraction = defines.distraction.none,
       radius = radius or 0.5,
-      pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
+      pathfind_flags = drone_path_flags
     }
     return
   end
@@ -606,7 +622,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
         destination_entity = depot.corpse,
         distraction = defines.distraction.none,
         radius = radius or 0.5,
-        pathfind_flags = {prefer_straight_paths = (random() > 0.5), use_cache = false, no_break = true}
+        pathfind_flags = drone_path_flags
       }
     }
   }
