@@ -180,6 +180,18 @@ local ore_truck = function(shift, tint)
         tint = tint,
         scale = 0.5
       },
+      {
+        filename = util.path("data/entities/transport_drone/trailer_base_shadow.png"),
+        frame_count = 1,
+        direction_count = 36,
+        line_length = 10,
+        repeat_count = 1,
+        width = 192,
+        height = 192,
+        shift = shift,
+        scale = 0.5,
+        draw_as_shadow = true
+      }
     }
   }
   
