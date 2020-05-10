@@ -3,6 +3,7 @@ Version: 0.6.3
 Date: 2020-05-10
   Changes:
     - Fix rail collision layer things a bit more.
+    - Fix compatibility with omni fluid and omni compression.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.2
 Date: 2020-05-10
