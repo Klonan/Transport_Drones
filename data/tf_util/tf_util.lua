@@ -137,6 +137,12 @@ util.has_flag = function(prototype, flag)
   end
 end
 
+util.has_value = function(list, value)
+  for k, v in pairs (list) do
+    if v == value then return true end
+  end
+end
+
 util.add_flag = function(prototype, flag)
   if not prototype.flags then return end
   table.insert(prototype.flags, flag)
