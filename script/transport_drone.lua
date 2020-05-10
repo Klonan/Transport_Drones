@@ -271,6 +271,11 @@ function transport_drone:process_pickup()
     self:return_to_requester()
     return
   end
+
+  if not self.supply_depot.entity.valid then
+    self:return_to_requester()
+    return
+  end
   
   local available_count = self.requested_count + self.supply_depot:get_available_item_count(self.request_depot.item)
 
@@ -301,14 +306,15 @@ end
 function transport_drone:process_deliver_fuel()
 
   self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
-
+  self:clear_reservations()
+  
   self:add_slow_sticker()
-  self:return_to_requester(true)
   self:update_speed()
+  self:return_to_requester(true)
   
 end
 
-function transport_drone:return_to_requester(sprite_switch)
+function transport_drone:clear_reservations()
 
   if self.state == states.going_to_supply then
     if self.supply_depot and self.request_depot.item then
@@ -317,12 +323,18 @@ function transport_drone:return_to_requester(sprite_switch)
   end
 
   if self.state == states.delivering_fuel then
-    if self.target_depot then
+    if self.target_depot and self.fuel_amount then
       self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
       self.fuel_amount = nil
     end
   end
-  
+
+end
+
+function transport_drone:return_to_requester(sprite_switch)
+
+  self:clear_reservations()
+
   if not self.request_depot.entity.valid then
     self:suicide()
     return
@@ -632,16 +644,8 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
 end
 
 function transport_drone:clear_drone_data()
-  if self.state == states.going_to_supply then
-    self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
-  end
 
-  if self.state == states.delivering_fuel then
-    if self.target_depot and self.fuel_amount then
-      self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
-      self.fuel_amount = nil
-    end
-  end
+  self:clear_reservations()
 
   if self.riding_player then
     local player = game.get_player(self.riding_player)
