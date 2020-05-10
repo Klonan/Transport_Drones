@@ -357,7 +357,10 @@ function request_depot:should_order()
   if self:get_fuel_amount() < fuel_amount_per_drone then
     return
   end
-  return self:get_current_amount() < self:get_storage_size()
+  local storage_ratio = self:get_current_amount() / self:get_storage_size()
+  if storage_ratio == 0 then return true end
+  local drone_ratio = 1 - (self:get_active_drone_count() / self:get_drone_item_count())
+  return storage_ratio < drone_ratio
 end
 
 local min = math.min
