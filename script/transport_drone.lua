@@ -9,7 +9,8 @@ local script_data =
 {
   drones = {},
   riding_players = {},
-  reset_to_be_taken_again = true
+  reset_to_be_taken_again = true,
+  reset_fuel_on_the_way = true
 }
 
 local fuel_fluid
@@ -309,12 +310,11 @@ function transport_drone:process_deliver_fuel()
 
   if self.target_depot.entity.valid then
     self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
+    self:clear_reservations()
     self.fuel_amount = nil
     delivered = true
   end
-  
-  self:clear_reservations()
-  
+    
   self:add_slow_sticker()
   self:update_speed()
   self:return_to_requester(delivered)
@@ -841,6 +841,15 @@ transport_drone.on_configuration_changed = function()
         local count = math.min(tonumber(drone.requested_count) or 0, drone.request_depot:get_request_size())
         if count ~= count then count = drone.request_depot:get_request_size() end
         drone:pickup_from_supply(drone.supply_depot, count)
+      end
+    end
+  end
+
+  if not script_data.reset_fuel_on_the_way then
+    script_data.reset_fuel_on_the_way = true
+    for k, drone in pairs (script_data.drones) do
+      if drone.state == states.deliver_fuel then
+        drone.target_depot.fuel_on_the_way = drone.target_depot.fuel_on_the_way + (drone.fuel_amount or 0)
       end
     end
   end

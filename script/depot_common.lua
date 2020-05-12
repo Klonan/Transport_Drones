@@ -51,7 +51,8 @@ local script_data =
   update_buckets = {},
   reset_to_be_taken_again = true,
   refresh_techs = true,
-  update_rate = 60
+  update_rate = 60,
+  reset_fuel_on_the_way = true
 }
 
 local get_depot_by_index = function(index)
@@ -393,6 +394,16 @@ lib.on_configuration_changed = function()
     for k, depot in pairs (script_data.depots) do
       if depot.to_be_taken then
         depot.to_be_taken = {}
+      end
+    end
+  end
+
+  
+  if not script_data.reset_fuel_on_the_way then
+    script_data.reset_fuel_on_the_way = true
+    for k, depot in pairs (script_data.depots) do
+      if depot.fuel_on_the_way then
+        depot.fuel_on_the_way = 0
       end
     end
   end

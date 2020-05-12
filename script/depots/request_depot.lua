@@ -1,9 +1,6 @@
 local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local drone_fluid_capacity = shared.drone_fluid_capacity
 
-local request_spawn_timeout = 60
-local no_buffer_offer_limit = 2
-
 local request_depot = {}
 request_depot.metatable = {__index = request_depot}
 
@@ -59,7 +56,6 @@ function request_depot.new(entity)
     node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
-    next_spawn_tick = 0,
     mode = request_mode.item,
     fuel_on_the_way = 0
   }
@@ -163,8 +159,6 @@ function request_depot:make_request()
 
   if not self:can_spawn_drone() then return end
   if not self:should_order() then return end
-
-  self.updates_without_buffer_offer = self.updates_without_buffer_offer + 1
   
   local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
   if not supply_depots then return end
@@ -254,8 +248,6 @@ function request_depot:check_request_change()
   if self.item == requested_item then
     return
   end
-
-  self.updates_without_buffer_offer = 0
 
   self:set_request_mode()
 
@@ -372,7 +364,6 @@ function request_depot:dispatch_drone(depot, count)
 
   self.drones[drone.index] = drone
 
-  self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 end
 
@@ -474,7 +465,6 @@ end
 function request_depot:on_config_changed()
   self.mode = self.mode or request_mode.item
   self.fuel_on_the_way = self.fuel_on_the_way or 0
-  self.updates_without_buffer_offer = 0
 end
 
 return request_depot
