@@ -794,6 +794,12 @@ local on_tick = function(event)
   end
 end
 
+local set_map_settings = function()
+  game.map_settings.path_finder.max_steps_worked_per_tick = 10000
+  game.map_settings.path_finder.max_work_done_per_tick = 80000
+  game.map_settings.path_finder.use_path_cache = false
+end
+
 transport_drone.events =
 {
   --[defines.events.on_built_entity] = on_built_entity,
@@ -822,7 +828,7 @@ end
 
 transport_drone.on_init = function()
   global.transport_drone = global.transport_drone or script_data
-  game.map_settings.path_finder.use_path_cache = false
+  set_map_settings()
 end
 
 transport_drone.on_configuration_changed = function()
@@ -838,6 +844,8 @@ transport_drone.on_configuration_changed = function()
       end
     end
   end
+
+  set_map_settings()
 
 end
 
