@@ -305,12 +305,19 @@ end
 
 function transport_drone:process_deliver_fuel()
 
-  self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
+  local delivered = false
+
+  if self.target_depot.entity.valid then
+    self.target_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
+    self.fuel_amount = nil
+    delivered = true
+  end
+  
   self:clear_reservations()
   
   self:add_slow_sticker()
   self:update_speed()
-  self:return_to_requester(true)
+  self:return_to_requester(delivered)
   
 end
 
@@ -325,7 +332,6 @@ function transport_drone:clear_reservations()
   if self.state == states.delivering_fuel then
     if self.target_depot and self.fuel_amount then
       self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
-      self.fuel_amount = nil
     end
   end
 
@@ -453,6 +459,11 @@ function transport_drone:process_return_to_requester()
   if self.held_item then
     self.request_depot:take_item(self.held_item, self.held_count, self.held_temperature)
     self.held_item = nil
+  end
+
+  if self.fuel_amount then
+    self.request_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = self.fuel_amount})
+    self.fuel_amount = nil
   end
 
   --self:update_sticker()
