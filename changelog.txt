@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.6.5
+Date: 2020-05-12
+  Changes:
+    - Fix depots not requesting fuel properly.
+    - Fix loading when road tile under depots gets changed to another tile somehow.
+---------------------------------------------------------------------------------------------------
 Version: 0.6.4
 Date: 2020-05-12
   Changes:

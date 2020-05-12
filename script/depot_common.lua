@@ -122,6 +122,24 @@ end
 
 local add_depot_to_node = function(depot)
   local node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+
+  if not node then
+
+    depot.entity.surface.set_tiles
+    {
+      {name = "transport-drone-road", position = depot.node_position}
+    }
+  
+    road_network.add_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+    node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+  end
+
+  if not node then
+    depot:on_removed({})
+    depot.entity.destroy()
+    --log("Wtf, depot with no node... killing it"..serpent.line(depot))
+    return
+  end
   node.depots = node.depots or {}
   node.depots[depot.index] = depot
 end
