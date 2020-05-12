@@ -3,6 +3,7 @@ Version: 0.6.4
 Date: 2020-05-12
   Changes:
     - Fix error when mining a depot with fuel on the way.
+    - Fixed fluid tanker graphics had an extra bit of the fluid mask showing.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.3
 Date: 2020-05-10
