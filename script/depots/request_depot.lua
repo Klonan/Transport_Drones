@@ -209,6 +209,7 @@ function request_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
   self:check_drone_validity()
+  self:update_circuit_writer()
   self:make_request()
   self:update_sticker()
 end
@@ -342,7 +343,7 @@ function request_depot:get_current_amount()
 end
 
 function request_depot:get_storage_size()
-  return self:get_drone_item_count() * self:get_request_size()
+  return self.circuit_limit or self:get_drone_item_count() * self:get_request_size()
 end
 
 function request_depot:should_order()
@@ -353,6 +354,45 @@ function request_depot:should_order()
   if storage_ratio == 0 then return true end
   local drone_ratio = 1 - (self:get_active_drone_count() / self:get_drone_item_count())
   return storage_ratio < drone_ratio
+end
+
+function request_depot:update_circuit_writer()
+  if not self.circuit_writer then return end
+
+  if not self.circuit_writer.valid then
+    self.circuit_writer = nil
+    self.circuit_limit = nil
+    return
+  end
+  
+  local behavior = self.circuit_writer.get_control_behavior()
+  if not behavior then
+    self:say("No Behavior")
+    return
+  end
+
+  local circuit_condition = behavior.circuit_condition
+  if circuit_condition then
+    local condition = circuit_condition.condition
+    if condition.comparator == "=" then
+      local first_signal = condition.first_signal
+      if first_signal then
+        if first_signal.name == self.item then
+          local count
+          if condition.second_signal then
+            count = self.circuit_writer.get_merged_signal(condition.second_signal) 
+          else
+            count = condition.constant or 0
+          end
+          self.circuit_limit = count
+          self:say("Set limit "..count)
+          return
+        end
+      end
+    end
+  end
+
+
 end
 
 local min = math.min
@@ -441,6 +481,12 @@ function request_depot:update_sticker()
     scale = 1.5
   }
 
+end
+
+function request_depot:attach_circuit_writer(entity)
+  if self.circuit_writer and self.circuit_writer.valid then return end
+  self:say("Writer attached "..entity.name)
+  self.circuit_writer = entity
 end
 
 

@@ -175,11 +175,46 @@ local add_to_update_bucket = function(index)
   best_bucket[best_count + 1] = index
 end
 
+local circuit_offsets =
+{
+  [0] = {0, 1},
+  [2] = {-1, 0},
+  [4] = {0, -1},
+  [6] = {1, 0},
+}
+
+local circuit_writer_built = function(entity)
+  game.print("Writer built")
+  local offset = circuit_offsets[entity.direction]
+  if not offset then error("HEUK") end
+  local search_position = entity.position
+  search_position.x = search_position.x + offset[1]
+  search_position.y = search_position.y + offset[2]
+
+  for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
+    local this_depot = get_depot(found_entity)
+    if this_depot and this_depot.attach_circuit_writer then
+      this_depot:attach_circuit_writer(entity) 
+      return 
+    end
+  end
+
+
+
+end
+
 local on_created_entity = function(event)
   local entity = event.entity or event.created_entity
   if not (entity and entity.valid) then return end
 
-  local depot_lib = depot_libs[entity.name]
+  local name = entity.name
+
+  if name == "transport-depot-writer" then
+    circuit_writer_built(entity)
+    return
+  end
+
+  local depot_lib = depot_libs[name]
   if not depot_lib then
     return
   end
