@@ -48,7 +48,16 @@ end
 function supply_depot:update_contents()
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
-  local new_contents = self.entity.get_output_inventory().get_contents()
+  local new_contents
+  if (self.circuit_writer and self.circuit_writer.valid) then
+    local behavior = self.circuit_writer.get_control_behavior()
+    if behavior and behavior.disabled then
+      new_contents = {}
+    end
+  end
+  if not new_contents then
+    new_contents = self.entity.get_output_inventory().get_contents()
+  end
 
   for name, count in pairs (self.old_contents) do
     if not new_contents[name] then
@@ -89,7 +98,7 @@ function supply_depot:update()
 end
 
 function supply_depot:say(string)
-  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 function supply_depot:give_item(requested_name, requested_count)

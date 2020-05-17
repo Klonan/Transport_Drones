@@ -503,15 +503,8 @@ function request_depot:update_sticker()
 
 end
 
-function request_depot:attach_circuit_writer(entity)
-  if self.circuit_writer and self.circuit_writer.valid then return end
-  self:say("Writer attached "..entity.name)
-  self.circuit_writer = entity
-end
-
-
 function request_depot:say(string)
-  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 function request_depot:add_to_network()

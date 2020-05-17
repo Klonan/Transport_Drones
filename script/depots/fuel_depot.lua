@@ -115,6 +115,14 @@ end
 
 function fuel_depot:handle_fuel_request(depot)
   if not self:can_spawn_drone() then return end
+  
+  if (self.circuit_writer and self.circuit_writer.valid) then
+    local behavior = self.circuit_writer.get_control_behavior()
+    if behavior and behavior.disabled then
+      return
+    end
+  end
+
   local amount = self:get_fuel_amount()
   if amount < self:minimum_request_size() then return end
 
@@ -135,7 +143,7 @@ function fuel_depot:handle_fuel_request(depot)
 end
 
 function fuel_depot:say(string)
-  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 

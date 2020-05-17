@@ -192,9 +192,12 @@ local circuit_writer_built = function(entity)
 
   for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
     local this_depot = get_depot(found_entity)
-    if this_depot and this_depot.attach_circuit_writer then
-      this_depot:attach_circuit_writer(entity) 
-      return 
+    if this_depot then
+      if not (this_depot.circuit_writer and this_depot.circuit_writer.valid) then
+        this_depot.circuit_writer = entity
+        this_depot:say("Circuit writer attached")
+        return 
+      end
     end
   end
 
@@ -231,10 +234,8 @@ local on_created_entity = function(event)
   depot:add_to_network()
   add_to_update_bucket(depot.index)
   
-  if depot.attach_circuit_writer then
-    for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-writer", radius = entity.get_radius() + 1, position = entity.position}) do
-      circuit_writer_built(entity)
-    end
+  for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-writer", radius = entity.get_radius() + 1, position = entity.position}) do
+    circuit_writer_built(entity)
   end
 
 end

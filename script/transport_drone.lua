@@ -588,7 +588,7 @@ function transport_drone:update(event)
 end
 
 function transport_drone:say(text)
-  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = text}
+  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 function transport_drone:go_to_position(position, radius)

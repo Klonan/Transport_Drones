@@ -146,7 +146,16 @@ function buffer_depot:update_contents()
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
   local new_contents = {}
-  if self.item then
+
+  local enabled = true
+  if (self.circuit_writer and self.circuit_writer.valid) then
+    local behavior = self.circuit_writer.get_control_behavior()
+    if behavior and behavior.disabled then
+      enabled = false
+    end
+  end
+
+  if enabled and self.item then
     new_contents[self.item] = self:get_current_amount()
   end
 
@@ -586,15 +595,8 @@ function buffer_depot:update_circuit_writer()
 
 end
 
-function buffer_depot:attach_circuit_writer(entity)
-  if self.circuit_writer and self.circuit_writer.valid then return end
-  self:say("Writer attached "..entity.name)
-  self.circuit_writer = entity
-end
-
-
 function buffer_depot:say(string)
-  self.entity.surface.create_entity{name = "flying-text", position = self.entity.position, text = string}
+  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 function buffer_depot:add_to_network()
