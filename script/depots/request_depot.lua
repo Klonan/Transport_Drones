@@ -164,7 +164,14 @@ function request_depot:make_request()
   if not supply_depots then return end
 
   local request_size = self:get_request_size()
+  local minimum_size = self:get_minimum_request_size()
   local stack_size = self:get_stack_size()
+
+  if self.circuit_limit then
+    local missing = self.circuit_limit - self:get_current_amount()
+    request_size = math.min(missing, request_size)
+    minimum_size = math.max(request_size, minimum_size)
+  end
   
   local node_position = self.node_position
   local heuristic = function(depot, count)
@@ -172,7 +179,6 @@ function request_depot:make_request()
     return distance(depot.node_position, node_position) - ((amount / request_size) * item_heuristic_bonus)
   end
   
-  local minimum_size = self:get_minimum_request_size()
   local best_buffer
   local best_index
   local lowest_score = big
@@ -343,17 +349,27 @@ function request_depot:get_current_amount()
 end
 
 function request_depot:get_storage_size()
-  return self.circuit_limit or self:get_drone_item_count() * self:get_request_size()
+  return self:get_drone_item_count() * self:get_request_size()
 end
 
 function request_depot:should_order()
   if self:get_fuel_amount() < fuel_amount_per_drone then
     return
   end
-  local storage_ratio = self:get_current_amount() / self:get_storage_size()
-  if storage_ratio == 0 then return true end
-  local drone_ratio = 1 - (self:get_active_drone_count() / self:get_drone_item_count())
-  return storage_ratio < drone_ratio
+
+  if self.circuit_limit == 0 then return end
+
+  local size = self.circuit_limit or self:get_storage_size()
+  local missing = size - self:get_current_amount()
+
+  local should_send_drone_count = math.ceil(missing / self:get_request_size())
+  return self:get_active_drone_count() < should_send_drone_count
+
+end
+
+function request_depot:search_for_circuit_writer()
+  local radius = self.entity.get_radius() + 1
+  --for k, entity in pairs (self.entity.surface)
 end
 
 function request_depot:update_circuit_writer()
@@ -362,16 +378,18 @@ function request_depot:update_circuit_writer()
   if not self.circuit_writer.valid then
     self.circuit_writer = nil
     self.circuit_limit = nil
+    self:search_for_circuit_writer()
     return
   end
   
   local behavior = self.circuit_writer.get_control_behavior()
   if not behavior then
-    self:say("No Behavior")
+    self.circuit_limit = 0
+    self:say("Depot disabled")
     return
   end
 
-  local circuit_condition = behavior.circuit_condition
+  local circuit_condition = behavior.connect_to_logistic_network and behavior.logistic_condition or behavior.circuit_condition
   if circuit_condition then
     local condition = circuit_condition.condition
     if condition.comparator == "=" then
@@ -379,8 +397,8 @@ function request_depot:update_circuit_writer()
       if first_signal then
         if first_signal.name == self.item then
           local count
-          if condition.second_signal then
-            count = self.circuit_writer.get_merged_signal(condition.second_signal) 
+          if condition.second_signal and condition.second_signal.name then
+            count = self.circuit_writer.get_merged_signal(condition.second_signal)
           else
             count = condition.constant or 0
           end
@@ -390,8 +408,15 @@ function request_depot:update_circuit_writer()
         end
       end
     end
+    if circuit_condition.fulfilled then
+      self.circuit_limit = nil
+      self:say("Depot enabled")
+    end
   end
 
+  --If there is a writer with no conditions, we just disable the depot.
+  self.circuit_limit = 0
+  self:say("Depot disabled")
 
 end
 

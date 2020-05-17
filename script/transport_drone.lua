@@ -280,7 +280,14 @@ function transport_drone:process_pickup()
   
   local available_count = self.requested_count + self.supply_depot:get_available_item_count(self.request_depot.item)
 
-  local to_take = min(available_count, self.request_depot:get_request_size())
+  local to_take
+  if not self.request_depot.circuit_limit then
+    -- No circuit limit, pickup as much as we can
+    to_take = min(available_count, self.request_depot:get_request_size())
+  else
+    -- We want to only take what we requested.
+    to_take = self.requested_count
+  end
 
   local sprite_switch = false
 
