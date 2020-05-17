@@ -14,10 +14,9 @@ request_depot.corpse_offsets =
 
 local fuel_fluid
 local get_fuel_fluid = function()
-  if fuel_fluid then
-    return fuel_fluid
+  if not fuel_fluid then
+    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
   end
-  fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
   return fuel_fluid
 end
 
@@ -317,11 +316,19 @@ function request_depot:get_request_size()
 end
 
 function request_depot:get_output_inventory()
-  return self.entity.get_output_inventory()
+  --return self.entity.get_output_inventory()
+  if not self.output_inventory then
+    self.output_inventory = self.entity.get_output_inventory()
+  end
+  return self.output_inventory
 end
 
 function request_depot:get_drone_inventory()
-  return self.entity.get_inventory(defines.inventory.assembling_machine_input)
+  if not self.drone_inventory then
+    self.drone_inventory = self.entity.get_inventory(defines.inventory.assembling_machine_input)
+                    end 
+  return self.drone_inventory
+  --return self.entity.get_inventory(defines.inventory.assembling_machine_input)
 end
 
 function request_depot:get_active_drone_count()
