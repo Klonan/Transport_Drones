@@ -147,13 +147,7 @@ function buffer_depot:update_contents()
 
   local new_contents = {}
 
-  local enabled = true
-  if (self.circuit_writer and self.circuit_writer.valid) then
-    local behavior = self.circuit_writer.get_control_behavior()
-    if behavior and behavior.disabled then
-      enabled = false
-    end
-  end
+  local enabled = (self.circuit_limit ~= 0)
 
   if enabled and self.item then
     new_contents[self.item] = self:get_current_amount()
