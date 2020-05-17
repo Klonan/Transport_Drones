@@ -448,16 +448,20 @@ end
 
 local valid_item_cache = {}
 local is_valid_item = function(item_name)
-  if valid_item_cache[item_name] then return true end
-  
+  local bool = valid_item_cache[item_name]
+  if bool ~= nil then
+    return bool
+  end    
   valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
   return valid_item_cache[item_name]
 end
 
 local valid_fluid_cache = {}
 local is_valid_fluid = function(fluid_name)
-  if valid_fluid_cache[fluid_name] then return true end
-  
+  local bool = valid_fluid_cache[fluid_name]
+  if bool ~= nil then
+    return bool
+  end  
   valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
   return valid_fluid_cache[fluid_name]
 end

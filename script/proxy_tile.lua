@@ -110,7 +110,7 @@ end
 
 local no_tile_text = "You're playing with a naughty mod that isn't raising events properly. Tile is missing from the built tile event."
 local broken_now = "The road network will probably be broken now if you were doing anything with road tiles."
-
+local shown = false
 local on_built_tile = function(event)
 
   if not event.tile then
@@ -118,8 +118,11 @@ local on_built_tile = function(event)
       game.print(no_tile_text)
       game.print(broken_now)
     else
-      game.show_message_dialog{text = no_tile_text}
-      game.show_message_dialog{text = broken_now}
+      if not shown then
+        game.show_message_dialog{text = no_tile_text}
+        game.show_message_dialog{text = broken_now}
+        shown = true
+      end
     end
     return
   end
@@ -128,6 +131,7 @@ local on_built_tile = function(event)
     raw_road_tile_built(event)
     return
   end
+  
   if event.tile.name == "transport-drone-proxy-tile" then
     road_tile_built(event)
     return
@@ -144,8 +148,11 @@ local on_mined_tile = function(event)
       game.print(text)
       game.print(broken_now)
     else
-      game.show_message_dialog{text = text}
-      game.show_message_dialog{text = broken_now}
+      if not shown then
+        game.show_message_dialog{text = text}
+        game.show_message_dialog{text = broken_now}
+        shown = true
+      end
     end
     return
   end

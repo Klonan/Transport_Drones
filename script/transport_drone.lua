@@ -125,7 +125,7 @@ transport_drone.new = function(request_depot, drone_name)
   setmetatable(drone, transport_drone.metatable)
   add_drone(drone)
 
-  entity.ai_settings.path_resolution_modifier = 0
+  --entity.ai_settings.path_resolution_modifier = 0
   
   return drone
 end
@@ -362,6 +362,26 @@ function transport_drone:return_to_requester(sprite_switch)
 
 end
 
+local valid_item_cache = {}
+local is_valid_item = function(item_name)
+  local bool = valid_item_cache[item_name]
+  if bool ~= nil then
+    return bool
+  end    
+  valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
+  return valid_item_cache[item_name]
+end
+
+local valid_fluid_cache = {}
+local is_valid_fluid = function(fluid_name)
+  local bool = valid_fluid_cache[fluid_name]
+  if bool ~= nil then
+    return bool
+  end  
+  valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
+  return valid_fluid_cache[fluid_name]
+end
+
 function transport_drone:update_sticker()
 
 
@@ -378,19 +398,23 @@ function transport_drone:update_sticker()
   if self.held_item then
 
     local sprite
-    if game.item_prototypes[self.held_item] then
-      sprite = "item/"..self.held_item
-    elseif game.fluid_prototypes[self.held_item] then
+    if is_valid_fluid(self.held_item) then
       sprite = "fluid/"..self.held_item
+    elseif is_valid_item(self.held_item) then
+      sprite = "item/"..self.held_item
     end
+
+    local surface = self.entity.surface
+    local offset = self.entity.prototype.sticker_box.left_top
+    --local force = self.entity.force
     
     self.background_rendering = rendering.draw_sprite 
     {
       sprite = "utility/entity_info_dark_background",
       target = self.entity,
-      target_offset = self.entity.prototype.sticker_box.left_top,
-      surface = self.entity.surface,
-      forces = {self.entity.force},
+      target_offset = offset,
+      surface = surface,
+      --forces = {force},
       only_in_alt_mode = true,
       --target_offset = {0, -0.5},
       x_scale = 0.6,
@@ -401,9 +425,9 @@ function transport_drone:update_sticker()
     {
       sprite = sprite,
       target = self.entity,
-      target_offset = self.entity.prototype.sticker_box.left_top,
-      surface = self.entity.surface,
-      forces = {self.entity.force},
+      target_offset = offset,
+      surface = surface,
+      --forces = {self.entity.force},
       only_in_alt_mode = true,
       --target_offset = {0, -0.5},
       x_scale = 0.6,
@@ -414,13 +438,16 @@ function transport_drone:update_sticker()
 
   if self.fuel_amount then
 
+    local surface = self.entity.surface
+    local offset = self.entity.prototype.sticker_box.left_top
+
     self.background_rendering = rendering.draw_sprite 
     {
       sprite = "utility/entity_info_dark_background",
       target = self.entity,
-      target_offset = self.entity.prototype.sticker_box.left_top,
-      surface = self.entity.surface,
-      forces = {self.entity.force},
+      target_offset = offset,
+      surface = surface,
+      --forces = {self.entity.force},
       only_in_alt_mode = true,
       --target_offset = {0, -0.5},
       x_scale = 0.6,
@@ -431,9 +458,9 @@ function transport_drone:update_sticker()
     {
       sprite = "fluid/"..get_fuel_fluid(),
       target = self.entity,
-      target_offset = self.entity.prototype.sticker_box.left_top,
-      surface = self.entity.surface,
-      forces = {self.entity.force},
+      target_offset = offset,
+      surface = surface,
+      --forces = {self.entity.force},
       only_in_alt_mode = true,
       --target_offset = {0, -0.5},
       x_scale = 0.6,
