@@ -190,6 +190,8 @@ local circuit_writer_built = function(entity)
   search_position.x = search_position.x + offset[1]
   search_position.y = search_position.y + offset[2]
 
+  entity.rotatable = false
+
   for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
     local this_depot = get_depot(found_entity)
     if this_depot then
@@ -200,9 +202,38 @@ local circuit_writer_built = function(entity)
       end
     end
   end
+end
 
+local circuit_reader_built = function(entity)
+  local offset = circuit_offsets[entity.direction]
+  if not offset then error("HEUK") end
+  local search_position = entity.position
+  search_position.x = search_position.x + offset[1]
+  search_position.y = search_position.y + offset[2]
 
+  entity.operable = false
+  entity.rotatable = false
 
+  rendering.draw_sprite
+  {
+    sprite = "utility/fluid_indication_arrow",
+    surface = entity.surface,
+    only_in_alt_mode = true,
+    target = entity,
+    target_offset = {offset[1] / 2, offset[2] / 2},
+    orientation_target = entity
+  }
+
+  for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
+    local this_depot = get_depot(found_entity)
+    if this_depot then
+      if not (this_depot.circuit_reader and this_depot.circuit_reader.valid) then
+        this_depot.circuit_reader = entity
+        this_depot:say("Circuit reader attached")
+        return 
+      end
+    end
+  end
 end
 
 local on_created_entity = function(event)
@@ -213,6 +244,11 @@ local on_created_entity = function(event)
 
   if name == "transport-depot-writer" then
     circuit_writer_built(entity)
+    return
+  end
+
+  if name == "transport-depot-reader" then
+    circuit_reader_built(entity)
     return
   end
 
@@ -236,6 +272,10 @@ local on_created_entity = function(event)
   
   for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-writer", radius = entity.get_radius() + 1, position = entity.position}) do
     circuit_writer_built(entity)
+  end
+  
+  for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-reader", radius = entity.get_radius() + 1, position = entity.position}) do
+    circuit_reader_built(entity)
   end
 
 end

@@ -56,3 +56,36 @@ data:extend
   writer,
   writer_item
 }
+
+local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
+reader.name = "transport-depot-reader"
+reader.localised_name = "Transport depot reader"
+reader.item_count = 1
+reader.radius_visualisation_specification = 
+{
+  offset = {0, 1},
+  distance = 0.5,
+  sprite = 
+  {
+    filename = "__core__/graphics/arrows/gui-arrow-circle.png",
+    height = 50,
+    width = 50
+  }
+
+}
+
+local reader_item = 
+{
+  type = "item",
+  name = "transport-depot-reader",
+  icon = reader.icon,
+  icon_size = reader.icon_size,
+  stack_size = 20,
+  place_result = "transport-depot-reader"
+}
+
+data:extend
+{
+  reader,
+  reader_item
+}

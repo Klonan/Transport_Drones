@@ -211,6 +211,17 @@ function request_depot:make_request()
 
 end
 
+function request_depot:update_circuit_reader()
+  if self.circuit_reader and self.circuit_reader.valid then
+    local behavior = self.circuit_reader.get_or_create_control_behavior()
+    local signal
+    if self.item then
+      signal = {signal = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item}, count = self:get_current_amount()}
+    end
+    behavior.set_signal(1, signal)
+  end
+end
+
 function request_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
@@ -218,6 +229,7 @@ function request_depot:update()
   self:update_circuit_writer()
   self:make_request()
   self:update_sticker()
+  self:update_circuit_reader()
 end
 
 function request_depot:suicide_all_drones()

@@ -178,6 +178,15 @@ function buffer_depot:update_contents()
 
   self.old_contents = new_contents
 
+  if self.circuit_reader and self.circuit_reader.valid then
+    local behavior = self.circuit_reader.get_or_create_control_behavior()
+    local signal
+    if self.item then
+      signal = {signal = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item}, count = self:get_current_amount()}
+    end
+    behavior.set_signal(1, signal)
+  end
+
 end
 
 local min = math.min
