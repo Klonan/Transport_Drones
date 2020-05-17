@@ -260,6 +260,7 @@ function buffer_depot:update()
   self:update_contents()
   self:check_fuel_amount()
   self:check_drone_validity()
+  self:update_circuit_writer()
   self:make_request()
   self:update_sticker()
 end
@@ -406,10 +407,15 @@ function buffer_depot:should_order()
   if self:get_fuel_amount() < fuel_amount_per_drone then
     return
   end
-  local storage_ratio = self:get_current_amount() / self:get_storage_size()
-  if storage_ratio == 0 then return true end
-  local drone_ratio = 1 - (self:get_active_drone_count() / self:get_drone_item_count())
-  return storage_ratio < drone_ratio
+
+  if self.circuit_limit == 0 then return end
+
+  local size = self.circuit_limit or self:get_storage_size()
+  local missing = size - self:get_current_amount()
+
+  local should_send_drone_count = math.ceil(missing / self:get_request_size())
+  return self:get_active_drone_count() < should_send_drone_count
+
 end
 
 local min = math.min
@@ -530,6 +536,60 @@ function buffer_depot:update_sticker()
     scale = 1.5
   }
 
+end
+
+function buffer_depot:update_circuit_writer()
+  if not self.circuit_writer then return end
+
+  if not self.circuit_writer.valid then
+    self.circuit_writer = nil
+    self.circuit_limit = nil
+    return
+  end
+  
+  local behavior = self.circuit_writer.get_control_behavior()
+  if not behavior then
+    self.circuit_limit = 0
+    --self:say("Depot disabled")
+    return
+  end
+
+  local circuit_condition = behavior.connect_to_logistic_network and behavior.logistic_condition or behavior.circuit_condition
+  if circuit_condition then
+    local condition = circuit_condition.condition
+    if condition.comparator == "=" then
+      local first_signal = condition.first_signal
+      if first_signal then
+        if first_signal.name == self.item then
+          local count
+          if condition.second_signal and condition.second_signal.name then
+            count = self.circuit_writer.get_merged_signal(condition.second_signal)
+          else
+            count = condition.constant or 0
+          end
+          self.circuit_limit = count
+          --self:say("Set limit "..count)
+          return
+        end
+      end
+    end
+    if circuit_condition.fulfilled then
+      self.circuit_limit = nil
+      --self:say("Depot enabled")
+      return
+    end
+  end
+
+  --If there is a writer with no conditions, we just disable the depot.
+  self.circuit_limit = 0
+  --self:say("Depot disabled")
+
+end
+
+function buffer_depot:attach_circuit_writer(entity)
+  if self.circuit_writer and self.circuit_writer.valid then return end
+  self:say("Writer attached "..entity.name)
+  self.circuit_writer = entity
 end
 
 

@@ -367,25 +367,19 @@ function request_depot:should_order()
 
 end
 
-function request_depot:search_for_circuit_writer()
-  local radius = self.entity.get_radius() + 1
-  --for k, entity in pairs (self.entity.surface)
-end
-
 function request_depot:update_circuit_writer()
   if not self.circuit_writer then return end
 
   if not self.circuit_writer.valid then
     self.circuit_writer = nil
     self.circuit_limit = nil
-    self:search_for_circuit_writer()
     return
   end
   
   local behavior = self.circuit_writer.get_control_behavior()
   if not behavior then
     self.circuit_limit = 0
-    self:say("Depot disabled")
+    --self:say("Depot disabled")
     return
   end
 
@@ -403,20 +397,21 @@ function request_depot:update_circuit_writer()
             count = condition.constant or 0
           end
           self.circuit_limit = count
-          self:say("Set limit "..count)
+          --self:say("Set limit "..count)
           return
         end
       end
     end
     if circuit_condition.fulfilled then
       self.circuit_limit = nil
-      self:say("Depot enabled")
+      --self:say("Depot enabled")
+      return
     end
   end
 
   --If there is a writer with no conditions, we just disable the depot.
   self.circuit_limit = 0
-  self:say("Depot disabled")
+  --self:say("Depot disabled")
 
 end
 

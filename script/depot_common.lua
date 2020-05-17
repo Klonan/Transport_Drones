@@ -184,7 +184,6 @@ local circuit_offsets =
 }
 
 local circuit_writer_built = function(entity)
-  game.print("Writer built")
   local offset = circuit_offsets[entity.direction]
   if not offset then error("HEUK") end
   local search_position = entity.position
@@ -231,6 +230,12 @@ local on_created_entity = function(event)
   add_depot_to_node(depot)
   depot:add_to_network()
   add_to_update_bucket(depot.index)
+  
+  if depot.attach_circuit_writer then
+    for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-writer", radius = entity.get_radius() + 1, position = entity.position}) do
+      circuit_writer_built(entity)
+    end
+  end
 
 end
 
