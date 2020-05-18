@@ -674,3 +674,30 @@ local buffer_depot_items =
 
 data:extend{buffer_depot}
 data:extend(buffer_depot_items)
+
+local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
+reader.name = "road-network-reader"
+reader.localised_name = "Road network reader"
+reader.item_slot_count = 1
+reader.radius_visualisation_specification =
+{
+  sprite = caution_sprite,
+  distance = 0.5,
+  offset = {0, 1}
+}
+
+local reader_item = 
+{
+  type = "item",
+  name = "road-network-reader",
+  icon = reader.icon,
+  icon_size = reader.icon_size,
+  stack_size = 20,
+  place_result = "road-network-reader"
+}
+
+data:extend
+{
+  reader,
+  reader_item
+}

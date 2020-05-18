@@ -60,7 +60,7 @@ data:extend
 local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
 reader.name = "transport-depot-reader"
 reader.localised_name = "Transport depot reader"
-reader.item_count = 1
+reader.item_slot_count = 1
 reader.radius_visualisation_specification = 
 {
   offset = {0, 1},
@@ -71,7 +71,6 @@ reader.radius_visualisation_specification =
     height = 50,
     width = 50
   }
-
 }
 
 local reader_item = 
