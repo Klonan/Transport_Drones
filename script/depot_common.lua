@@ -212,9 +212,7 @@ local circuit_reader_built = function(entity)
   search_position.x = search_position.x + offset[1]
   search_position.y = search_position.y + offset[2]
 
-  entity.operable = false
   entity.rotatable = false
-
 
   local attached = false
 
@@ -229,7 +227,6 @@ local circuit_reader_built = function(entity)
       end
     end
   end
-
 
   if attached then
     rendering.draw_sprite
