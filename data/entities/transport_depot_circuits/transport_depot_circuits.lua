@@ -89,6 +89,7 @@ reader.sprites = require(util.path("data/entities/transport_depot_circuits/depot
 reader.icon = util.path("data/entities/transport_depot_circuits/depot-reader-icon.png")
 reader.icon_mipmaps = 0
 reader.icon_size = 72
+reader.minable.result = "transport-depot-reader"
 reader.radius_visualisation_specification = 
 {
   offset = {0, 1},

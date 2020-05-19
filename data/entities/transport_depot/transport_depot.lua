@@ -683,7 +683,7 @@ reader.sprites = require(util.path("data/entities/transport_depot_circuits/road-
 reader.icon = util.path("data/entities/transport_depot_circuits/road-network-reader-icon.png")
 reader.icon_mipmaps = 0
 reader.icon_size = 72
-reader.minable.resulte = "road-network-reader"
+reader.minable.result = "road-network-reader"
 reader.radius_visualisation_specification =
 {
   sprite = caution_sprite,
@@ -707,7 +707,7 @@ local reader_recipe =
 {
   type = "recipe",
   name = "road-network-reader",
-  localised_name = {"transport-depot-reader"},
+  localised_name = {"road-network-reader"},
   icon = reader.icon,
   icon_size = reader.icon_size,
   enabled = false,
