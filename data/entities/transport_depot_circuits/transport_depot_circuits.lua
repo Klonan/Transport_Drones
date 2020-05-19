@@ -13,7 +13,10 @@ writer.energy_source =
 }
 
 writer.glass_pictures = nil
-writer.animations = writer_sprite.sprites
+writer.animations = require(util.path("data/entities/transport_depot_circuits/depot-writer-sprite"))
+writer.icon = util.path("data/entities/transport_depot_circuits/depot-writer-icon.png")
+writer.icon_mipmaps = 0
+writer.icon_size = 72
 writer.fluid_animations = nil
 writer.pumping_speed = 0
 writer.load_connector_animations = nil
@@ -48,19 +51,44 @@ local writer_item =
   icon = writer.icon,
   icon_size = writer.icon_size,
   stack_size = 20,
+  subgroup = "transport-drones",
+  order = "z-b",
   place_result = "transport-depot-writer"
+}
+
+
+local writer_recipe = 
+{
+  type = "recipe",
+  name = "transport-depot-writer",
+  localised_name = {"transport-depot-writer"},
+  icon = writer.icon,
+  icon_size = writer.icon_size,
+  enabled = false,
+  ingredients =
+  {
+    {"copper-cable", 5},
+    {"electronic-circuit", 10},
+  },
+  energy_required = 5,
+  result = "transport-depot-writer"
 }
 
 data:extend
 {
   writer,
-  writer_item
+  writer_item,
+  writer_recipe
 }
 
 local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
 reader.name = "transport-depot-reader"
 reader.localised_name = "Transport depot reader"
 reader.item_slot_count = 1
+reader.sprites = require(util.path("data/entities/transport_depot_circuits/depot-reader-sprite"))
+reader.icon = util.path("data/entities/transport_depot_circuits/depot-reader-icon.png")
+reader.icon_mipmaps = 0
+reader.icon_size = 72
 reader.radius_visualisation_specification = 
 {
   offset = {0, 1},
@@ -80,11 +108,31 @@ local reader_item =
   icon = reader.icon,
   icon_size = reader.icon_size,
   stack_size = 20,
+  subgroup = "transport-drones",
+  order = "z-c",
   place_result = "transport-depot-reader"
+}
+
+local reader_recipe = 
+{
+  type = "recipe",
+  name = "transport-depot-reader",
+  localised_name = {"transport-depot-reader"},
+  icon = reader.icon,
+  icon_size = reader.icon_size,
+  enabled = false,
+  ingredients =
+  {
+    {"copper-cable", 5},
+    {"electronic-circuit", 10},
+  },
+  energy_required = 5,
+  result = "transport-depot-reader"
 }
 
 data:extend
 {
   reader,
-  reader_item
+  reader_item,
+  reader_recipe
 }

@@ -39,6 +39,17 @@ function network_reader.new(entity)
   }
   setmetatable(depot, network_reader.metatable)
 
+  local offset = network_reader.corpse_offsets[entity.direction]
+  rendering.draw_sprite
+  {
+    sprite = "utility/fluid_indication_arrow",
+    surface = entity.surface,
+    only_in_alt_mode = true,
+    target = entity,
+    target_offset = {offset[1] / 2, offset[2] / 2},
+    orientation_target = entity
+  }
+
   return depot
   
 end

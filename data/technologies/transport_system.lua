@@ -55,3 +55,43 @@ local transport_system =
 }
 
 data:extend{transport_system}
+
+
+local transport_circuits =
+{
+  name = "transport-depot-circuits",
+  localised_name = {"transport-depot-circuits"},
+  type = "technology",
+  icon = util.path("data/technologies/transport-circuits-icon.png"),
+  icon_size = 144,
+  upgrade = true,
+  effects =
+  {
+    {
+      type = "unlock-recipe",
+      recipe = "transport-depot-writer"
+    },
+    {
+      type = "unlock-recipe",
+      recipe = "transport-depot-reader"
+    },
+    {
+      type = "unlock-recipe",
+      recipe = "road-network-reader"
+    },
+  },
+  prerequisites = {"circuit-network", name},
+  unit =
+  {
+    count = 500,
+    ingredients =
+    {
+      {"automation-science-pack", 1},
+      {"logistic-science-pack", 1},
+    },
+    time = 30
+  },
+  order = "transport-depot-circuits",
+}
+
+data:extend{transport_circuits}

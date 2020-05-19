@@ -679,6 +679,11 @@ local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
 reader.name = "road-network-reader"
 reader.localised_name = "Road network reader"
 reader.item_slot_count = 1
+reader.sprites = require(util.path("data/entities/transport_depot_circuits/road-network-reader-sprite"))
+reader.icon = util.path("data/entities/transport_depot_circuits/road-network-reader-icon.png")
+reader.icon_mipmaps = 0
+reader.icon_size = 72
+reader.minable.resulte = "road-network-reader"
 reader.radius_visualisation_specification =
 {
   sprite = caution_sprite,
@@ -693,11 +698,31 @@ local reader_item =
   icon = reader.icon,
   icon_size = reader.icon_size,
   stack_size = 20,
+  subgroup = "transport-drones",
+  order = "z-a",
   place_result = "road-network-reader"
+}
+
+local reader_recipe = 
+{
+  type = "recipe",
+  name = "road-network-reader",
+  localised_name = {"transport-depot-reader"},
+  icon = reader.icon,
+  icon_size = reader.icon_size,
+  enabled = false,
+  ingredients =
+  {
+    {"copper-cable", 5},
+    {"electronic-circuit", 10},
+  },
+  energy_required = 5,
+  result = "road-network-reader"
 }
 
 data:extend
 {
   reader,
-  reader_item
+  reader_item,
+  reader_recipe
 }

@@ -215,15 +215,8 @@ local circuit_reader_built = function(entity)
   entity.operable = false
   entity.rotatable = false
 
-  rendering.draw_sprite
-  {
-    sprite = "utility/fluid_indication_arrow",
-    surface = entity.surface,
-    only_in_alt_mode = true,
-    target = entity,
-    target_offset = {offset[1] / 2, offset[2] / 2},
-    orientation_target = entity
-  }
+
+  local attached = false
 
   for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
     local this_depot = get_depot(found_entity)
@@ -231,10 +224,25 @@ local circuit_reader_built = function(entity)
       if not (this_depot.circuit_reader and this_depot.circuit_reader.valid) then
         this_depot.circuit_reader = entity
         this_depot:say("Circuit reader attached")
-        return 
+        attached = true
+        break
       end
     end
   end
+
+
+  if attached then
+    rendering.draw_sprite
+    {
+      sprite = "utility/fluid_indication_arrow",
+      surface = entity.surface,
+      only_in_alt_mode = true,
+      target = entity,
+      target_offset = {offset[1] / 2, offset[2] / 2},
+      orientation_target = entity
+    }
+  end
+
 end
 
 local on_created_entity = function(event)
