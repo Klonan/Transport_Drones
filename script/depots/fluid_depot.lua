@@ -112,9 +112,16 @@ function fluid_depot:update_contents()
 
   if self.circuit_reader and self.circuit_reader.valid then
     local behavior = self.circuit_reader.get_or_create_control_behavior()
-    local name, count = next(new_contents) or next(self.entity.get_output_inventory().get_contents())
+    local name, count = next(new_contents)
+    if not name then
+      local box = self:get_output_fluidbox()
+      if box then
+        name = box.name
+        count = box.amount
+      end
+    end
     local signal
-    if name then
+    if name and count then
       signal = {signal = {type = "fluid", name = name}, count = count}
     end
     behavior.set_signal(1, signal)
