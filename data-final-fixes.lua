@@ -1,3 +1,15 @@
+local shared = require("shared")
+
+data.raw.tile["transport-drone-road"].collision_mask = {"object-layer"}
+data.raw.tile["transport-drone-proxy-tile"].collision_mask = {"ground-tile"}
+
+data.raw.item.road.place_as_tile =
+{
+  result = "transport-drone-proxy-tile",
+  condition_size = 1,
+  condition = { "water-tile", "object-layer" }
+}
+
 local util = require "__Transport_Drones__/data/tf_util/tf_util"
 require("data/entities/transport_drone/transport_drone")
 require("data/make_request_recipes")

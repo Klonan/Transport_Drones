@@ -77,7 +77,8 @@ depot.fluid_boxes =
 depot.crafting_categories = {"transport-drone-request"}
 depot.crafting_speed = (1)
 depot.ingredient_count = nil
-depot.collision_mask = {"item-layer", "object-layer", "water-tile", "player-layer", "resource-layer"}
+--depot.collision_mask = {"item-layer", "object-layer", "water-tile", "player-layer", "resource-layer"}
+depot.se_allow_in_space = true
 depot.allowed_effects = {}
 depot.module_specification = nil
 depot.minable = {result = "request-depot", mining_time = 1}

@@ -5,7 +5,7 @@ tile.localised_name = {"road"}
 tile.tint = {0.5, 0.5, 0.5}
 tile.collision_mask = shared.tile_collision_mask
 tile.minable.result = "road"
-tile.layer = 150
+tile.layer = 250
 tile.placeable_by = {{item   = "road", count = 1}}
 tile.map_color={r=86/2, g=82/2, b=74/2}
 
@@ -25,10 +25,10 @@ local proxy_entity =
   subgroup = "wrecks",
   order = "d[remnants]-d[ship-wreck]-c[small]-a",
   max_health = 1,
-  collision_box = {{-0.5, -0.5}, {0.5, 0.5}},
+  collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
   pictures = util.empty_sprite(),
   render_layer = "object",
-  collision_mask = shared.tile_collision_mask
+  collision_mask = { "water-tile", "object-layer" }
 }
 
 local item = 

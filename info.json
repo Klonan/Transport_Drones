@@ -8,6 +8,7 @@
   "description": "Adds transport drones and transport depots",
   "dependencies": ["base >= 0.18.22", 
     "(?)deadlock_stacked_recipes",
+    "(?)space-exploration-postprocess",
     "(?)Krastorio2",
     "(?)apm_recycling",
     "(?)PickerDollies",

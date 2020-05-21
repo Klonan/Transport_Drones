@@ -42,7 +42,7 @@ local road_tile_built = function(event)
     end
   end
 
-  surface.set_tiles(new_tiles)
+  surface.set_tiles(new_tiles, true, false)
   
   if next(refund_product) then
     -- Remove first, so we make space in the inventory
