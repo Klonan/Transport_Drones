@@ -331,7 +331,7 @@ end
 function transport_drone:clear_reservations()
 
   if self.state == states.going_to_supply then
-    if self.supply_depot and self.request_depot.item then
+    if self.supply_depot and self.supply_depot.valid and self.request_depot.item then
       self.supply_depot:add_to_be_taken(self.request_depot.item, -self.requested_count)
     end
   end

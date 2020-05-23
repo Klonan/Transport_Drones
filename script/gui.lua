@@ -163,7 +163,7 @@ local update_contents_table = function(contents_table, network, filter, sort)
               type = "sprite-button",
               sprite = item_locale.icon,
               number = sum,
-              style = "slot_button",
+              style = "transparent_slot",
               name = "count",
               tooltip = sum
             }
@@ -220,7 +220,7 @@ local update_contents = function(gui, contents)
           type = "sprite-button",
           sprite = item_locale.icon,
           number = count,
-          style = "slot_button",
+          style = "transparent_slot",
           name = name,
           tooltip = count
         }
@@ -528,7 +528,7 @@ local update_request_depot_gui = function(depot, gui, filter)
           sprite = item_locale.icon,
           number = current_count,
           tooltip = current_count,
-          style = "slot_button",
+          style = "transparent_slot",
           name = "count"
         }
         current_item_flow.add{type = "label", caption = {"current"}}    
@@ -552,7 +552,7 @@ local update_request_depot_gui = function(depot, gui, filter)
           sprite = item_locale.icon,
           number = current_count,
           tooltip = requested_count,
-          style = "slot_button",
+          style = "transparent_slot",
           name = "count"
         }
         requested_item_flow.add{type = "label", caption = {"requested"}}    
@@ -698,6 +698,7 @@ local refresh_network_gui = function(player, selected_index)
   pusher.style.horizontally_stretchable = true
   subheader.add{type = "label", caption = {"filter"}}
   local filter = subheader.add{type = "choose-elem-button", name = "depot_filter_button", elem_type = "signal"}
+  subheader.style.right_padding = 12
 
   make_network_gui(inner, network)
 
@@ -763,7 +764,7 @@ local open_gui = function(player, network_index)
 
   local drop_down = title_flow.add{type = "drop-down", name = "road_network_drop_down"}
 
-  title_flow.add{type = "sprite-button", style = "close_button", sprite = "utility/close_white", name = "close_road_network_gui"}
+  title_flow.add{type = "sprite-button", style = "frame_action_button", sprite = "utility/close_white", name = "close_road_network_gui"}
   
   
   local selected
