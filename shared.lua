@@ -3,7 +3,7 @@
 local data = {}
 
 data.tile_collision_mask = {"object-layer"}
-data.drone_collision_mask = {"resource-layer", "ground-tile", "water-tile", "not-colliding-with-itself", "colliding-with-tiles-only", "consider-tile-transitions"}
+data.drone_collision_mask = {"layer-14", "resource-layer", "ground-tile", "water-tile", "not-colliding-with-itself", "colliding-with-tiles-only", "consider-tile-transitions"}
 --data.drone_collision_mask = {"ground-tile", "water-tile", "not-colliding-with-itself", "colliding-with-tiles-only"}
 --data.drone_collision_mask = {"ground-tile", "water-tile"}
 data.variation_count = 50

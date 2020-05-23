@@ -144,7 +144,7 @@ local on_built_tile = function(event)
     return
   end
 
-  if is_road_tile[event.tile.name] then
+  if is_road_tile(event.tile.name) then
     raw_road_tile_built(event)
     return
   end

@@ -7,7 +7,7 @@ data.raw.item.road.place_as_tile =
 {
   result = "transport-drone-proxy-tile",
   condition_size = 1,
-  condition = { "water-tile", "object-layer" }
+  condition = { "layer-14", "object-layer" }
 }
 
 local util = require "__Transport_Drones__/data/tf_util/tf_util"

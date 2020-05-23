@@ -28,7 +28,7 @@ local proxy_entity =
   collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
   pictures = util.empty_sprite(),
   render_layer = "object",
-  collision_mask = { "water-tile", "object-layer" }
+  collision_mask = { "layer-14", "object-layer" }
 }
 
 local item = 
@@ -51,7 +51,7 @@ local item =
   {
     result = "transport-drone-proxy-tile",
     condition_size = 1,
-    condition = { "water-tile", "object-layer" }
+    condition = { "layer-14", "object-layer" }
   }
 }
 
