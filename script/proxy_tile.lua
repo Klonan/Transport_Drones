@@ -4,6 +4,20 @@ local road_network = require("script/road_network")
 
 local real_name = "transport-drone-road"
 
+local road_tiles =
+{
+  ["transport-drone-road"] = true
+}
+
+local tile_proxies =
+{
+  ["transport-drone-proxy-tile"] = "transport-drone-road"
+}
+
+local is_road_tile = function(name)
+  return road_tiles[name]
+end
+
 local raw_road_tile_built = function(event)
 
   for k, tile in pairs (event.tiles) do
@@ -13,8 +27,17 @@ local raw_road_tile_built = function(event)
 
 end
 
+local can_place_road_tile = function(surface, position)
+  return surface.can_place_entity
+  {
+    name = "road-tile-collision-proxy",
+    position = {position.x + 0.5, position.y + 0.5},
+    build_check_type = defines.build_check_type.manual
+  }
+end
+
 local product_amount = util.product_amount
-local road_tile_built = function(event)
+local road_tile_built = function(event, proxy)
 
   local tiles = event.tiles
   local surface = game.get_surface(event.surface_index)
@@ -24,14 +47,8 @@ local road_tile_built = function(event)
 
   for k, tile in pairs (tiles) do
     local position = tile.position
-    if surface.can_place_entity(
-      {
-        name = "road-tile-collision-proxy",
-        position = {position.x + 0.5, position.y + 0.5},
-        build_check_type = defines.build_check_type.manual
-      }
-    ) then
-      new_tiles[k] = {name = real_name, position = position}
+    if can_place_road_tile(surface, position) then
+      new_tiles[k] = {name = proxy, position = position}
       road_network.add_node(event.surface_index, position.x, position.y)
     else
       new_tiles[k] = {name = tile.old_tile.name, position = position}
@@ -127,13 +144,15 @@ local on_built_tile = function(event)
     return
   end
 
-  if event.tile.name == "transport-drone-road" then
+  if is_road_tile[event.tile.name] then
     raw_road_tile_built(event)
     return
   end
+
+  local proxy = tile_proxies[event.tile.name]
   
-  if event.tile.name == "transport-drone-proxy-tile" then
-    road_tile_built(event)
+  if proxy then
+    road_tile_built(event, proxy)
     return
   end
 
@@ -160,7 +179,7 @@ local on_mined_tile = function(event)
   local new_tiles = {}
   local refund_count = 0
   for k, tile in pairs (tiles) do
-    if tile.old_tile.name == real_name then
+    if is_road_tile(tile.old_tile.name) then
       if road_network.remove_node(event.surface_index, tile.position.x, tile.position.y) then
         --can't remove this tile, supply or requester is there.
         new_tiles[k] = {name = tile.old_tile.name, position = tile.position}
@@ -186,15 +205,42 @@ local on_mined_tile = function(event)
 
 end
 
+local script_raised_set_tiles = function(event)
+  local surface = game.get_surface(event.surface_index)
+  if not event.tiles then return end
+  local new_tiles = {}
+  for k, tile in pairs (event.tiles) do
+    if is_road_tile(tile.name) then
+      if road_network.remove_node(event.surface_index, tile.position.x, tile.position.y) then
+        --can't remove this tile, supply or requester is there.
+        new_tiles[k] = {name = tile.name, position = tile.position}
+      end
+    else
+      local proxy = tile_proxies[tile.name]
+      if proxy then
+        if can_place_road_tile(surface, tile.position) then
+          new_tiles[k] = {name = proxy, position = tile.position}
+        else
+          new_tiles[k] = {name = surface.get_hidden_tile(tile.position) or "grass-1", position = tile.position}
+        end
+      end
+    end    
+  end
+  surface.set_tiles(new_tiles)
+end
+
 local lib = {}
 
 lib.events = 
 {
   [defines.events.on_player_built_tile] = on_built_tile,
   [defines.events.on_robot_built_tile] = on_built_tile,
-
+  
   [defines.events.on_player_mined_tile] = on_mined_tile,
   [defines.events.on_robot_mined_tile] = on_mined_tile,
+
+  [defines.events.script_raised_set_tiles] = script_raised_set_tiles
+
 }
 
 return lib
