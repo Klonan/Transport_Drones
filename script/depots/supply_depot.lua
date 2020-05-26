@@ -2,7 +2,7 @@ local supply_depot = {}
 
 supply_depot.metatable = {__index = supply_depot}
 
-supply_depot.corpse_offsets = 
+supply_depot.corpse_offsets =
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -18,7 +18,7 @@ function supply_depot.new(entity)
   local offset = supply_depot.corpse_offsets[direction]
   entity.destructible = false
   entity.minable = false
-  entity.rotatable = false  
+  entity.rotatable = false
   entity.active = false
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force, player = entity.last_user}
   local corpse_position = {position.x + offset[1], position.y + offset[2]}
@@ -38,7 +38,7 @@ function supply_depot.new(entity)
   setmetatable(depot, supply_depot.metatable)
 
   return depot
-  
+
 end
 
 function supply_depot:get_to_be_taken(name)
@@ -55,6 +55,7 @@ function supply_depot:update_contents()
       new_contents = {}
     end
   end
+
   if not new_contents then
     new_contents = self.entity.get_output_inventory().get_contents()
   end
@@ -63,7 +64,7 @@ function supply_depot:update_contents()
     if not new_contents[name] then
       local item_supply = supply[name]
       if item_supply then
-        item_supply[self.index] = nil      
+        item_supply[self.index] = nil
       end
     end
   end
@@ -131,12 +132,12 @@ function supply_depot:on_removed(event)
 
   self.corpse.destroy()
   self.assembler.destructible = true
-  
+
   if event.name == defines.events.on_entity_died then
     self.entity.destroy()
     self.assembler.die()
   else
-    self.assembler.destroy()    
+    self.assembler.destroy()
   end
 end
 

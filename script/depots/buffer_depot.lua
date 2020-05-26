@@ -6,7 +6,7 @@ local request_spawn_timeout = 60
 local buffer_depot = {}
 buffer_depot.metatable = {__index = buffer_depot}
 
-buffer_depot.corpse_offsets = 
+buffer_depot.corpse_offsets =
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -51,7 +51,7 @@ function buffer_depot.new(entity)
   local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
-  
+
   local depot =
   {
     entity = entity,
@@ -142,7 +142,7 @@ end
 function buffer_depot:update_contents()
 
   if not self.network_id then return end
-  
+
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
   local new_contents = {}
@@ -157,7 +157,7 @@ function buffer_depot:update_contents()
     if not new_contents[name] then
       local item_supply = supply[name]
       if item_supply then
-        item_supply[self.index] = nil      
+        item_supply[self.index] = nil
       end
     end
   end
@@ -191,9 +191,9 @@ end
 
 local min = math.min
 function buffer_depot:dispatch_drone(depot, count)
-  
+
   local drone = self.transport_drone.new(self, self.item)
-  drone:pickup_from_supply(depot, count)
+  drone:pickup_from_supply(depot, self.item, count)
   self:remove_fuel(fuel_amount_per_drone)
 
   self.drones[drone.index] = drone
@@ -218,7 +218,7 @@ function buffer_depot:make_request()
 
   if not self:can_spawn_drone() then return end
   if not self:should_order() then return end
-  
+
   local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
   if not supply_depots then return end
 
@@ -235,12 +235,12 @@ function buffer_depot:make_request()
     end
     return distance(depot.node_position, node_position) - ((amount / request_size) * item_heuristic_bonus)
   end
-  
+
   local best_buffer
   local best_index
   local lowest_score = big
   local get_depot = self.get_depot
-    
+
   for depot_index, count in pairs (supply_depots) do
     local depot = get_depot(depot_index)
     if depot then
@@ -293,7 +293,7 @@ function buffer_depot:set_request_mode()
     self.mode = request_mode.item
     return
   end
-  
+
   if product_type == "fluid" then
     --self:say("Set to fluid")
     self.mode = request_mode.fluid
@@ -313,7 +313,7 @@ function buffer_depot:check_request_change()
   end
 
   self.item = requested_item
-  
+
 end
 
 function buffer_depot:get_requested_item()
@@ -338,7 +338,7 @@ function buffer_depot:get_stack_size()
     return get_stack_size(self.item)
   end
 
-  
+
   if self.mode == request_mode.fluid then
     return drone_fluid_capacity
   end
@@ -465,7 +465,7 @@ local is_valid_item = function(item_name)
   local bool = valid_item_cache[item_name]
   if bool ~= nil then
     return bool
-  end    
+  end
   valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
   return valid_item_cache[item_name]
 end
@@ -475,7 +475,7 @@ local is_valid_fluid = function(fluid_name)
   local bool = valid_fluid_cache[fluid_name]
   if bool ~= nil then
     return bool
-  end  
+  end
   valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
   return valid_fluid_cache[fluid_name]
 end
@@ -499,7 +499,7 @@ function buffer_depot:take_item(name, count, temperature)
     end
     self:set_output_fluidbox(box)
     return
-  end  
+  end
 
 end
 
@@ -526,7 +526,7 @@ function buffer_depot:remove_drone(drone, remove_item)
 end
 
 function buffer_depot:update_sticker()
-  
+
   if not self.item then
     if self.rendering and rendering.is_valid(self.rendering) then
       rendering.destroy(self.rendering)
@@ -562,7 +562,7 @@ function buffer_depot:update_circuit_writer()
     self.circuit_limit = nil
     return
   end
-  
+
   local behavior = self.circuit_writer.get_control_behavior()
   if not behavior then
     self.circuit_limit = 0

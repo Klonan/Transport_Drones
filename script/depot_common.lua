@@ -46,7 +46,7 @@ for name, setting in pairs (settings.startup) do
   end
 end
 
-local script_data = 
+local script_data =
 {
   depots = {},
   update_buckets = {},
@@ -77,7 +77,7 @@ end
 local attempt_to_place_node = function(entity, depot_lib)
   local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
-  
+
   local node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
 
   if road_network.get_node(surface.index, node_position[1], node_position[2]) then
@@ -130,7 +130,7 @@ local add_depot_to_node = function(depot)
     {
       {name = "transport-drone-road", position = depot.node_position}
     }
-  
+
     road_network.add_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
     node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
   end
@@ -199,7 +199,7 @@ local circuit_writer_built = function(entity)
       if not (this_depot.circuit_writer and this_depot.circuit_writer.valid) then
         this_depot.circuit_writer = entity
         this_depot:say("Circuit writer attached")
-        return 
+        return
       end
     end
   end
@@ -269,17 +269,17 @@ local on_created_entity = function(event)
     entity.destroy({raise_destroy = true})
     return
   end
-  
+
   local depot = depot_lib.new(entity)
   script_data.depots[depot.index] = depot
   add_depot_to_node(depot)
   depot:add_to_network()
   add_to_update_bucket(depot.index)
-  
+
   for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-writer", radius = entity.get_radius() + 1, position = entity.position}) do
     circuit_writer_built(entity)
   end
-  
+
   for k, entity in pairs (entity.surface.find_entities_filtered{name = "transport-depot-reader", radius = entity.get_radius() + 1, position = entity.position}) do
     circuit_reader_built(entity)
   end
@@ -332,7 +332,7 @@ local migrate_depots = function()
     count = count + 1
   end
   global.request_depots = nil
-  
+
   local supply_depots = global.supply_depots.supply_depots
   for k, v in pairs (supply_depots) do
     depots[k] = v
@@ -340,7 +340,7 @@ local migrate_depots = function()
     count = count + 1
   end
   global.supply_depots = nil
-  
+
   script_data.depots = depots
   script_data.update_order = update_order
 
@@ -436,7 +436,7 @@ end
 
 local lib = {}
 
-lib.events = 
+lib.events =
 {
   [defines.events.on_built_entity] = on_created_entity,
   [defines.events.on_robot_built_entity] = on_created_entity,
@@ -494,22 +494,16 @@ lib.on_configuration_changed = function()
     end
   end
 
-  if not script_data.reset_to_be_taken_again then
-    script_data.reset_to_be_taken_again = true
-    for k, depot in pairs (script_data.depots) do
-      if depot.to_be_taken then
-        depot.to_be_taken = {}
-      end
+  for k, depot in pairs (script_data.depots) do
+    if depot.to_be_taken then
+      depot.to_be_taken = {}
     end
   end
 
-  
-  if not script_data.reset_fuel_on_the_way then
-    script_data.reset_fuel_on_the_way = true
-    for k, depot in pairs (script_data.depots) do
-      if depot.fuel_on_the_way then
-        depot.fuel_on_the_way = 0
-      end
+
+  for k, depot in pairs (script_data.depots) do
+    if depot.fuel_on_the_way then
+      depot.fuel_on_the_way = 0
     end
   end
 

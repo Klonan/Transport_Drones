@@ -3,6 +3,7 @@ Version: 0.7.5
 Date: 2020-05-26
   Changes:
     - Fix road network logic regarding script raised tiles event.
+    - Fixed an issue with supply depots getting stuck not supplying.
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.4
 Date: 2020-05-26
