@@ -163,7 +163,6 @@ function request_depot:make_request()
 
   local request_size = self:get_request_size()
   local minimum_size = self:get_minimum_request_size()
-  self:say("hi")
   local stack_size = self:get_stack_size()
 
   if self.circuit_limit then
@@ -182,7 +181,6 @@ function request_depot:make_request()
   local best_index
   local lowest_score = big
   local get_depot = self.get_depot
-  --self:say("HI")
 
   for depot_index, count in pairs (supply_depots) do
     if count >= minimum_size then
