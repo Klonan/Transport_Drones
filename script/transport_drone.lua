@@ -276,6 +276,7 @@ function transport_drone:process_pickup()
 
   if self.requested_item ~= self.request_depot.item then
     self:return_to_requester()
+    return
   end
 
   if not self.supply_depot.entity.valid then
@@ -298,10 +299,10 @@ function transport_drone:process_pickup()
 
   if to_take > 0 then
 
-    local given_count = self.supply_depot:give_item(self.request_depot.item, to_take)
+    local given_count = self.supply_depot:give_item(self.requested_item, to_take)
 
     if given_count > 0 then
-      self.held_item = self.request_depot.item
+      self.held_item = self.requested_item
       self.held_count = given_count
       self.held_temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
       self:update_sticker()
@@ -336,7 +337,7 @@ end
 function transport_drone:clear_reservations()
 
   if self.state == states.going_to_supply then
-    if self.supply_depot and self.supply_depot.valid and self.requested_item then
+    if self.supply_depot and self.requested_item then
       self.supply_depot:add_to_be_taken(self.requested_item, -self.requested_count)
       self.requested_item = nil
       self.requested_count = nil

@@ -111,7 +111,7 @@ end
 function supply_depot:add_to_be_taken(name, count)
   --if not (name and count) then return end
   self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
-  --self:say(self.to_be_taken[name])
+  --self:say(name.." - "..self.to_be_taken[name]..": "..count)
 end
 
 function supply_depot:get_available_item_count(name)
