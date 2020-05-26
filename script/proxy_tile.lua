@@ -60,7 +60,7 @@ local road_tile_built = function(event, proxy)
   end
 
   surface.set_tiles(new_tiles, true, false)
-  
+
   if next(refund_product) then
     -- Remove first, so we make space in the inventory
     local remove_function = (event.player_index and game.get_player(event.player_index).remove_item) or (event.robot and event.robot.get_inventory(defines.inventory.robot_cargo).remove)
@@ -102,9 +102,9 @@ local non_road_tile_built = function(event)
   local surface = game.get_surface(event.surface_index)
   surface.set_tiles(new_tiles)
 
-  
+
   if event.item then
-    
+
     if refund_count > 0 then
       if event.player_index then
         local player = game.get_player(event.player_index)
@@ -150,14 +150,14 @@ local on_built_tile = function(event)
   end
 
   local proxy = tile_proxies[event.tile.name]
-  
+
   if proxy then
     road_tile_built(event, proxy)
     return
   end
 
   non_road_tile_built(event)
-  
+
 end
 
 local text = "You're playing with a naughty mod that isn't raising events properly. Surface index is missing from the tile mined event."
@@ -211,31 +211,34 @@ local script_raised_set_tiles = function(event)
   local new_tiles = {}
   for k, tile in pairs (event.tiles) do
     if is_road_tile(tile.name) then
-      if road_network.remove_node(event.surface_index, tile.position.x, tile.position.y) then
-        --can't remove this tile, supply or requester is there.
-        new_tiles[k] = {name = tile.name, position = tile.position}
-      end
+      road_network.add_node(event.surface_index, tile.position.x, tile.position.y)
     else
       local proxy = tile_proxies[tile.name]
       if proxy then
         if can_place_road_tile(surface, tile.position) then
           new_tiles[k] = {name = proxy, position = tile.position}
+          road_network.add_node(event.surface_index, tile.position.x, tile.position.y)
         else
           new_tiles[k] = {name = surface.get_hidden_tile(tile.position) or "grass-1", position = tile.position}
         end
+      else
+        if road_network.remove_node(event.surface_index, tile.position.x, tile.position.y) then
+          --can't remove this tile, depot is here.
+          new_tiles[k] = {name = "transport-drone-road", position = tile.position}
+        end
       end
-    end    
+    end
   end
   surface.set_tiles(new_tiles)
 end
 
 local lib = {}
 
-lib.events = 
+lib.events =
 {
   [defines.events.on_player_built_tile] = on_built_tile,
   [defines.events.on_robot_built_tile] = on_built_tile,
-  
+
   [defines.events.on_player_mined_tile] = on_mined_tile,
   [defines.events.on_robot_mined_tile] = on_mined_tile,
 
