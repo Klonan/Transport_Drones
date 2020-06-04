@@ -6,8 +6,10 @@ tile.tint = {0.5, 0.5, 0.5}
 tile.collision_mask = shared.tile_collision_mask
 tile.minable.result = "road"
 tile.layer = 250
-tile.placeable_by = {{item   = "road", count = 1}}
+tile.placeable_by = {{item = "road", count = 1}}
 tile.map_color={r=86/2, g=82/2, b=74/2}
+tile.walking_speed_modifier = 1.5
+tile.vehicle_friction_modifier = 0.9
 
 local proxy_tile = util.copy(data.raw.tile["stone-path"])
 
@@ -15,7 +17,7 @@ proxy_tile.name = "transport-drone-proxy-tile"
 proxy_tile.tint = {0.5, 0.5, 0.5}
 proxy_tile.localised_name = {"road"}
 
-local proxy_entity = 
+local proxy_entity =
 {
   type = "simple-entity",
   name = "road-tile-collision-proxy",
@@ -31,7 +33,7 @@ local proxy_entity =
   collision_mask = {"object-layer"}
 }
 
-local item = 
+local item =
 {
   type = "item",
   name = "road",
@@ -55,7 +57,7 @@ local item =
   }
 }
 
-local recipe = 
+local recipe =
 {
   type = "recipe",
   name = "road",

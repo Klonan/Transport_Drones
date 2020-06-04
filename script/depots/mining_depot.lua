@@ -1,7 +1,7 @@
 local mining_depot = {}
 mining_depot.metatable = {__index = mining_depot}
 
-mining_depot.corpse_offsets = 
+mining_depot.corpse_offsets =
 {
   [0] = {0, -3},
   [2] = {3, 0},
@@ -29,7 +29,7 @@ function mining_depot.new(entity)
   local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "invisible-transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
-  
+
   local depot =
   {
     entity = entity,
@@ -50,7 +50,7 @@ function mining_depot:get_to_be_taken(name)
 end
 
 function mining_depot:update_contents()
-  
+
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
   local new_contents
@@ -68,7 +68,7 @@ function mining_depot:update_contents()
     if not new_contents[name] then
       local item_supply = supply[name]
       if item_supply then
-        item_supply[self.index] = nil      
+        item_supply[self.index] = nil
       end
     end
   end
@@ -93,7 +93,7 @@ function mining_depot:update_contents()
     local behavior = self.circuit_reader.get_or_create_control_behavior()
     local name, count = next(new_contents) or next(self.entity.get_output_inventory().get_contents())
     local signal
-    if name then
+    if name and count and count > 0 then
       signal = {signal = {type = "item", name = name}, count = count}
     end
     behavior.set_signal(1, signal)

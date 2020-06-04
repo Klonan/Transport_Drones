@@ -1,7 +1,7 @@
 local fluid_depot = {}
 
 fluid_depot.metatable = {__index = fluid_depot}
-fluid_depot.corpse_offsets = 
+fluid_depot.corpse_offsets =
 {
   [0] = {0, -2},
   [2] = {2, 0},
@@ -19,7 +19,7 @@ local get_corpse_position = function(entity)
 end
 
 function fluid_depot.new(entity)
-  
+
   local force = entity.force
   local surface = entity.surface
 
@@ -29,7 +29,7 @@ function fluid_depot.new(entity)
   local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
-  
+
   local depot =
   {
     entity = entity,
@@ -42,7 +42,7 @@ function fluid_depot.new(entity)
   setmetatable(depot, fluid_depot.metatable)
 
   return depot
-  
+
 end
 
 function fluid_depot:get_to_be_taken(name)
@@ -69,7 +69,7 @@ function fluid_depot:update_contents()
 
   local new_contents = {}
 
-  
+
   local enabled = true
   if (self.circuit_writer and self.circuit_writer.valid) then
     local behavior = self.circuit_writer.get_control_behavior()
@@ -84,12 +84,12 @@ function fluid_depot:update_contents()
       new_contents[box.name] = box.amount
     end
   end
-  
+
   for name, count in pairs (self.old_contents) do
     if not new_contents[name] then
       local item_supply = supply[name]
       if item_supply then
-        item_supply[self.index] = nil      
+        item_supply[self.index] = nil
       end
     end
   end
@@ -121,7 +121,7 @@ function fluid_depot:update_contents()
       end
     end
     local signal
-    if name and count then
+    if name and count and count > 0 then
       signal = {signal = {type = "fluid", name = name}, count = count}
     end
     behavior.set_signal(1, signal)

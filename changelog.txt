@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.6
+Date: 2020-05-26
+  Changes:
+    - Fix error when trying to read mining depot.
+    - Fix error when trying to load after config changed with invalid depots.
+    - Buffed the character walking speed of road tiles to 150%.
+---------------------------------------------------------------------------------------------------
 Version: 0.7.5
 Date: 2020-05-26
   Changes:

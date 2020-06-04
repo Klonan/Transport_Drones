@@ -147,6 +147,11 @@ function transport_drone:add_slow_sticker()
 end
 
 function transport_drone:pickup_from_supply(supply, item, count)
+
+  if not supply.entity.valid then
+    self:return_to_requester()
+  end
+
   self.supply_depot = supply
   self.requested_count = count
   self.requested_item = item
@@ -161,6 +166,10 @@ function transport_drone:pickup_from_supply(supply, item, count)
 end
 
 function transport_drone:deliver_fuel(depot, amount)
+
+  if not depot.entity.valid then
+    self:return_to_requester()
+  end
 
   self.target_depot = depot
   self.fuel_amount = amount
@@ -844,16 +853,17 @@ transport_drone.on_configuration_changed = function()
   script_data.riding_players = script_data.riding_players or {}
 
   for k, drone in pairs (script_data.drones) do
-    if drone.state == states.going_to_supply then
-      local count = drone.requested_count or 0
-      local item = drone.requested_item or drone.request_depot.item
-      drone:pickup_from_supply(drone.supply_depot, item, count)
-    end
-  end
-
-  for k, drone in pairs (script_data.drones) do
-    if drone.state == states.deliver_fuel then
-      drone.target_depot.fuel_on_the_way = drone.target_depot.fuel_on_the_way + (drone.fuel_amount or 0)
+    if drone.entity.valid then
+      if drone.state == states.going_to_supply then
+        local count = drone.requested_count or 0
+        local item = drone.requested_item or drone.request_depot.item
+        drone:pickup_from_supply(drone.supply_depot, item, count)
+      end
+      if drone.state == states.deliver_fuel then
+        drone.target_depot.fuel_on_the_way = drone.target_depot.fuel_on_the_way + (drone.fuel_amount or 0)
+      end
+    else
+      script_data.drones[k] = nil
     end
   end
 

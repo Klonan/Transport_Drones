@@ -2,9 +2,9 @@ local road_network = require("script/road_network")
 local depot_common = require("script/depot_common")
 
 local network_size = function(network)
-  
+
   local sum = 0
-  
+
   for category, depots in pairs (network.depots) do
     sum = sum + table_size(depots)
   end
@@ -76,7 +76,7 @@ local get_item_icon_and_locale = function(name)
 
   local items = game.item_prototypes
   if items[name] then
-    icon = "item/"..name 
+    icon = "item/"..name
     locale = items[name].localised_name
     local value = {icon = icon, locale = locale}
     cache[name] = value
@@ -120,7 +120,7 @@ local floor = math.floor
 local update_contents_table = function(contents_table, network, filter, sort)
 
   local supply = network.item_supply
-  
+
   if sort then
     local sorted_supply = {}
     local k = 1
@@ -227,7 +227,7 @@ local update_contents = function(gui, contents)
       else
         button.number = count
         button.tooltip = count
-      end      
+      end
     end
   end
 
@@ -236,7 +236,7 @@ local update_contents = function(gui, contents)
       element.destroy()
     end
   end
-  
+
 end
 
 
@@ -267,7 +267,7 @@ local add_depot_map_button = function(depot, gui, size)
   --sprite.style.padding = {padding, padding, padding, padding}
   --sprite.style.width = sprite_size
   --sprite.style.height = sprite_size
-  
+
 end
 
 
@@ -339,9 +339,9 @@ end
 local add_supply_tab = function(tabbed_pane, network)
   local supply_tab = tabbed_pane.add{type = "tab", caption = {"supply-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "supply_tab"}
-  
+
   local depots = network.depots.supply
-  
+
   if not depots then
     supply_tab.enabled = false
     tabbed_pane.add_tab(supply_tab, contents)
@@ -379,7 +379,7 @@ end
 local add_mining_tab = function(tabbed_pane, network)
   local mining_tab = tabbed_pane.add{type = "tab", caption = {"mining-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "mining_tab"}
-  
+
   local depots = network.depots.mining
 
   if not depots then
@@ -405,7 +405,7 @@ local update_fuel_depot_gui = function(depot, gui)
     flow = gui.add{type = "table", column_count = 1, style = "bordered_table", name = "table"}
     flow.style.horizontally_stretchable = true
   end
-  
+
   local active_drone_label = flow.active_drone_label
   if not active_drone_label then
     active_drone_label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}, name = "active_drone_label"}
@@ -429,12 +429,12 @@ local update_fuel_depot_gui = function(depot, gui)
   end
 end
 
-  
+
 local fuel_map_size = 64 * 3
 local update_fuel_tab = function(depots, gui)
-  
+
   if not depots then return end
-  
+
   for index, depot in pairs (depots) do
     if depot.entity.valid then
       local depot_frame = gui[index]
@@ -446,7 +446,7 @@ local update_fuel_tab = function(depots, gui)
       update_fuel_depot_gui(depot, depot_frame)
     end
   end
-    
+
   for k, gui in pairs (gui.children) do
     if not depots[gui.name] then
       gui.destroy()
@@ -465,9 +465,9 @@ end
 local add_fuel_tab = function(tabbed_pane, network)
   local fuel_tab = tabbed_pane.add{type = "tab", caption = {"fuel-depots-tab"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "fuel_tab"}
-  
+
   local depots = network.depots.fuel
-  
+
   if not depots then
     fuel_tab.enabled = false
     tabbed_pane.add_tab(fuel_tab, contents)
@@ -518,7 +518,7 @@ local update_request_depot_gui = function(depot, gui, filter)
         current_item_flow = flow.add{type = "flow", name = "current_item_flow"}
         current_item_flow.style.vertical_align = "center"
       end
-      
+
       local count = current_item_flow.count
       local current_count = floor(depot:get_current_amount())
       if not count then
@@ -531,7 +531,7 @@ local update_request_depot_gui = function(depot, gui, filter)
           style = "transparent_slot",
           name = "count"
         }
-        current_item_flow.add{type = "label", caption = {"current"}}    
+        current_item_flow.add{type = "label", caption = {"current"}}
       else
         count.tooltip = current_count
         count.number = current_count
@@ -542,7 +542,7 @@ local update_request_depot_gui = function(depot, gui, filter)
         requested_item_flow = flow.add{type = "flow", name = "requested_item_flow"}
         requested_item_flow.style.vertical_align = "center"
       end
-   
+
       local request_count = requested_item_flow.count
       local requested_count = depot:get_request_size() * depot:get_drone_item_count()
       if not request_count then
@@ -555,15 +555,15 @@ local update_request_depot_gui = function(depot, gui, filter)
           style = "transparent_slot",
           name = "count"
         }
-        requested_item_flow.add{type = "label", caption = {"requested"}}    
+        requested_item_flow.add{type = "label", caption = {"requested"}}
       else
         request_count.tooltip = requested_count
         request_count.number = requested_count
       end
-      
+
     end
   end
-  
+
   local active_drone_label = flow.active_drone_label
   if not active_drone_label then
     active_drone_label = flow.add{type = "label", caption = {"active-drones", depot:get_active_drone_count()}, name = "active_drone_label"}
@@ -604,7 +604,7 @@ local update_request_tab = function(depots, gui, filter)
       update_request_depot_gui(depot, depot_frame, filter)
     end
   end
-    
+
   for k, gui in pairs (gui.children) do
     if not depots[gui.name] then
       gui.destroy()
@@ -633,7 +633,7 @@ end
 local add_request_tab = function(tabbed_pane, network)
   local request_tab = tabbed_pane.add{type = "tab", caption = {"request-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "request_tab"}
-  
+
   local depots = network.depots.request
   if not depots then
     request_tab.enabled = false
@@ -653,7 +653,7 @@ local floor = math.floor
 local add_buffer_tab = function(tabbed_pane, network)
   local buffer_tab = tabbed_pane.add{type = "tab", caption = {"buffer-depots"}}
   local contents = tabbed_pane.add{type = "scroll-pane", name = "buffer_tab"}
-  
+
   local depots = network.depots.buffer
   if not depots then
     buffer_tab.enabled = false
@@ -669,7 +669,7 @@ local add_buffer_tab = function(tabbed_pane, network)
 end
 
 local make_network_gui = function(inner, network)
-  
+
   local tabbed_pane = inner.add{type = "tabbed-pane", name = "tab_pane"}
   add_contents_tab(tabbed_pane, network)
   add_supply_tab(tabbed_pane, network)
@@ -679,7 +679,7 @@ local make_network_gui = function(inner, network)
   add_request_tab(tabbed_pane, network)
   add_buffer_tab(tabbed_pane, network)
   tabbed_pane.selected_tab_index = 1
-  
+
 end
 
 local refresh_network_gui = function(player, selected_index)
@@ -705,7 +705,7 @@ local refresh_network_gui = function(player, selected_index)
 end
 
 local close_gui = function(player)
-  
+
   local gui = player.gui.screen
   local frame = gui.road_network_frame
 
@@ -765,8 +765,8 @@ local open_gui = function(player, network_index)
   local drop_down = title_flow.add{type = "drop-down", name = "road_network_drop_down"}
 
   title_flow.add{type = "sprite-button", style = "frame_action_button", sprite = "utility/close_white", name = "close_road_network_gui"}
-  
-  
+
+
   local selected
   local big = 0
   local count = 0
@@ -804,7 +804,7 @@ end
 local on_gui_click = function(event)
   local gui = event.element
   if not (gui and gui.valid) then return end
-  
+
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
 
@@ -820,7 +820,7 @@ local on_gui_click = function(event)
     end
     return
   end
-  
+
   if gui.name == "close_road_network_gui" then
     close_gui(player)
     return
@@ -842,10 +842,10 @@ end
 local on_gui_selection_state_changed = function(event)
   local gui = event.element
   if not (gui and gui.valid) then return end
-  
+
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
-  
+
   if gui.name == "road_network_drop_down" then
     open_gui(player, gui.selected_index)
     return
@@ -861,7 +861,7 @@ local on_tick = function(event)
 end
 
 local on_gui_elem_changed = function(event)
-  
+
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
 
@@ -870,7 +870,7 @@ local on_gui_elem_changed = function(event)
 end
 
 local on_gui_selected_tab_changed = function(event)
-  
+
   local player = game.get_player(event.player_index)
   if not (player and player.valid) then return end
 
@@ -900,10 +900,10 @@ local toggle_gui = function(event)
   local nearby_network_index
 
   local nearby_road_tile = player.surface.find_tiles_filtered{name = "transport-drone-road", limit = 1, position = player.position, radius = 32}[1]
-  
+
   if nearby_road_tile then
       local node = road_network.get_node(player.surface.index, nearby_road_tile.position.x, nearby_road_tile.position.y)
-      if node then 
+      if node then
         local network_id = node.id
         local count = 1
         for id, network in pairs (road_network.get_networks()) do
