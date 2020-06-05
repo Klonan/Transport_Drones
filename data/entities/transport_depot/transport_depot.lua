@@ -1,7 +1,7 @@
 local collision_box = {{-1.25, -1.25},{1.25, 1.25}}
 local selection_box = {{-1.5, -1.5}, {1.5, 1.5}}
 
-local category = 
+local category =
 {
   type = "item-subgroup",
   name = "transport-drones",
@@ -131,6 +131,8 @@ local supply_depot = util.copy(depot)
 supply_depot.name = "supply-depot"
 supply_depot.localised_name = {"supply-depot"}
 supply_depot.icon = util.path("data/entities/transport_depot/supply-depot-icon.png")
+supply_depot.minable = {result = "supply-depot", mining_time = 1}
+supply_depot.placeable_by = {item = "supply-depot", count = 1}
 table.insert(supply_depot.flags, "not-deconstructable")
 
 supply_depot.fluid_boxes =
@@ -199,7 +201,7 @@ local caution_corpse =
   remove_on_tile_placement = false
 }
 
-local supply_depot_chest = 
+local supply_depot_chest =
 {
   type = "container",
   name = "supply-depot-chest",
@@ -243,8 +245,7 @@ local category =
   name = "transport-drone-request"
 }
 
-
-local items = 
+local items =
 {
   {
     type = "item",
@@ -380,7 +381,7 @@ fuel_depot.animation =
   },
 }
 
-local fuel_depot_items = 
+local fuel_depot_items =
 {
   {
     type = "item",
@@ -421,7 +422,7 @@ local fuel_recipe_category =
 
 data:extend{fuel_recipe_category}
 
-local fuel_signal = 
+local fuel_signal =
 {
   type = "virtual-signal",
   name = "fuel-signal",
@@ -449,7 +450,7 @@ local invisble_corpse =
   remove_on_tile_placement = false
 }
 
-local fluid_request_category = 
+local fluid_request_category =
 {
   type = "recipe-category",
   name = "transport-fluid-request"
@@ -542,7 +543,7 @@ data:extend
   fluid_request_category
 }
 
-local fluid_depot_items = 
+local fluid_depot_items =
 {
   {
     type = "item",
@@ -640,7 +641,7 @@ buffer_depot.animation =
   }
 }
 
-local buffer_depot_items = 
+local buffer_depot_items =
 {
   {
     type = "item",
@@ -692,7 +693,7 @@ reader.radius_visualisation_specification =
   offset = {0, 1}
 }
 
-local reader_item = 
+local reader_item =
 {
   type = "item",
   name = "road-network-reader",
@@ -704,7 +705,7 @@ local reader_item =
   place_result = "road-network-reader"
 }
 
-local reader_recipe = 
+local reader_recipe =
 {
   type = "recipe",
   name = "road-network-reader",

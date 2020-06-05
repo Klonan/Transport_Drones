@@ -20,7 +20,7 @@ local doerhickers =
     gui.add{type = "label", caption = {"transport_drones_pages.welcome-2"}}
   end,
   road_network = function(gui)
-
+    gui.add{type="button", style="road_network"}
   end,
   request_depots = function(gui)
 
