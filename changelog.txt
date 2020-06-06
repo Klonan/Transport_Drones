@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.7
+Date: 2020-06-06
+  Changes:
+    - Added in-game documentation using the 'Informatron' mod.
+---------------------------------------------------------------------------------------------------
 Version: 0.7.6
-Date: 2020-05-26
+Date: 2020-06-04
   Changes:
     - Fix error when trying to read mining depot.
     - Fix error when trying to load after config changed with invalid depots.
