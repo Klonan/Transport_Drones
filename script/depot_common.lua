@@ -122,7 +122,7 @@ local refund_build = function(event, entity_prototype)
 end
 
 local add_depot_to_node = function(depot)
-  local node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
+  local node = road_network.get_node(depot.surface_index, depot.node_position[1], depot.node_position[2])
 
   if not node then
 
@@ -271,6 +271,8 @@ local on_created_entity = function(event)
   end
 
   local depot = depot_lib.new(entity)
+  script.register_on_entity_destroyed(entity)
+  depot.surface_index = entity.surface.index
   script_data.depots[depot.index] = depot
   add_depot_to_node(depot)
   depot:add_to_network()
@@ -286,6 +288,15 @@ local on_created_entity = function(event)
 
 end
 
+local remove_depot = function(depot, event)
+  depot:remove_from_network()
+  local surface = depot.surface_index
+  local index = depot.index
+  local x, y = depot.node_position[1], depot.node_position[2]
+  remove_depot_from_node(surface, x, y, index)
+  script_data.depots[index] = nil
+  depot:on_removed(event)
+end
 
 local on_entity_removed = function(event)
   local entity = event.entity
@@ -293,17 +304,20 @@ local on_entity_removed = function(event)
   if not (entity and entity.valid) then return end
 
   local depot = get_depot(entity)
-
   if depot then
-    depot:remove_from_network()
-    local surface = depot.entity.surface
-    local index = depot.index
-    local x, y = depot.node_position[1], depot.node_position[2]
-    remove_depot_from_node(surface.index, x, y, index)
-    script_data.depots[index] = nil
-    depot:on_removed(event)
+    remove_depot(depot, event)
   end
 
+end
+
+local on_entity_destroyed = function(event)
+  local unit_number = event.unit_number
+  if not unit_number then return end
+
+  local depot = get_depot_by_index(tostring(unit_number))
+  if depot then
+    remove_depot(depot, event)
+  end
 end
 
 local get_lib = function(depot)
@@ -447,6 +461,7 @@ lib.events =
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
+  [defines.events.on_entity_destroyed] = on_entity_destroyed,
 
   [defines.events.on_tick] = on_tick,
   [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
@@ -464,10 +479,7 @@ lib.on_load = function()
   script_data = global.transport_depots or script_data
   setup_lib_values()
   for k, depot in pairs (script_data.depots) do
-    if depot.entity.valid then
-      --Not sure if I should remove it here, as it will cry "oh modifying global during on load wtf"
-      load_depot(depot)
-    end
+    load_depot(depot)
   end
 end
 
@@ -483,14 +495,14 @@ lib.on_configuration_changed = function()
     if not depot.entity.valid then
       script_data.depots[k] = nil
     else
+      script.register_on_entity_destroyed(depot.entity)
+      depot.surface_index = depot.entity.surface.index
       if depot.on_config_changed then
         depot:on_config_changed()
       end
       add_depot_to_node(depot)
-      if depot.entity.valid then
-        depot:remove_from_network()
-        depot:add_to_network()
-      end
+      depot:remove_from_network()
+      depot:add_to_network()
     end
   end
 

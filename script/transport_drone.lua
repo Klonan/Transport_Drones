@@ -346,7 +346,7 @@ end
 function transport_drone:clear_reservations()
 
   if self.state == states.going_to_supply then
-    if self.supply_depot and self.requested_item then
+    if self.supply_depot and self.supply_depot.entity.valid and self.requested_item then
       self.supply_depot:add_to_be_taken(self.requested_item, -self.requested_count)
       self.requested_item = nil
       self.requested_count = nil
@@ -354,7 +354,7 @@ function transport_drone:clear_reservations()
   end
 
   if self.state == states.delivering_fuel then
-    if self.target_depot and self.fuel_amount then
+    if self.target_depot and self.target_depot.entity.valid and self.fuel_amount then
       self.target_depot.fuel_on_the_way = self.target_depot.fuel_on_the_way - self.fuel_amount
     end
   end
