@@ -631,20 +631,20 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
 
   local commands = {}
 
-  if sprite_switch then
-    local proxy = self.entity.surface.create_entity
-    {
-      name = "sprite-switch-proxy",
-      position = self.entity.position,
-      force = "neutral"
-    }
-    insert(commands,
-    {
-      type = defines.command.attack,
-      target = proxy,
-      distraction = defines.distraction.none
-    })
-  end
+  --if sprite_switch then
+  --  local proxy = self.entity.surface.create_entity
+  --  {
+  --    name = "sprite-switch-proxy",
+  --    position = self.entity.position,
+  --    force = "neutral"
+  --  }
+  --  insert(commands,
+  --  {
+  --    type = defines.command.attack,
+  --    target = proxy,
+  --    distraction = defines.distraction.none
+  --  })
+  --end
 
   insert(commands,
   {
