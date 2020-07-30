@@ -28,13 +28,13 @@ local get_network_by_id = function(id)
   return script_data.networks[id]
 end
 
-local neighbor_offsets = 
+local neighbor_offsets =
 {
   {-1, 0},
   {1, 0},
   {0, -1},
   {0, 1},
-  
+
   {-1, -1},
   {1, -1},
   {1, 1},
@@ -45,10 +45,10 @@ local neighbor_offsets =
 local get_node = function(surface, x, y)
   local surface_map = script_data.node_map[surface]
   if not surface_map then return end
-  
+
   local x_map = surface_map[x]
   if not x_map then return end
-  
+
   return x_map[y]
 
 end
@@ -91,7 +91,7 @@ local accumulate_nodes = function(surface, x, y)
   local get_node = get_node
   local next = next
   local pairs = pairs
-  
+
   while true do
     local node, node_position = next(new_nodes)
     if not node then break end
@@ -117,18 +117,18 @@ local symmetric_connection_check = function(surface, x1, y1, x2, y2)
 
   local nodes_1 = {}
   local new_nodes_1 = {}
-  
+
   local root_node_1 = get_node(surface, x1, y1)
   nodes_1[root_node_1] = true
   new_nodes_1[root_node_1] = {x1, y1}
-  
+
   local nodes_2 = {}
   local new_nodes_2 = {}
-  
+
   local root_node_2 = get_node(surface, x2, y2)
   nodes_2[root_node_2] = true
   new_nodes_2[root_node_2] = {x2, y2}
-  
+
 
   local neighbor_offsets = neighbor_offsets
   local get_node = get_node
@@ -154,7 +154,7 @@ local symmetric_connection_check = function(surface, x1, y1, x2, y2)
         end
       end
     end
-    
+
     local node, node_position = next(new_nodes_2)
     if not node then break end
     --game.surfaces[surface].create_entity{name = "flying-text", position = {node_position[1], node_position[2]}, text = "B"}
@@ -175,28 +175,28 @@ local symmetric_connection_check = function(surface, x1, y1, x2, y2)
 
   end
 
-  return false 
-  
+  return false
+
 end
 
 local accumulate_smaller_node = function(surface, x1, y1, x2, y2)
 
   --returns the smaller of the 2 node groups.
-  
+
   local nodes_1 = {}
   local new_nodes_1 = {}
-  
+
   local root_node_1 = get_node(surface, x1, y1)
   nodes_1[root_node_1] = true
   new_nodes_1[root_node_1] = {x1, y1}
-  
+
   local nodes_2 = {}
   local new_nodes_2 = {}
-  
+
   local root_node_2 = get_node(surface, x2, y2)
   nodes_2[root_node_2] = true
   new_nodes_2[root_node_2] = {x2, y2}
-  
+
 
   local neighbor_offsets = neighbor_offsets
   local get_node = get_node
@@ -219,7 +219,7 @@ local accumulate_smaller_node = function(surface, x1, y1, x2, y2)
         end
       end
     end
-    
+
     local node, node_position = next(new_nodes_2)
     if not node then return nodes_2 end
     --game.surfaces[surface].create_entity{name = "flying-text", position = {node_position[1], node_position[2]}, text = "B"}
@@ -259,9 +259,9 @@ local set_node_ids = function(nodes, id)
   for node, bool in pairs (nodes) do
     --local node_position = debug_get_node_postion(node)
     --game.surfaces[node_position.surface].create_entity{name = "flying-text", position = {node_position.x, node_position.y}, text = id}
-    
+
     node.id = id
-    
+
     if node.depots then
       for k, depot in pairs (node.depots) do
         depot:remove_from_network()
@@ -357,12 +357,12 @@ road_network.add_node = function(surface, x, y)
     x_map = {}
     surface_map[x] = x_map
   end
-  
+
   if not new_node_id then
     new_node_id = new_id()
   end
-  
-  x_map[y] = 
+
+  x_map[y] =
   {
     id = new_node_id
   }
@@ -371,10 +371,10 @@ end
 
 road_network.remove_node = function(surface, x, y)
 
-  
+
   local node = get_node(surface, x, y)
   if not node then return end
-  
+
   --print("Removing node "..serpent.line({node.id, x, y}))
 
   if node.depots and next(node.depots) then
@@ -384,7 +384,7 @@ road_network.remove_node = function(surface, x, y)
   script_data.node_map[surface][x][y] = nil
 
   local count = get_neighbor_count(surface, x, y)
-  
+
   --game.surfaces[surface].create_entity{name = "flying-text", position = {x, y}, text = count}
 
   if count == 0 then
@@ -407,10 +407,10 @@ road_network.remove_node = function(surface, x, y)
   for k, offset in pairs(neighbor_offsets) do
 
     checked[k] = true
-    
+
     local fx, fy = x + offset[1], y + offset[2]
     local neighbor = get_node(surface, fx, fy)
-    
+
     if neighbor then
       if neighbor.id == node_id then
         for j, offset in pairs(neighbor_offsets) do
@@ -457,7 +457,7 @@ road_network.remove_depot = function(depot, category)
   --local surface = depot.entity.surface.index
   --local node = get_node(surface, x, y)
   --local network = get_network_by_id(node.id)
-  
+
   local network_id = depot.network_id
   if not network_id then return end
 
@@ -524,7 +524,7 @@ local get_tiles = function()
   local mask = game.tile_prototypes["transport-drone-road"].collision_mask
   local tiles = {}
   for name, tile in pairs (game.tile_prototypes) do
-    local tile_mask = tile.collision_mask
+    local tile_mask = tile.collision_mask or {}
     if table_size(tile_mask) == table_size(mask) then
       local good = true
       for layer, bool in pairs (mask) do
@@ -578,7 +578,7 @@ road_network.get_depots_by_distance = function(id, category, node_position)
   local network = get_network_by_id(id)
   local depots = network.depots[category]
   if not depots then return end
-  
+
   local to_sort = {}
   local i = 1
   for k, v in pairs (depots) do
@@ -586,7 +586,7 @@ road_network.get_depots_by_distance = function(id, category, node_position)
     i = i + 1
   end
 
-  sort(to_sort, sort_function)  
+  sort(to_sort, sort_function)
   return to_sort
 end
 

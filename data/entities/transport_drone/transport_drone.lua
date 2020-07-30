@@ -35,7 +35,7 @@ local empty_truck = function(shift)
   assert(shift)
   return
   {
-    layers = 
+    layers =
     {
       {
         filename = util.path("data/entities/transport_drone/trailer_base.png"),
@@ -74,7 +74,7 @@ local empty_truck = function(shift)
       }
     }
   }
-  
+
 end
 
 local box_variant = 0
@@ -82,7 +82,7 @@ local full_truck = function(shift)
   box_variant = box_variant + 1
   return
   {
-    layers = 
+    layers =
     {
       {
         filename = util.path("data/entities/transport_drone/truck_boxes_variation_"..(box_variant % 5)..".png"),
@@ -121,7 +121,7 @@ local full_truck = function(shift)
       }
     }
   }
-  
+
 end
 
 local ore_variant = 0
@@ -129,7 +129,7 @@ local ore_truck = function(shift, tint)
   ore_variant = ore_variant + 1
   return
   {
-    layers = 
+    layers =
     {
       {
         filename = util.path("data/entities/transport_drone/trailer_base.png"),
@@ -194,14 +194,14 @@ local ore_truck = function(shift, tint)
       }
     }
   }
-  
+
 end
 
 local fluid_truck = function(shift, tint)
 
   return
   {
-    layers = 
+    layers =
     {
       {
         filename = util.path("data/entities/transport_drone/fluid_base.png"),
@@ -253,7 +253,7 @@ local fluid_truck = function(shift, tint)
       }
     }
   }
-  
+
 end
 
 
@@ -296,7 +296,7 @@ local make_unit = function(k)
     radar_range = 1,
     order="i-d",
     subgroup = "transport",
-    resistances = 
+    resistances =
     {
       {
         type = "acid",
@@ -394,7 +394,8 @@ local make_unit = function(k)
       max_sounds_per_type = 5,
       audible_distance_modifier = 0.7
     },
-    run_animation = empty_truck(shift),
+    --run_animation = empty_truck(shift),
+    run_animation = full_truck(shift),
     emissions_per_second = shared.drone_pollution_per_second
   }
   data:extend{unit}
@@ -479,7 +480,7 @@ local make_ore_truck = function(resource, item_name)
   g = (g + 0.5) / 1.5
   b = (b + 0.5) / 1.5
   local color = {r, g, b, 1}
-  
+
   for k = 1, shared.special_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
 
@@ -494,9 +495,9 @@ local make_ore_truck = function(resource, item_name)
         0.3 + shift[2],
       }
     }
-  
+
     local darkness = 0.3  + math.random() / 5
-  
+
     local unit =
     {
       type = "unit",
@@ -512,7 +513,7 @@ local make_ore_truck = function(resource, item_name)
       radar_range = 1,
       order="i-d",
       subgroup = "transport",
-      resistances = 
+      resistances =
       {
         {
           type = "acid",
@@ -610,7 +611,8 @@ local make_ore_truck = function(resource, item_name)
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },
-      run_animation = empty_truck(shift),
+      --run_animation = empty_truck(shift),
+      run_animation = ore_truck(shift, color),
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
@@ -635,7 +637,7 @@ local make_fluid_truck = function(fluid)
   g = (g + 0.8) / 2
   b = (b + 0.8) / 2
   local color = {r, g, b, 1}
-  
+
   for k = 1, shared.special_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
 
@@ -650,9 +652,9 @@ local make_fluid_truck = function(fluid)
         0.3 + shift[2],
       }
     }
-  
+
     local darkness = 0.3  + math.random() / 5
-  
+
     local unit =
     {
       type = "unit",
@@ -668,7 +670,7 @@ local make_fluid_truck = function(fluid)
       radar_range = 1,
       order="i-d",
       subgroup = "transport",
-      resistances = 
+      resistances =
       {
         {
           type = "acid",
@@ -766,7 +768,8 @@ local make_fluid_truck = function(fluid)
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },
-      run_animation = fluid_truck(shift, {0,0,0, 0.5}),
+      --run_animation = fluid_truck(shift, {0,0,0, 0.5}),
+      run_animation = fluid_truck(shift, color)
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
@@ -804,7 +807,7 @@ local make_fuel_truck = function(fluid)
   g = (g + 0.8) / 2
   b = (b + 0.8) / 2
   local color = {r, g, b, 1}
-  
+
   for k = 1, shared.special_variation_count do
     local shift = {(math.random() - 0.5) / 1.5, (math.random() - 0.5) / 1.5}
 
@@ -819,9 +822,9 @@ local make_fuel_truck = function(fluid)
         0.3 + shift[2],
       }
     }
-  
+
     local darkness = 0.3  + math.random() / 5
-  
+
     local unit =
     {
       type = "unit",
@@ -837,7 +840,7 @@ local make_fuel_truck = function(fluid)
       radar_range = 1,
       order="i-d",
       subgroup = "transport",
-      resistances = 
+      resistances =
       {
         {
           type = "acid",
@@ -948,4 +951,3 @@ for k = 1, shared.special_variation_count do
 end
 
 data:extend{sprite_switch_hack_proxy}
-
