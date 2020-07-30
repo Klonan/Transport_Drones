@@ -769,7 +769,7 @@ local make_fluid_truck = function(fluid)
         audible_distance_modifier = 0.7
       },
       --run_animation = fluid_truck(shift, {0,0,0, 0.5}),
-      run_animation = fluid_truck(shift, color)
+      run_animation = fluid_truck(shift, color),
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
