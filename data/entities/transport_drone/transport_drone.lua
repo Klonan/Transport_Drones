@@ -632,7 +632,7 @@ end
 
 local make_fluid_truck = function(fluid)
 
-  local r, g, b = fluid.base_color[1] or fluid.base_color.r, fluid.base_color[2] or fluid.base_color.g, fluid.base_color[3] or fluid.base_color.b
+  local r, g, b = fluid.base_color[1] or fluid.base_color.r or 0, fluid.base_color[2] or fluid.base_color.g or 0, fluid.base_color[3] or fluid.base_color.b or 0
   r = (r + 0.8) / 2
   g = (g + 0.8) / 2
   b = (b + 0.8) / 2
