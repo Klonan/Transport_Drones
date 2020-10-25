@@ -1,62 +1,34 @@
 local shared = require("shared")
+local collision_mask_util = require("collision-mask-util")
 
-data.raw.tile["transport-drone-road"].collision_mask = {"object-layer"}
-data.raw.tile["transport-drone-proxy-tile"].collision_mask = {"ground-tile"}
+local road_tile = data.raw.tile["transport-drone-road"]
+local road_tile_proxy = data.raw.tile["transport-drone-proxy-tile"]
+local road_item = data.raw.item.road
 
-data.raw.item.road.place_as_tile =
+local road_collision_layer = collision_mask_util.get_first_unused_layer()
+road_tile.collision_mask = {road_collision_layer}
+
+road_tile_proxy.collision_mask = {"ground-tile"}
+
+road_item.place_as_tile =
 {
-  result = "transport-drone-proxy-tile",
+  result = road_tile_proxy.name,
   condition_size = 1,
-  condition = {"object-layer"}
+  condition = {"water-tile", road_collision_layer}
 }
+
+for k, prototype in pairs (collision_mask_util.collect_prototypes_with_layer("player-layer")) do
+  if prototype.type ~= "gate" then
+    local mask = collision_mask_util.get_mask(prototype)
+    if collision_mask_util.mask_contains_layer(mask, "item-layer") then
+      collision_mask_util.add_layer(mask, road_collision_layer)
+    end
+    prototype.collision_mask = mask
+  end
+end
+
+shared.drone_collision_mask = {"ground-tile", "water-tile", "colliding-with-tiles-only", "consider-tile-transitions"}
 
 local util = require "__Transport_Drones__/data/tf_util/tf_util"
 require("data/entities/transport_drone/transport_drone")
 require("data/make_request_recipes")
-
--- ruin rails
-
-local rail_addition_mask = "floor-layer"
-local rail_collision_mask = {"floor-layer", "water-tile", "item-layer"}
-
-for k, rail in pairs (data.raw["straight-rail"]) do
-  if rail.collision_mask then
-    util.remove_from_list(rail.collision_mask, "object-layer")
-    if not util.has_value(rail.collision_mask, rail_addition_mask) then
-      table.insert(rail.collision_mask, rail_addition_mask)
-    end
-  else
-    rail.collision_mask = rail_collision_mask
-  end
-  rail.selection_priority = 45
-end
-
-for k, rail in pairs (data.raw["curved-rail"]) do
-  if rail.collision_mask then
-    util.remove_from_list(rail.collision_mask, "object-layer")
-    if not util.has_value(rail.collision_mask, rail_addition_mask) then
-      table.insert(rail.collision_mask, rail_addition_mask)
-    end
-  else
-    rail.collision_mask = rail_collision_mask
-  end
-  rail.selection_priority = 45
-end
-
--- ruin gates
-
-local gate_collision_mask = {"item-layer", "player-layer", "train-layer", "water-tile"}
-local opened_gate_collision_mask = {"item-layer", "water-tile", "floor-layer"}
-
-for k, gate in pairs (data.raw.gate) do
-  if gate.collision_mask then
-    util.remove_from_list(gate.collision_mask, "object-layer")
-  else
-    gate.collision_mask = gate_collision_mask
-  end
-  if gate.opened_collision_mask then
-    util.remove_from_list(gate.opened_collision_mask, "object-layer")
-  else
-    gate.opened_collision_mask = opened_gate_collision_mask
-  end
-end
