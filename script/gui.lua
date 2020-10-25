@@ -194,7 +194,7 @@ end
 
 local add_contents_tab = function(tabbed_pane, network)
   local contents_tab = tabbed_pane.add{type = "tab", caption = {"contents"}}
-  local contents = tabbed_pane.add{type = "scroll-pane",  name = "contents_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane",  name = "contents_tab", style = "naked_scroll_pane"}
   contents.style.maximal_width = 1900
 
   local contents_table = contents.add{type = "table", column_count = 4, style = "bordered_table", name = "contents_table"}
@@ -338,7 +338,7 @@ end
 
 local add_supply_tab = function(tabbed_pane, network)
   local supply_tab = tabbed_pane.add{type = "tab", caption = {"supply-depots"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "supply_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "supply_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.supply
 
@@ -358,7 +358,7 @@ end
 
 local add_fluid_tab = function(tabbed_pane, network)
   local fluid_tab = tabbed_pane.add{type = "tab", caption = {"fluid-depots"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "fluid_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "fluid_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.fluid
 
@@ -378,7 +378,7 @@ end
 
 local add_mining_tab = function(tabbed_pane, network)
   local mining_tab = tabbed_pane.add{type = "tab", caption = {"mining-depots"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "mining_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "mining_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.mining
 
@@ -464,7 +464,7 @@ end
 
 local add_fuel_tab = function(tabbed_pane, network)
   local fuel_tab = tabbed_pane.add{type = "tab", caption = {"fuel-depots-tab"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "fuel_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "fuel_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.fuel
 
@@ -632,7 +632,7 @@ end
 
 local add_request_tab = function(tabbed_pane, network)
   local request_tab = tabbed_pane.add{type = "tab", caption = {"request-depots"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "request_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "request_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.request
   if not depots then
@@ -652,7 +652,7 @@ local buffer_map_size = 64 * 3
 local floor = math.floor
 local add_buffer_tab = function(tabbed_pane, network)
   local buffer_tab = tabbed_pane.add{type = "tab", caption = {"buffer-depots"}}
-  local contents = tabbed_pane.add{type = "scroll-pane", name = "buffer_tab"}
+  local contents = tabbed_pane.add{type = "scroll-pane", name = "buffer_tab", style = "naked_scroll_pane"}
 
   local depots = network.depots.buffer
   if not depots then
