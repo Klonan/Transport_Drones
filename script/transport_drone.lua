@@ -307,13 +307,13 @@ function transport_drone:process_pickup()
   local sprite_switch = false
 
   if to_take > 0 then
-
+    local temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
     local given_count = self.supply_depot:give_item(self.requested_item, to_take)
 
     if given_count > 0 then
       self.held_item = self.requested_item
       self.held_count = given_count
-      self.held_temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
+      self.held_temperature = temperature
       self:update_sticker()
       sprite_switch = true
     end
