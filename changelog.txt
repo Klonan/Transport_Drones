@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
-Date: ????
+Date: 2021-01-06
   Changes:
     - Fix some collision layer things, like not being able to build over rail, landfilling roads, etc.
     - Ghost road tile will try to mark for deconstruction to be placed.
