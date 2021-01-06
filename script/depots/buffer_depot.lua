@@ -408,7 +408,20 @@ function buffer_depot:get_available_stack_amount()
 end
 
 function buffer_depot:get_minimum_request_size()
-  return self:get_request_size()
+
+  local stack_size = self:get_stack_size()
+
+  local current_amount = self:get_current_amount()
+  if current_amount < stack_size and self:get_active_drone_count() == 0 then
+    return 1
+  end
+
+  local request_size = self:get_request_size()
+  if current_amount < request_size then
+    return stack_size
+  end
+
+  return request_size
 end
 
 function buffer_depot:get_storage_size()
