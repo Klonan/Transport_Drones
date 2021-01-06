@@ -10,3 +10,4 @@ require "data/hotkey"
 require "data/shortcut"
 require("data/tiles/road_tile")
 --require("data/informatron/informatron")
+require("data/tips/tips")
