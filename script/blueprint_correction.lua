@@ -1,10 +1,10 @@
 
-local tile_correction = 
+local tile_correction =
 {
   ["transport-drone-road"] = "transport-drone-proxy-tile"
 }
 
-local placement_check = 
+local placement_check =
 {
   ["transport-drone-proxy-tile"] = "road-tile-collision-proxy"
 }
@@ -21,13 +21,37 @@ end
 
 local do_placement_check = function(entity, placement_check)
 
-  if entity.surface.can_place_entity(
+  if entity.surface.can_place_entity
     {
       name = placement_check,
       position = entity.position,
       build_check_type = defines.build_check_type.manual
     }
-  ) then return
+   then
+    -- Bob the builder we can build it
+    return
+  end
+
+  if entity.surface.can_place_entity
+    {
+      name = placement_check,
+      position = entity.position,
+      build_check_type = defines.build_check_type.manual_ghost,
+      forced = true
+    }
+   then
+    --We can build if we mark something for deconstruction.
+    local colliding = entity.surface.find_entities_filtered
+    {
+      collision_mask = game.entity_prototypes[placement_check].collision_mask,
+      force = "neutral",
+      position = entity.position,
+      radius = 1
+    }
+    for k, collider in pairs (colliding) do
+      collider.order_deconstruction(entity.force)
+    end
+    return
   end
 
   entity.destroy()

@@ -30,7 +30,7 @@ local proxy_entity =
   collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
   pictures = util.empty_sprite(),
   render_layer = "object",
-  collision_mask = {"object-layer"}
+  collision_mask = {"ooglyboogly I am an error fix me"}
 }
 
 local item =
