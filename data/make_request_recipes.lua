@@ -73,7 +73,8 @@ local make_recipe = function(item)
     allow_decomposition = false,
     allow_as_intermediate = false,
     allow_intermediates = true,
-    allow_inserter_overload = false
+    allow_inserter_overload = false,
+    energy_required = 2 ^ 50
   }
   data:extend{recipe}
 end
