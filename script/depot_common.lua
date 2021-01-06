@@ -321,6 +321,9 @@ local on_entity_destroyed = function(event)
 end
 
 local get_lib = function(depot)
+  if not depot.entity.valid then
+    return {}
+  end
   local name = depot.entity.name
   return depot_libs[name]
 end
