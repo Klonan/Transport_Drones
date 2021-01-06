@@ -42,7 +42,7 @@ local make_recipe = function(item)
     return
   end
   if util.has_flag(item, "not-stackable") or util.has_flag(item, "hidden")  then return end
-  local recipe = 
+  local recipe =
   {
     type = "recipe",
     name = "request-"..item.name,
@@ -56,19 +56,24 @@ local make_recipe = function(item)
     },
     results =
     {
-      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 60000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
     },
     category = category,
     order = item.order,
     subgroup = get_subgroup(item),
-    overload_multiplier = math.min(200, 60000 / (item.stack_size or 1)),
+    overload_multiplier = 100,
     hide_from_player_crafting = true,
     main_product = item.name,
     allow_decomposition = false,
     allow_as_intermediate = false,
-    allow_intermediates = true
+    allow_intermediates = true,
+    allow_inserter_overload = false
   }
   data:extend{recipe}
 end
@@ -115,7 +120,7 @@ end
 
 local make_fluid_request_recipe = function(fluid)
 
-  local recipe = 
+  local recipe =
   {
     type = "recipe",
     name = "request-"..fluid.name,
@@ -150,7 +155,7 @@ for k, fluid in pairs (data.raw.fluid) do
   make_fluid_request_recipe(fluid)
 end
 
-local fuel_recipe = 
+local fuel_recipe =
 {
   type = "recipe",
   name = "fuel-depots",

@@ -6,6 +6,8 @@ Date: ????
     - Ghost road tile will try to mark for deconstruction to be placed.
     - Attempt at fixing crash when loading with removed mods.
     - Fix loading with Industrial revolution.
+    - Made a bigger request depot buffer, so people playing with stack size mods might end up not losing items.
+    - Adjusted depots so you can have max 100 drones in a depot, sorry if that hurts you.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2020-11-26
