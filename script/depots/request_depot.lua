@@ -168,7 +168,7 @@ function request_depot:make_request()
   if self.circuit_limit then
     local missing = self.circuit_limit - self:get_current_amount()
     request_size = math.min(missing, request_size)
-    minimum_size = math.max(request_size, minimum_size)
+    minimum_size = 1
   end
 
   local node_position = self.node_position
