@@ -287,7 +287,7 @@ local make_unit = function(k)
     name = name.."-"..k,
     localised_name = {name},
     icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
-    icon_size = 113,
+    icon_size = 112,
     icon_mipmaps = 0,
     flags = transport_drone_flags,
     map_color = {b = 0.5, g = 1},
@@ -405,38 +405,6 @@ for k = 1, shared.variation_count do
   make_unit(k)
 end
 
-
-local item =
-{
-  type = "item",
-  name = name,
-  localised_name = {name},
-  icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
-  icon_size = 113,
-  flags = {},
-  subgroup = "transport-drones",
-  order = "e-"..name,
-  stack_size = 10,
-  --place_result = name
-}
-
-local recipe =
-{
-  type = "recipe",
-  name = name,
-  localised_name = {name},
-  --category = "transport",
-  enabled = false,
-  ingredients =
-  {
-    {"engine-unit", 1},
-    {"steel-plate", 5},
-    {"iron-gear-wheel", 5},
-  },
-  energy_required = 2,
-  result = name
-}
-
 local slow_sticker =
 {
   type = "sticker",
@@ -504,7 +472,7 @@ local make_ore_truck = function(resource, item_name)
       name = name.."-"..item_name.."-"..k,
       localised_name = {name},
       icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
-      icon_size = 113,
+      icon_size = 112,
       icon_mipmaps = 0,
       flags = transport_drone_flags,
       map_color = {b = 0.5, g = 1},
@@ -661,7 +629,7 @@ local make_fluid_truck = function(fluid)
       name = name.."-"..fluid.name.."-"..k,
       localised_name = {name},
       icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
-      icon_size = 113,
+      icon_size = 112,
       icon_mipmaps = 0,
       flags = transport_drone_flags,
       map_color = {b = 0.5, g = 1},
@@ -784,8 +752,6 @@ end
 
 data:extend
 {
-  item,
-  recipe,
   slow_sticker
 }
 
@@ -831,7 +797,7 @@ local make_fuel_truck = function(fluid)
       name = name.."-fuel-truck-"..k,
       localised_name = {name},
       icon = util.path("data/entities/transport_drone/transport-drone-icon.png"),
-      icon_size = 113,
+      icon_size = 112,
       icon_mipmaps = 0,
       flags = transport_drone_flags,
       map_color = {b = 0.5, g = 1},

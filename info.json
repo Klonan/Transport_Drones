@@ -1,6 +1,6 @@
 {
   "name": "Transport_Drones",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "title": "Transport Drones",
   "author": "Klonan",
   "contact": "",
@@ -16,7 +16,8 @@
     "(?)SpeaceBlock",
     "(?)omnimatter_fluid",
     "(?)omnimatter_compression",
-    "(?)alien-biomes"
+    "(?)alien-biomes",
+    "(?)IndustrialRevolution"
   ],
   "factorio_version": "1.1"
 }
