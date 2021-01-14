@@ -29,6 +29,10 @@ for k, prototype in pairs (collision_mask_util.collect_prototypes_with_layer("pl
   end
 end
 
+if data.raw["assembling-machine"]["mining-depot"] then
+  collision_mask_util.add_layer(data.raw["assembling-machine"]["mining-depot"].collision_mask, road_collision_layer)
+end
+
 --Disable belts on roads
 --[[
   for k, prototype in pairs (collision_mask_util.collect_prototypes_with_layer("transport-belt-layer")) do
