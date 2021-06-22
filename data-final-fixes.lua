@@ -54,7 +54,18 @@ for k, item in pairs (data.raw.item) do
   end
 end
 
-shared.drone_collision_mask = {"ground-tile", "water-tile", "colliding-with-tiles-only", "consider-tile-transitions"}
+local ignored_mask = { "not-colliding-with-itself", "resource-layer", "ghost-layer", "doodad-layer", "object-layer", "player-layer", "floor-layer", "item-layer" }
+
+local drone_mask = {"ground-tile", "water-tile", "colliding-with-tiles-only", "consider-tile-transitions"}
+for k, tile in pairs(data.raw.tile) do
+    for _, layer in pairs(tile.collision_mask) do
+      if not collision_mask_util.mask_contains_layer(ignored_mask, layer) then
+        collision_mask_util.add_layer(drone_mask, layer)
+      end
+    end
+end
+collision_mask_util.remove_layer(drone_mask, road_collision_layer)
+shared.drone_collision_mask = drone_mask
 
 local util = require "__Transport_Drones__/data/tf_util/tf_util"
 require("data/entities/transport_drone/transport_drone")
