@@ -159,6 +159,7 @@ function buffer_depot:update_contents()
       if item_supply then
         item_supply[self.index] = nil
       end
+      self.road_network.report_stats(self, name, 0)
     end
   end
 
@@ -174,6 +175,7 @@ function buffer_depot:update_contents()
     else
       item_supply[self.index] = nil
     end
+    self.road_network.report_stats(self, name, count, self.mode == request_mode.item and "item" or "fluid")
   end
 
   self.old_contents = new_contents

@@ -62,25 +62,37 @@ end
 function network_reader:update()
   local behavior = self.entity.get_control_behavior()
   if not behavior then return end
-
-  local signal = behavior.get_signal(1)
-  local name = signal.signal and signal.signal.name
-  if not name then return end
-
-  local supply = self.road_network.get_network_item_supply(self.network_id)
-  if not supply then return end
   
-  local sum = 0
-  local counts = supply[name]
-  if counts then 
-    for depot, count in pairs (counts) do
-      sum = sum + count
+  for i = 1, behavior.signals_count do
+    behavior.set_signal(i, nil)
+  end
+  local network = self.road_network.get_network_by_id(self.network_id)
+  if not network.stats then return end
+  local i = 1
+  local order = {}
+  for name, s in pairs(network.stats.by_item) do
+    if s.count ~= 0 then
+      table.insert(order, {name=name, item_type=s.item_type, count=s.count})
+    end
+  end  
+  table.sort(order, function(a, b) return a.count > b.count end)
+  for _, n in pairs(order) do
+    local name, item_type, count = n.name, n.item_type, n.count
+    local signal = {
+      signal = {
+        type = item_type,
+        name = name,
+      },
+      count = count
+    }
+    behavior.set_signal(i, signal)
+    i = i + 1
+
+    -- combinator maximum
+    if i > 1000 then
+      return
     end
   end
-  
-  signal.count = sum
-  behavior.set_signal(1, signal)
-
 end
 
 function network_reader:add_to_network()

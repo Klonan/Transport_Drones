@@ -680,7 +680,7 @@ data:extend(buffer_depot_items)
 local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
 reader.name = "road-network-reader"
 reader.localised_name = "Road network reader"
-reader.item_slot_count = 1
+reader.item_slot_count = 1000
 reader.sprites = require(util.path("data/entities/transport_depot_circuits/road-network-reader-sprite"))
 reader.icon = util.path("data/entities/transport_depot_circuits/road-network-reader-icon.png")
 reader.icon_mipmaps = 0

@@ -18,7 +18,11 @@ local new_id = function()
   script_data.networks[id] =
   {
     item_supply = {},
-    depots = {}
+    depots = {},
+    stats = {
+      by_depot = {},
+      by_item = {}
+    }
   }
   --print("New network "..id)
   return id
@@ -477,6 +481,8 @@ road_network.remove_depot = function(depot, category)
     network.depots[category][depot.index] = nil
   end
 
+  road_network.clear_stats(network, depot.index)
+
 end
 
 local distance_squared = function(a, b)
@@ -629,6 +635,47 @@ road_network.on_configuration_changed = function()
 
   reset()
 
+end
+
+road_network.report_stats = function(depot, name, count, item_type)  
+  local network = get_network_by_id(depot.network_id)
+  local stats = network.stats  
+
+  local item_stats = stats.by_item[name]
+  if item_stats == nil then
+    -- warn if item_type not given, may happend when a mod is removed
+    if not item_type then
+      log("warning: invalid item " .. name)
+      return
+    end
+    item_stats = {
+      item_type = item_type, -- used to create signal
+      count = 0
+    }
+    stats.by_item[name] = item_stats
+  end
+
+  local depot_stats = stats.by_depot[depot.index]
+  if depot_stats == nil then
+    depot_stats = {}
+    stats.by_depot[depot.index] = depot_stats
+  end
+  local previous_depot_item_stats = depot_stats[name] or 0
+  item_stats.count = item_stats.count - previous_depot_item_stats + count
+  depot_stats[name] = count
+end
+
+road_network.clear_stats = function(network, depot_id)
+  local stats = network.stats
+
+  local depot_stats = stats.by_depot[depot_id]
+  if depot_stats ~= nil then
+    for name, depot_item_stats in pairs(depot_stats) do 
+      local item_stats = stats.by_item[name]
+      item_stats.count = item_stats.count - depot_item_stats
+    end
+    stats.by_depot[depot_id] = nil
+  end
 end
 
 road_network.get_network_by_id = get_network_by_id

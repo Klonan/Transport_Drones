@@ -71,6 +71,7 @@ function mining_depot:update_contents()
         item_supply[self.index] = nil
       end
     end
+    self.road_network.report_stats(self, name, 0)
   end
 
   for name, count in pairs (new_contents) do
@@ -85,6 +86,7 @@ function mining_depot:update_contents()
     else
       item_supply[self.index] = nil
     end
+    self.road_network.report_stats(self, name, count, "item")
   end
 
   self.old_contents = new_contents

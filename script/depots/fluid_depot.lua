@@ -91,6 +91,7 @@ function fluid_depot:update_contents()
       if item_supply then
         item_supply[self.index] = nil
       end
+      self.road_network.report_stats(self, name, 0)
     end
   end
 
@@ -106,6 +107,7 @@ function fluid_depot:update_contents()
     else
       item_supply[self.index] = nil
     end
+    self.road_network.report_stats(self, name, count, "fluid")
   end
 
   self.old_contents = new_contents
