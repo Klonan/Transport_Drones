@@ -404,8 +404,8 @@ function request_depot:update_circuit_writer()
   local circuit_condition = behavior.connect_to_logistic_network and behavior.logistic_condition or behavior.circuit_condition
   if circuit_condition then
     local condition = circuit_condition.condition
-    if condition.comparator == "=" then
-      local first_signal = condition.first_signal
+    local first_signal = condition.first_signal
+    --[[ if condition.comparator == "=" then      
       if first_signal then
         if first_signal.name == self.item then
           local count
@@ -419,10 +419,43 @@ function request_depot:update_circuit_writer()
           return
         end
       end
-    end
+    end ]]
     if circuit_condition.fulfilled then
+      local signals = self.circuit_writer.get_merged_signals()
+      if signals then
+        for k, signal in pairs(signals) do
+          if signal.count and signal.signal and signal.signal.name and (not first_signal or signal.signal.name ~= first_signal.name) then
+            local recipe = nil
+            if signal.signal.type == "item" then
+              recipe = "request-" .. signal.signal.name
+              self.circuit_limit = signal.count              
+            elseif signal.signal.type == "fluid" then
+              recipe = "request-" .. signal.signal.name
+              self.circuit_limit = signal.count
+            else
+              game.print("err: nor an item nor an fluid " .. signal.signal.name)
+              self.circuit_limit = 0
+              return
+            end
+            -- check if the recipe exists
+            local force = self.entity.force            
+            if force.recipes[recipe] then
+              self.entity.set_recipe(recipe)
+              self:check_request_change()
+            else
+              game.print("warn: invalid recipe " .. recipe)
+            end
+            return
+          end
+        end
+      end
       self.circuit_limit = nil
       --self:say("Depot enabled")
+      return
+    else
+      -- self.entity.set_recipe(nil)
+      self:suicide_all_drones()
+      self.circuit_limit = 0
       return
     end
   end
