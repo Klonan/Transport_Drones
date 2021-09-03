@@ -96,6 +96,13 @@ function request_depot:show_fuel_alert(message)
   end
 end
 
+local icon_param = {type = "item", name = "transport-drone"}
+function request_depot:show_drone_alert(message)
+  for k, player in pairs (game.connected_players) do
+    player.add_custom_alert(self.entity, icon_param, message, true)
+  end
+end
+
 function request_depot:check_fuel_amount()
 
   if not self.item then return end
@@ -123,6 +130,19 @@ function request_depot:check_fuel_amount()
   end
 
   self:show_fuel_alert({"no-fuel-in-network"})
+
+end
+function request_depot:check_drone_amount()
+
+  if not self.item then return end
+
+  local current_amount = self:get_drone_item_count()
+  if current_amount > 0 then
+    return
+  end
+
+  self:show_drone_alert("No drone in request depot")
+  
 
 end
 
@@ -224,6 +244,7 @@ function request_depot:update()
   self:check_request_change()
   self:check_fuel_amount()
   self:check_drone_validity()
+  self:check_drone_amount()
   self:update_circuit_writer()
   self:make_request()
   self:update_sticker()
