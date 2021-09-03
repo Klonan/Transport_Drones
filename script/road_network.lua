@@ -18,7 +18,9 @@ local new_id = function()
   script_data.networks[id] =
   {
     item_supply = {},
-    depots = {}
+    item_type = {},
+    depots = {},
+    stats = {}
   }
   --print("New network "..id)
   return id
@@ -631,10 +633,55 @@ road_network.on_configuration_changed = function()
 
 end
 
+local on_tick = function(event)  
+  -- if game.tick % 10 ~= 0 then return end
+
+  for i, network in pairs(script_data.networks) do
+    network.stats = {}
+    for name, counts in pairs(network.item_supply) do
+      local sum = 0
+      if counts then 
+        for depot, count in pairs (counts) do
+          sum = sum + count
+        end
+      end
+      if sum then
+        network.stats[name] = sum
+      end
+      -- game.print("network.stats " .. name .. "=" .. sum)
+    end
+    if network.depots and network.depots.request then 
+      for index, depot in pairs(network.depots.request) do 
+        if depot.entity.valid and (not depot.circuit_limit or depot.circuit_limit > 0) then
+          local item = depot.item
+          if item then
+            local size = depot.circuit_limit or depot:get_storage_size()
+            local missing = size - depot:get_current_amount()
+            -- game.print(serpent.line(item))
+            if missing then
+              network.stats[item] = (network.stats[item] or 0) - missing
+              -- game.print("network.item_type[" .. item .. "] = " .. depot.mode)
+              network.item_type = network.item_type or {}
+              network.item_type[item] = depot.mode == 1 and "item" or "fluid"
+            end
+          end
+        end
+      end
+    end
+   
+  end
+end
+
+road_network.events =
+{
+  [defines.events.on_tick] = on_tick,
+}
+
 road_network.get_network_by_id = get_network_by_id
 road_network.get_node = get_node
 road_network.get_networks = function()
   return script_data.networks
 end
+
 
 return road_network

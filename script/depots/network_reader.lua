@@ -60,12 +60,41 @@ function network_reader:say(string)
 end
 
 function network_reader:update()
+  -- if game.tick % 10 ~= 0 then return end
   local behavior = self.entity.get_control_behavior()
   if not behavior then return end
-
-  local signal = behavior.get_signal(1)
+  
+  for i = 1, behavior.signals_count do
+    behavior.set_signal(i, nil)
+  end
+  local network = self.road_network.get_network_by_id(self.network_id)
+  if not network.stats then return end
+  local i = 1
+  local order = {}
+  for s, c in pairs(network.stats) do table.insert(order, {s=s, c=c}) end
+  table.sort(order, function(a, b) return a.c > b.c end)
+  for _, n in pairs(order) do
+    local name, count = n.s, n.c
+    -- game.print("stats [" .. i .."] name=" .. name .. " count=" .. count)
+    if i > 1000 then
+      return
+    end
+    if count ~= 0 and network.item_type[name] then
+      local signal = {
+        signal = {
+          type = network.item_type[name],
+          name = name,
+        },
+        count = count
+      }
+      -- game.print(serpent.line(signal))
+      behavior.set_signal(i, signal)
+      i = i + 1
+    end
+  end
+  return
+--[[   local signal = behavior.get_signal(1)
   local name = signal.signal and signal.signal.name
-  if not name then return end
 
   local supply = self.road_network.get_network_item_supply(self.network_id)
   if not supply then return end
@@ -80,7 +109,7 @@ function network_reader:update()
   
   signal.count = sum
   behavior.set_signal(1, signal)
-
+ ]]
 end
 
 function network_reader:add_to_network()

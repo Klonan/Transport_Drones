@@ -46,6 +46,7 @@ function supply_depot:get_to_be_taken(name)
 end
 
 function supply_depot:update_contents()
+  local network = self.road_network.get_network_by_id(self.network_id)
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
   local new_contents
@@ -71,6 +72,7 @@ function supply_depot:update_contents()
 
   for name, count in pairs (new_contents) do
     local item_supply = supply[name]
+    network.item_type[name] = "item"
     if not item_supply then
       item_supply = {}
       supply[name] = item_supply
