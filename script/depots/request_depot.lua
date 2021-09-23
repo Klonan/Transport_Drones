@@ -132,6 +132,7 @@ function request_depot:check_fuel_amount()
   self:show_fuel_alert({"no-fuel-in-network"})
 
 end
+
 function request_depot:check_drone_amount()
 
   if not self.item then return end
@@ -141,8 +142,7 @@ function request_depot:check_drone_amount()
     return
   end
 
-  self:show_drone_alert("No drone in request depot")
-  
+  self:show_drone_alert({"no-drone-in-depot"})
 
 end
 
