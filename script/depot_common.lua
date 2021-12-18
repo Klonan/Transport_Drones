@@ -74,6 +74,19 @@ local get_corpse_position = function(entity, corpse_offsets)
 
 end
 
+local mineable_tiles
+local is_tile_mineable = function(name)
+  if not mineable_tiles then
+    mineable_tiles = {}
+    for _, tile in pairs (game.tile_prototypes) do
+      if tile.mineable_properties and tile.mineable_properties.minable then
+        mineable_tiles[tile.name] = true
+      end
+    end
+  end
+  return mineable_tiles[name]
+end
+
 local attempt_to_place_node = function(entity, depot_lib)
   local corpse_position = get_corpse_position(entity, depot_lib.corpse_offsets)
   local surface = entity.surface
@@ -85,24 +98,19 @@ local attempt_to_place_node = function(entity, depot_lib)
     return true
   end
 
-  if not surface.can_place_entity(
-    {
-      name = "road-tile-collision-proxy",
-      position = corpse_position,
-      build_check_type = defines.build_check_type.manual
-    }) then
-    surface.create_entity{name = "flying-text", text = "Road placement blocked", position = corpse_position}
-    return
+  local hidden_tile = surface.get_tile(node_position).name
+  if not is_tile_mineable(hidden_tile) then
+    surface.set_hidden_tile(node_position, hidden_tile)
   end
 
-  surface.set_hidden_tile(node_position, surface.get_tile(node_position).name)
-  surface.set_tiles
-  {
-    {name = "transport-drone-road", position = node_position}
-  }
+  local tiles = { {name = "transport-drone-road", position = node_position} }
+  surface.set_tiles(tiles, false, "abort_on_collision", false, true)
 
-  road_network.add_node(surface.index, node_position[1], node_position[2])
-  return true
+  if road_network.get_node(surface.index, node_position[1], node_position[2]) then
+    return true
+  end
+
+  return false
 end
 
 local refund_build = function(event, entity_prototype)

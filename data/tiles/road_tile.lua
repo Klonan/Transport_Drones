@@ -3,35 +3,13 @@ local tile = util.copy(data.raw.tile["stone-path"])
 tile.name = "transport-drone-road"
 tile.localised_name = {"road"}
 tile.tint = {0.5, 0.5, 0.5}
-tile.collision_mask = shared.tile_collision_mask
+tile.collision_mask = {"ooga wooga error"}
 tile.minable.result = "road"
 tile.layer = 250
 tile.placeable_by = {{item = "road", count = 1}}
 tile.map_color={r=86/2, g=82/2, b=74/2}
 tile.walking_speed_modifier = 1.5
 tile.vehicle_friction_modifier = 0.9
-
-local proxy_tile = util.copy(data.raw.tile["stone-path"])
-
-proxy_tile.name = "transport-drone-proxy-tile"
-proxy_tile.tint = {0.5, 0.5, 0.5}
-proxy_tile.localised_name = {"road"}
-
-local proxy_entity =
-{
-  type = "simple-entity",
-  name = "road-tile-collision-proxy",
-  icon = "__base__/graphics/icons/ship-wreck/small-ship-wreck.png",
-  icon_size = 64,
-  flags = {"placeable-neutral", "placeable-off-grid", "not-on-map"},
-  subgroup = "wrecks",
-  order = "d[remnants]-d[ship-wreck]-c[small]-a",
-  max_health = 1,
-  collision_box = {{-0.49, -0.49}, {0.49, 0.49}},
-  pictures = util.empty_sprite(),
-  render_layer = "object",
-  collision_mask = {"ooglyboogly I am an error fix me"}
-}
 
 local item =
 {
@@ -51,10 +29,11 @@ local item =
   stack_size = 100,
   place_as_tile =
   {
-    result = "transport-drone-proxy-tile",
+    result = "transport-drone-road",
     condition_size = 1,
-    condition = {"object-layer" }
-  }
+    condition = {"ooga wooga error me"}
+  },
+  is_road_tile = true
 }
 
 local recipe =
@@ -79,13 +58,10 @@ local recipe =
 data:extend
 {
   tile,
-  proxy_tile,
-  proxy_entity,
   item,
   recipe
 }
 
 if alien_biomes_priority_tiles then
-  table.insert(alien_biomes_priority_tiles, "transport-drone-proxy-tile")
   table.insert(alien_biomes_priority_tiles, "transport-drone-road")
 end

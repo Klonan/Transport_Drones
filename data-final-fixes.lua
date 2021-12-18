@@ -1,23 +1,74 @@
 local shared = require("shared")
 local collision_mask_util = require("collision-mask-util")
 
-local road_tile = data.raw.tile["transport-drone-road"]
-local road_tile_proxy = data.raw.tile["transport-drone-proxy-tile"]
-local road_proxy_entity = data.raw["simple-entity"]["road-tile-collision-proxy"]
-local road_item = data.raw.item.road
-
 local road_collision_layer = collision_mask_util.get_first_unused_layer()
-road_tile.collision_mask = {road_collision_layer}
-road_proxy_entity.collision_mask = {road_collision_layer}
+local tiles = data.raw.tile
 
-road_tile_proxy.collision_mask = {"ground-tile"}
 
-road_item.place_as_tile =
+local road_list = {}
+local road_tile_list =
 {
-  result = road_tile_proxy.name,
-  condition_size = 1,
-  condition = {"water-tile", road_collision_layer}
+  type = "selection-tool",
+  name = "road-tile-list",
+  flags = {"hidden"},
+  icon = "__Transport_Drones__/data/tf_util/empty-sprite.png",
+  icon_size = 1,
+  tile_filters = road_list,
+  stack_size = 1,
+  selection_color = {},
+  alt_selection_color = {},
+  selection_mode = {"any-tile"},
+  alt_selection_mode = {"any-tile"},
+  selection_cursor_box_type = "entity",
+  alt_selection_cursor_box_type = "entity"
 }
+data:extend{road_tile_list}
+
+local place_as_tile_condition = {"water-tile", road_collision_layer}
+
+if mods["space-exploration"] then
+  table.insert(place_as_tile_condition, spaceship_collision_layer)
+end
+
+local process_road_item = function(item)
+
+  local tile = tiles[item.place_as_tile.result]
+  if not tile then return end
+
+  tile.collision_mask = {road_collision_layer}
+  item.place_as_tile.condition = {"water-tile", road_collision_layer}
+  table.insert(road_list, tile.name)
+
+end
+
+
+local process_non_road_item = function(item)
+  local condition = item.place_as_tile.condition
+  collision_mask_util.add_layer(condition, road_collision_layer)
+end
+
+for k, item in pairs (data.raw.item) do
+  if item.place_as_tile then
+    if item.is_road_tile then
+      process_road_item(item)
+    else
+      process_non_road_item(item)
+    end
+  end
+end
+
+local all_used_tile_collision_masks = {}
+for k, tile in pairs (tiles) do
+  tile.check_collision_with_entities =  true
+  for k, layer in pairs (tile.collision_mask or {}) do
+    all_used_tile_collision_masks[layer] = true
+  end
+end
+
+shared.drone_collision_mask = all_used_tile_collision_masks
+shared.drone_collision_mask[road_collision_layer] = nil
+shared.drone_collision_mask["colliding-with-tiles-only"] = true
+shared.drone_collision_mask["consider-tile-transitions"] = true
 
 for k, prototype in pairs (collision_mask_util.collect_prototypes_with_layer("player-layer")) do
   if prototype.type ~= "gate" then
@@ -42,19 +93,7 @@ end
   end
 ]]
 
---So you don't landfill over road.
-for k, item in pairs (data.raw.item) do
-  if item.place_as_tile then
-    local condition = item.place_as_tile.condition
-    if condition then
-      if collision_mask_util.mask_contains_layer(condition, "ground-tile") then
-        collision_mask_util.add_layer(condition, road_collision_layer)
-      end
-    end
-  end
-end
-
-shared.drone_collision_mask = {"ground-tile", "water-tile", "colliding-with-tiles-only", "consider-tile-transitions"}
+--So you don't place any tiles over road.
 
 local util = require "__Transport_Drones__/data/tf_util/tf_util"
 require("data/entities/transport_drone/transport_drone")
