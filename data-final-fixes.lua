@@ -24,7 +24,7 @@ local road_tile_list =
 }
 data:extend{road_tile_list}
 
-local place_as_tile_condition = {"water-tile", road_collision_layer}
+local place_as_tile_condition = {"water-tile"}
 
 if mods["space-exploration"] then
   table.insert(place_as_tile_condition, spaceship_collision_layer)

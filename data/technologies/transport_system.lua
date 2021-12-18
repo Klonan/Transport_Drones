@@ -8,7 +8,7 @@ local transport_system =
   type = "technology",
   icon = util.path("data/technologies/transport-system.png"),
   icon_size = 256,
-  upgrade = true,
+  upgrade = false,
   effects =
   {
     {
@@ -64,7 +64,7 @@ local transport_circuits =
   type = "technology",
   icon = util.path("data/technologies/transport-circuits-icon.png"),
   icon_size = 144,
-  upgrade = true,
+  upgrade = false,
   effects =
   {
     {
@@ -95,3 +95,36 @@ local transport_circuits =
 }
 
 data:extend{transport_circuits}
+
+
+local better_road =
+{
+  name = "fast-road",
+  localised_name = {"fast-road"},
+  type = "technology",
+  icon = util.path("data/technologies/transport-system.png"),
+  icon_size = 256,
+  upgrade = false,
+  effects =
+  {
+    {
+      type = "unlock-recipe",
+      recipe = "fast-road"
+    }
+  },
+  prerequisites = {name},
+  unit =
+  {
+    count = 500,
+    ingredients =
+    {
+      {"automation-science-pack", 1},
+      {"logistic-science-pack", 1},
+      {"chemical-science-pack", 1},
+    },
+    time = 30
+  },
+  order = name.."z",
+}
+
+data:extend{better_road}

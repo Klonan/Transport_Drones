@@ -4,6 +4,8 @@ Date: ????
   Changes:
     - Other tiles can't be built over roads. You have to mine the road first then mine it.
     - Fixes for compatibility with space exploration.
+    - Added fast road tile. Faster for walking and for drones!
+    - Other mods can add their tile as a road tile by setting `is_road_tile = true` in the item prototype with the place_as_tile for that tile.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2021-01-14
