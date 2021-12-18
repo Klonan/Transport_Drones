@@ -133,17 +133,6 @@ local add_depot_to_node = function(depot)
   local node = road_network.get_node(depot.surface_index, depot.node_position[1], depot.node_position[2])
 
   if not node then
-
-    depot.entity.surface.set_tiles
-    {
-      {name = "transport-drone-road", position = depot.node_position}
-    }
-
-    road_network.add_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
-    node = road_network.get_node(depot.entity.surface.index, depot.node_position[1], depot.node_position[2])
-  end
-
-  if not node then
     depot:on_removed({})
     depot.entity.destroy()
     --log("Wtf, depot with no node... killing it"..serpent.line(depot))
@@ -512,8 +501,12 @@ lib.on_configuration_changed = function()
         depot:on_config_changed()
       end
       add_depot_to_node(depot)
-      depot:remove_from_network()
-      depot:add_to_network()
+      if depot.entity.valid then
+        depot:remove_from_network()
+        depot:add_to_network()
+      else
+        script_data.depots[k] = nil
+      end
     end
   end
 

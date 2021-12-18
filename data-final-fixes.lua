@@ -28,6 +28,7 @@ local place_as_tile_condition = {"water-tile", road_collision_layer}
 
 if mods["space-exploration"] then
   table.insert(place_as_tile_condition, spaceship_collision_layer)
+  table.insert(place_as_tile_condition, empty_space_collision_layer)
 end
 
 local process_road_item = function(item)
@@ -36,7 +37,7 @@ local process_road_item = function(item)
   if not tile then return end
 
   tile.collision_mask = {road_collision_layer}
-  item.place_as_tile.condition = {"water-tile", road_collision_layer}
+  item.place_as_tile.condition = place_as_tile_condition
   table.insert(road_list, tile.name)
 
 end
