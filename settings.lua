@@ -15,7 +15,6 @@ local settings =
     name = "fuel-fluid",
     localised_name = "Transport drone fuel",
     setting_type = "startup",
-    allowed_values = {"petroleum-gas", "water", "crude-oil", "heavy-oil", "light-oil", "lubricant", "steam", "sulfuric-acid"},
     default_value = "petroleum-gas"
   },
 
