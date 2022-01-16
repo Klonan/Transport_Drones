@@ -61,7 +61,7 @@ local states =
 }
 
 local get_drone_speed = function(force_index)
-  return (0.10 * (1 + transport_technologies.get_transport_speed_bonus(force_index))) --+ (math.random() / 32)
+  return (0.066 * (1 + transport_technologies.get_transport_speed_bonus(force_index))) --+ (math.random() / 32)
 end
 
 local variation_count = shared.variation_count

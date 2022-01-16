@@ -1,3 +1,5 @@
+local affected_by_tiles = true
+
 local util = require "__Transport_Drones__/data/tf_util/tf_util"
 
 local fuel = settings.startup["fuel-fluid"].value
@@ -396,6 +398,7 @@ local make_unit = function(k)
     },
     --run_animation = empty_truck(shift),
     run_animation = full_truck(shift),
+    affected_by_tiles = affected_by_tiles,
     emissions_per_second = shared.drone_pollution_per_second
   }
   data:extend{unit}
@@ -581,6 +584,7 @@ local make_ore_truck = function(resource, item_name)
       },
       --run_animation = empty_truck(shift),
       run_animation = ore_truck(shift, color),
+    affected_by_tiles = affected_by_tiles,
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
@@ -738,6 +742,7 @@ local make_fluid_truck = function(fluid)
       },
       --run_animation = fluid_truck(shift, {0,0,0, 0.5}),
       run_animation = fluid_truck(shift, color),
+    affected_by_tiles = affected_by_tiles,
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
@@ -905,6 +910,7 @@ local make_fuel_truck = function(fluid)
         audible_distance_modifier = 0.7
       },
       run_animation = fluid_truck(shift, color),
+    affected_by_tiles = affected_by_tiles,
       emissions_per_second = shared.drone_pollution_per_second
     }
     data:extend{unit}
