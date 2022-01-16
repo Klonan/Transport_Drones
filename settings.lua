@@ -9,7 +9,7 @@ local settings =
     minimum_value = 1,
     maximum_value = 80085
   },
-  
+
   {
     type = "string-setting",
     name = "fuel-fluid",
@@ -17,7 +17,7 @@ local settings =
     setting_type = "startup",
     default_value = "petroleum-gas"
   },
-  
+
   {
     type = "double-setting",
     name = "fuel-amount-per-drone",
@@ -26,8 +26,8 @@ local settings =
     default_value = 50,
     minimum_value = 0,
     maximum_value = 10000
-  },  
-  
+  },
+
   {
     type = "double-setting",
     name = "drone-fluid-capacity",
@@ -37,7 +37,7 @@ local settings =
     minimum_value = 1,
     maximum_value = 10000
   },
-  
+
   {
     type = "double-setting",
     name = "fuel-consumption-per-meter",
@@ -46,7 +46,7 @@ local settings =
     default_value = 0.025,
     minimum_value = 0
   },
-  
+
   {
     type = "double-setting",
     name = "drone-pollution-per-second",
