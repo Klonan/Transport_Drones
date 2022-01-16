@@ -131,13 +131,18 @@ end
 function supply_depot:on_removed(event)
 
   self.corpse.destroy()
-  self.assembler.destructible = true
 
-  if event.name == defines.events.on_entity_died then
+  if self.assembler.valid then
+    self.assembler.destructible = true
+    if event.name == defines.events.on_entity_died then
+      self.assembler.die()
+    else
+      self.assembler.destroy()
+    end
+  end
+
+  if self.entity.valid then
     self.entity.destroy()
-    self.assembler.die()
-  else
-    self.assembler.destroy()
   end
 end
 

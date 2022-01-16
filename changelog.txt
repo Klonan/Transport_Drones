@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.6
+Date: ????
+  Changes:
+    - Fix crash when mining somehow invalid supply depot.
+    - Fix drones not using the tile speed bonus properly.
+    - Added Polish translations, courtesy of  S3BA-pl.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.5
 Date: 2021-12-23
   Changes:
