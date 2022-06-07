@@ -72,7 +72,7 @@ shared.drone_collision_mask["colliding-with-tiles-only"] = true
 shared.drone_collision_mask["consider-tile-transitions"] = true
 
 for k, prototype in pairs (collision_mask_util.collect_prototypes_with_layer("player-layer")) do
-  if prototype.type ~= "gate" then
+  if prototype.type ~= "gate" and prototype.type ~= "tile" then
     local mask = collision_mask_util.get_mask(prototype)
     if collision_mask_util.mask_contains_layer(mask, "item-layer") then
       collision_mask_util.add_layer(mask, road_collision_layer)
