@@ -265,7 +265,9 @@ local set_node_ids = function(nodes, id)
     if node.depots then
       for k, depot in pairs (node.depots) do
         depot:remove_from_network()
-        depot:add_to_network()
+        if depot.entity.valid then
+          depot:add_to_network()
+        end
       end
     end
   end
