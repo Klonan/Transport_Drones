@@ -5,7 +5,7 @@ local request_spawn_timeout = 60
 local fuel_depot = {}
 fuel_depot.metatable = {__index = fuel_depot}
 
-fuel_depot.corpse_offsets = 
+fuel_depot.corpse_offsets =
 {
   [0] = {0, -3},
   [2] = {3, 0},
@@ -42,7 +42,7 @@ function fuel_depot.new(entity)
   local corpse_position = get_corpse_position(entity)
   local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
   corpse.corpse_expires = false
-  
+
   local depot =
   {
     entity = entity,
@@ -124,7 +124,7 @@ end
 
 function fuel_depot:handle_fuel_request(depot)
   if not self:can_spawn_drone() then return end
-  
+
   if (self.circuit_writer and self.circuit_writer.valid) then
     local behavior = self.circuit_writer.get_control_behavior()
     if behavior and behavior.disabled then
@@ -136,8 +136,9 @@ function fuel_depot:handle_fuel_request(depot)
   if amount < self:minimum_request_size() then return end
 
   amount = math.min((amount - fuel_amount_per_drone), self:get_drone_fluid_capacity())
-  
+
   local drone = fuel_depot.transport_drone.new(self, "fuel-truck")
+  if not drone then return end
 
   self:remove_fuel(amount)
   self:remove_fuel(fuel_amount_per_drone)
@@ -145,7 +146,7 @@ function fuel_depot:handle_fuel_request(depot)
   drone:deliver_fuel(depot, amount)
 
   self.drones[drone.index] = drone
-  
+
   self.next_spawn_tick = game.tick + request_spawn_timeout
   self:update_sticker()
 
