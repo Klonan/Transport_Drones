@@ -501,25 +501,14 @@ lib.on_configuration_changed = function()
         depot:on_config_changed()
       end
       add_depot_to_node(depot)
-      if depot.entity.valid then
-        depot:remove_from_network()
-        depot:add_to_network()
-      else
-        script_data.depots[k] = nil
+      depot:remove_from_network()
+      depot:add_to_network()
+      if depot.to_be_taken then
+        depot.to_be_taken = {}
       end
-    end
-  end
-
-  for k, depot in pairs (script_data.depots) do
-    if depot.to_be_taken then
-      depot.to_be_taken = {}
-    end
-  end
-
-
-  for k, depot in pairs (script_data.depots) do
-    if depot.fuel_on_the_way then
-      depot.fuel_on_the_way = 0
+      if depot.fuel_on_the_way then
+        depot.fuel_on_the_way = 0
+      end
     end
   end
 

@@ -656,6 +656,7 @@ function buffer_depot:on_removed()
 end
 
 function buffer_depot:on_config_changed()
+  self:set_request_mode()
   self.to_be_taken = self.to_be_taken or {}
   self.old_contents = self.old_contents or {}
 end

@@ -263,6 +263,7 @@ function request_depot:suicide_all_drones()
 end
 
 function request_depot:set_request_mode()
+  self.mode = nil
   local recipe = self.entity.get_recipe()
   if not recipe then return end
 
@@ -312,7 +313,9 @@ local stack_cache = {}
 local get_stack_size = function(item)
   local size = stack_cache[item]
   if not size then
-    size = game.item_prototypes[item].stack_size
+    local prototype = game.item_prototypes[item]
+    if not prototype then error("what? "..item) end
+    size = prototype.stack_size
     stack_cache[item] = size
   end
   return size
@@ -565,7 +568,7 @@ function request_depot:on_removed()
 end
 
 function request_depot:on_config_changed()
-  self.mode = self.mode or request_mode.item
+  self:set_request_mode()
   self.fuel_on_the_way = self.fuel_on_the_way or 0
 end
 
