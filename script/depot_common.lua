@@ -136,7 +136,7 @@ local add_depot_to_node = function(depot)
     depot:on_removed({})
     depot.entity.destroy()
     --log("Wtf, depot with no node... killing it"..serpent.line(depot))
-    return
+    return true
   end
   node.depots = node.depots or {}
   node.depots[depot.index] = depot
@@ -144,6 +144,7 @@ end
 
 local remove_depot_from_node = function(surface, x, y, depot_index)
   local node = road_network.get_node(surface, x, y)
+  if not node then return end
   node.depots[depot_index] = nil
   road_network.check_clear_lonely_node(surface, x, y)
 end
@@ -271,7 +272,9 @@ local on_created_entity = function(event)
   script.register_on_entity_destroyed(entity)
   depot.surface_index = entity.surface.index
   script_data.depots[depot.index] = depot
-  add_depot_to_node(depot)
+  if add_depot_to_node(depot) then
+    return
+  end
   depot:add_to_network()
   add_to_update_bucket(depot.index)
 
@@ -500,14 +503,15 @@ lib.on_configuration_changed = function()
       if depot.on_config_changed then
         depot:on_config_changed()
       end
-      add_depot_to_node(depot)
-      depot:remove_from_network()
-      depot:add_to_network()
-      if depot.to_be_taken then
-        depot.to_be_taken = {}
-      end
-      if depot.fuel_on_the_way then
-        depot.fuel_on_the_way = 0
+      if not add_depot_to_node(depot) then
+        depot:remove_from_network()
+        depot:add_to_network()
+        if depot.to_be_taken then
+          depot.to_be_taken = {}
+        end
+        if depot.fuel_on_the_way then
+          depot.fuel_on_the_way = 0
+        end
       end
     end
   end
