@@ -84,7 +84,7 @@ data:extend
 local reader = util.copy(data.raw["constant-combinator"]["constant-combinator"])
 reader.name = "transport-depot-reader"
 reader.localised_name = "Transport depot reader"
-reader.item_slot_count = 1
+reader.item_slot_count = 2
 reader.sprites = require(util.path("data/entities/transport_depot_circuits/depot-reader-sprite"))
 reader.icon = util.path("data/entities/transport_depot_circuits/depot-reader-icon.png")
 reader.icon_mipmaps = 0
