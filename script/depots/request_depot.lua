@@ -237,6 +237,11 @@ function request_depot:update_circuit_reader()
       signal = {signal = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item}, count = self:get_current_amount()}
     end
     behavior.set_signal(1, signal)
+    local drone_signal
+    if self.item then
+      drone_signal = {signal = {type = "virtual", name = "signal-D"}, count = self:get_drone_item_count()}
+    end
+    behavior.set_signal(2, drone_signal)
   end
 end
 
