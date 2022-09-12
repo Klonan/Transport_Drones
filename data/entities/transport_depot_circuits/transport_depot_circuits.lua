@@ -44,6 +44,9 @@ writer.fluid_box =
   }
 }
 
+-- regex to replace CRLF with LF
+-- ^\r
+
 local writer_item = 
 {
   type = "item",
