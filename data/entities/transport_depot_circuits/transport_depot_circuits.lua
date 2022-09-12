@@ -38,7 +38,7 @@ writer.fluid_box =
   pipe_connections = 
   {
     {
-      position = {0,1},
+      position = {0, 1},
       type = "output"
     }
   }
