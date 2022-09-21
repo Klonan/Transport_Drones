@@ -76,8 +76,8 @@ local get_item_icon_and_locale = function(name)
 
   local items = game.item_prototypes
   if items[name] then
-    icon = "item/"..name
-    locale = items[name].localised_name
+    local icon = "item/"..name
+    local locale = items[name].localised_name
     local value = {icon = icon, locale = locale}
     cache[name] = value
     return value
@@ -85,8 +85,8 @@ local get_item_icon_and_locale = function(name)
 
   local fluids = game.fluid_prototypes
   if fluids[name] then
-    icon = "fluid/"..name
-    locale = fluids[name].localised_name
+    local icon = "fluid/"..name
+    local locale = fluids[name].localised_name
     local value = {icon = icon, locale = locale}
     cache[name] = value
     return value
