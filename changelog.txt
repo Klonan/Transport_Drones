@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.10
+Date: 2022-09-21
+  Changes:
+    - The second output signal for the circuit reader is the number of drones. (Contributed by anud12)
+---------------------------------------------------------------------------------------------------
 Version: 1.0.9
 Date: 2022-07-09
   Changes:
