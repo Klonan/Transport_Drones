@@ -327,7 +327,7 @@ util.item_types = function()
     "tool",
     "gun",
     "ammo",
-    --"armor",
+    "armor",
     --"selection-tool",
     --"item-with-inventory",
     "item-with-label",

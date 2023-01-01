@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.11
+Date: ????
+  Changes:
+      - Fix updating road tiles with 'next_direction' in the prototype.
+      - Removed Oil processing requirement for the technology.
+      - Allowed to request armor with the road network (But it will lose equipment so be careful).
+---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2022-09-21
   Changes:

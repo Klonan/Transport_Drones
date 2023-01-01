@@ -40,7 +40,7 @@ local transport_system =
       recipe = "road"
     }
   },
-  prerequisites = {"engine", "oil-processing"},
+  prerequisites = {"engine"},
   unit =
   {
     count = 200,

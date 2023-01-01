@@ -41,7 +41,11 @@ local make_recipe = function(item)
   if not item.name then
     return
   end
-  if util.has_flag(item, "not-stackable") or util.has_flag(item, "hidden")  then return end
+  if util.has_flag(item, "hidden") then return end
+  local max_stack = 65000
+  if util.has_flag(item, "not-stackable") or item.type == "armor" then
+    max_stack = 1
+  end
   local recipe =
   {
     type = "recipe",
@@ -56,13 +60,13 @@ local make_recipe = function(item)
     },
     results =
     {
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
-      {type = "item", name = item.name, amount = 65000, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
+      {type = "item", name = item.name, amount = max_stack, show_details_in_recipe_tooltip = false},
     },
     category = category,
     order = item.order,
