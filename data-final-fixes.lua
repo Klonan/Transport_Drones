@@ -35,11 +35,16 @@ local process_road_item = function(item)
 
   local tile = tiles[item.place_as_tile.result]
   if not tile then return end
-
-  tile.collision_mask = {road_collision_layer}
+  local seen = {}
+  while true do
+    tile.collision_mask = {road_collision_layer}
+    table.insert(road_list, tile.name)
+    seen[tile.name] = true
+    tile = tiles[tile.next_direction or ""]
+    if not tile then break end
+    if seen[tile.name] then break end
+  end
   item.place_as_tile.condition = place_as_tile_condition
-  table.insert(road_list, tile.name)
-
 end
 
 
@@ -93,6 +98,8 @@ end
     prototype.collision_mask = mask
   end
 ]]
+
+--error(serpent.block(road_list))
 
 --So you don't place any tiles over road.
 
