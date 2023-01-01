@@ -17,7 +17,8 @@
     "(?)omnimatter_fluid",
     "(?)omnimatter_compression",
     "(?)alien-biomes",
-    "(?)IndustrialRevolution"
+    "(?)IndustrialRevolution",
+    "!railloader"
   ],
   "factorio_version": "1.1"
 }

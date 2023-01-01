@@ -6,6 +6,7 @@ Date: 2023-01-01
       - Removed Oil processing requirement for the technology.
       - Allowed to request armor with the road network (But it will lose equipment so be careful).
       - Item request to add drones will be created by blueprints.
+      - Added mod incompatibility with Bulk rail loader, as it breaks the blueprint tags.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2022-09-21
