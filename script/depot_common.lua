@@ -268,7 +268,7 @@ local on_created_entity = function(event)
     return
   end
 
-  local depot = depot_lib.new(entity)
+  local depot = depot_lib.new(entity, event.tags)
   script.register_on_entity_destroyed(entity)
   depot.surface_index = entity.surface.index
   script_data.depots[depot.index] = depot
@@ -451,6 +451,37 @@ local picker_dolly_blacklist = function()
 
 end
 
+
+local on_player_setup_blueprint = function(event)
+  local player = game.get_player(event.player_index)
+  if not (player and player.valid) then return end
+
+  local item = player.cursor_stack
+  if not (item and item.valid_for_read) then
+    item = player.blueprint_to_setup
+    if not (item and item.valid_for_read) then return end
+  end
+
+  local count = item.get_blueprint_entity_count()
+  if count == 0 then return end
+
+  for index, entity in pairs(event.mapping.get()) do
+    if entity.valid then
+      local depot = get_depot(entity)
+      if depot then
+        local saver = depot.save_to_blueprint_tags
+        local save_tags = saver and saver(depot)
+        if save_tags then
+          if index <= count then
+            item.set_blueprint_entity_tag(index, "transport_depot_tags", save_tags)
+          end
+        end
+      end
+    end
+  end
+
+end
+
 local lib = {}
 
 lib.events =
@@ -465,6 +496,8 @@ lib.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
   [defines.events.on_entity_destroyed] = on_entity_destroyed,
+
+  [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
 
   [defines.events.on_tick] = on_tick,
   [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,

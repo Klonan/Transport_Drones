@@ -35,7 +35,7 @@ local request_mode =
   fluid = 2
 }
 
-function request_depot.new(entity)
+function request_depot.new(entity, tags)
 
   local force = entity.force
   local surface = entity.surface
@@ -60,8 +60,35 @@ function request_depot.new(entity)
   }
   setmetatable(depot, request_depot.metatable)
 
+  depot:read_tags(tags)
+
   return depot
 
+end
+
+function request_depot:read_tags(tags)
+  if tags then
+    if tags.transport_depot_tags then
+      local drone_count = tags.transport_depot_tags.drone_count
+      if drone_count then
+        self.entity.surface.create_entity
+        {
+          name = "item-request-proxy",
+          position = self.entity.position,
+          force = self.entity.force,
+          target = self.entity,
+          modules = {["transport-drone"] = drone_count}
+        }
+      end
+    end
+  end
+end
+
+function request_depot:save_to_blueprint_tags()
+  return
+  {
+    drone_count = self:get_drone_item_count()
+  }
 end
 
 function request_depot:remove_fuel(amount)

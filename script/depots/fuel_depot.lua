@@ -31,7 +31,7 @@ local get_corpse_position = function(entity)
 
 end
 
-function fuel_depot.new(entity)
+function fuel_depot.new(entity, tags)
 
   local force = entity.force
   local surface = entity.surface
@@ -55,8 +55,35 @@ function fuel_depot.new(entity)
   }
   setmetatable(depot, fuel_depot.metatable)
 
+  depot:read_tags(tags)
+
   return depot
 
+end
+
+function fuel_depot:read_tags(tags)
+  if tags then
+    if tags.transport_depot_tags then
+      local drone_count = tags.transport_depot_tags.drone_count
+      if drone_count then
+        self.entity.surface.create_entity
+        {
+          name = "item-request-proxy",
+          position = self.entity.position,
+          force = self.entity.force,
+          target = self.entity,
+          modules = {["transport-drone"] = drone_count}
+        }
+      end
+    end
+  end
+end
+
+function fuel_depot:save_to_blueprint_tags()
+  return
+  {
+    drone_count = self:get_drone_item_count()
+  }
 end
 
 function fuel_depot:update_circuit_reader()
