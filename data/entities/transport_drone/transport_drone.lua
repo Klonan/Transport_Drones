@@ -446,7 +446,7 @@ end
 local make_ore_truck = function(resource, item_name)
 
   local map_color = resource.map_color
-  local r, g, b = map_color[1] or map_color.r, map_color[2] or map_color.g, map_color[3] or map_color.b
+  local r, g, b = map_color[1] or map_color.r or 0, map_color[2] or map_color.g or 0, map_color[3] or map_color.b or 0
   r = (r + 0.5) / 1.5
   g = (g + 0.5) / 1.5
   b = (b + 0.5) / 1.5
