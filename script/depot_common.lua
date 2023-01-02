@@ -335,43 +335,6 @@ local load_depot = function(depot)
   end
 end
 
-local migrate_depots = function()
-
-  local depots = {}
-  local update_order = {}
-
-  local count = 1
-
-  local request_depots = global.request_depots.request_depots
-  for k, v in pairs (request_depots) do
-    depots[k] = v
-    update_order[count] = k
-    count = count + 1
-  end
-  global.request_depots = nil
-
-  local supply_depots = global.supply_depots.supply_depots
-  for k, v in pairs (supply_depots) do
-    depots[k] = v
-    update_order[count] = k
-    count = count + 1
-  end
-  global.supply_depots = nil
-
-  script_data.depots = depots
-  script_data.update_order = update_order
-
-  for k, depot in pairs (script_data.depots) do
-    load_depot(depot)
-  end
-
-
-  game.print("Transport drones 0.2.0 update:")
-  game.print("I added fuel depots and fluid depots. The transport drones now need petroleum to work properly, sorry for any inconvenience.")
-  game.print("Thanks for playing with my mod.")
-
-end
-
 local update_depots = function(tick)
   local bucket_index = tick % script_data.update_rate
   local update_list = script_data.update_buckets[bucket_index]
@@ -451,6 +414,27 @@ local picker_dolly_blacklist = function()
 
 end
 
+local get_tags = function(blueprint_entity, surface)
+  local name = blueprint_entity.name
+  local lib = depot_libs[name]
+  if not lib then return end
+
+  if name == "supply-depot" then
+    name = "supply-depot-chest"
+  end
+
+  local entity = surface.find_entity(name, blueprint_entity.position)
+  if not entity then return end
+
+  local depot = get_depot(entity)
+  if not depot then return end
+
+  local saver = depot.save_to_blueprint_tags
+  if not saver then return end
+
+  return saver(depot)
+end
+
 
 local on_player_setup_blueprint = function(event)
   local player = game.get_player(event.player_index)
@@ -462,27 +446,16 @@ local on_player_setup_blueprint = function(event)
     if not (item and item.valid_for_read) then return end
   end
 
-  local count = item.get_blueprint_entity_count()
-  if count == 0 then return end
+  local entities = item.get_blueprint_entities()
+  if not next(entities) then return end
+  local surface = player.surface
 
-  --game.print("My man")
-  --local mapping = event.mapping.get()
-  --game.print(serpent.block(mapping))
-  for index, entity in pairs(event.mapping.get()) do
-    if entity.valid then
-      local depot = get_depot(entity)
-      if depot then
-        local saver = depot.save_to_blueprint_tags
-        local save_tags = saver and saver(depot)
-        if save_tags then
-          if index <= count then
-            item.set_blueprint_entity_tag(index, "transport_depot_tags", save_tags)
-          end
-        end
-      end
+  for index, blueprint_entity in pairs(entities) do
+    local tags = get_tags(blueprint_entity, surface)
+    if tags then
+      item.set_blueprint_entity_tag(index, "transport_depot_tags", tags)
     end
   end
-
 end
 
 local lib = {}
@@ -503,8 +476,7 @@ lib.events =
   [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
 
   [defines.events.on_tick] = on_tick,
-  [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
-
+  [defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed
 }
 
 lib.on_init = function()
@@ -525,10 +497,6 @@ end
 lib.on_configuration_changed = function()
 
   global.transport_depots = global.transport_depots or script_data
-
-  if global.request_depots then
-    migrate_depots()
-  end
 
   for k, depot in pairs (script_data.depots) do
     if not depot.entity.valid then

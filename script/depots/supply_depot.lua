@@ -10,7 +10,7 @@ supply_depot.corpse_offsets =
   [6] = {-2, 0},
 }
 
-function supply_depot.new(entity)
+function supply_depot.new(entity, tags)
   local position = entity.position
   local direction = entity.direction
   local force = entity.force
@@ -37,8 +37,28 @@ function supply_depot.new(entity)
   }
   setmetatable(depot, supply_depot.metatable)
 
+  depot:read_tags(tags)
+
   return depot
 
+end
+
+function supply_depot:read_tags(tags)
+  if tags then
+    if tags.transport_depot_tags then
+      local bar = tags.transport_depot_tags.bar
+      if bar then
+        self.entity.get_output_inventory().set_bar(bar)
+      end
+    end
+  end
+end
+
+function supply_depot:save_to_blueprint_tags()
+  return
+  {
+    bar = self.entity.get_output_inventory().get_bar()
+  }
 end
 
 function supply_depot:get_to_be_taken(name)
