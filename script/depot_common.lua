@@ -447,7 +447,8 @@ local on_player_setup_blueprint = function(event)
   end
 
   local entities = item.get_blueprint_entities()
-  if not next(entities) then return end
+  if not (entities and next(entities)) then return end
+
   local surface = player.surface
 
   for index, blueprint_entity in pairs(entities) do
