@@ -151,6 +151,7 @@ function transport_drone:pickup_from_supply(supply, item, count)
 
   if not supply.entity.valid then
     self:return_to_requester()
+    return
   end
 
   self.supply_depot = supply
