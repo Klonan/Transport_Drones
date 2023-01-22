@@ -65,7 +65,7 @@ function fuel_depot:read_tags(tags)
   if tags then
     if tags.transport_depot_tags then
       local drone_count = tags.transport_depot_tags.drone_count
-      if drone_count then
+      if drone_count and drone_count > 0 then
         self.entity.surface.create_entity
         {
           name = "item-request-proxy",
@@ -80,9 +80,11 @@ function fuel_depot:read_tags(tags)
 end
 
 function fuel_depot:save_to_blueprint_tags()
+  local count = self:get_drone_item_count()
+  if count == 0 then return end
   return
   {
-    drone_count = self:get_drone_item_count()
+    drone_count = count
   }
 end
 
