@@ -6,7 +6,7 @@ local writer_sprite = util.copy(data.raw["constant-combinator"]["constant-combin
 local writer = util.copy(data.raw.pump.pump)
 writer.name = "transport-depot-writer"
 writer.localised_name = "Transport depot writer"
-writer.energy_source = 
+writer.energy_source =
 {
   type = "void",
   energy_usage = "0w"
@@ -25,6 +25,7 @@ writer.fluid_wagon_connector_frame_count = 0
 writer.collision_box = {{-0.4, -0.4},{0.4, 0.4}}
 writer.selection_box = {{-0.5, -0.5}, {0.5, 0.5}}
 writer.minable.result = "transport-depot-writer"
+writer.next_upgrade = nil
 writer.circuit_connector_sprites =
 {
   data.raw.lamp["small-lamp"].circuit_connector_sprites,
@@ -35,7 +36,7 @@ writer.circuit_connector_sprites =
 writer.circuit_wire_connection_points = writer_sprite.circuit_wire_connection_points
 writer.fluid_box =
 {
-  pipe_connections = 
+  pipe_connections =
   {
     {
       position = {0, 1},
@@ -47,7 +48,7 @@ writer.fluid_box =
 -- regex to replace CRLF with LF
 -- ^\r
 
-local writer_item = 
+local writer_item =
 {
   type = "item",
   name = "transport-depot-writer",
@@ -60,7 +61,7 @@ local writer_item =
 }
 
 
-local writer_recipe = 
+local writer_recipe =
 {
   type = "recipe",
   name = "transport-depot-writer",
@@ -93,11 +94,11 @@ reader.icon = util.path("data/entities/transport_depot_circuits/depot-reader-ico
 reader.icon_mipmaps = 0
 reader.icon_size = 72
 reader.minable.result = "transport-depot-reader"
-reader.radius_visualisation_specification = 
+reader.radius_visualisation_specification =
 {
   offset = {0, 1},
   distance = 0.5,
-  sprite = 
+  sprite =
   {
     filename = "__core__/graphics/arrows/gui-arrow-circle.png",
     height = 50,
@@ -105,7 +106,7 @@ reader.radius_visualisation_specification =
   }
 }
 
-local reader_item = 
+local reader_item =
 {
   type = "item",
   name = "transport-depot-reader",
@@ -117,7 +118,7 @@ local reader_item =
   place_result = "transport-depot-reader"
 }
 
-local reader_recipe = 
+local reader_recipe =
 {
   type = "recipe",
   name = "transport-depot-reader",
