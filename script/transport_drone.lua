@@ -631,8 +631,6 @@ local drone_path_flags = {prefer_straight_paths = true, use_cache = false, no_br
 local insert = table.insert
 
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
-
-  local corpse = depot:get_corpse()
   local commands = {}
 
   --if sprite_switch then
@@ -653,7 +651,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
   insert(commands,
   {
     type = defines.command.go_to_location,
-    destination_entity = corpse,
+    destination_entity = depot:get_corpse(),
     distraction = defines.distraction.none,
     radius = radius or 0.5,
     pathfind_flags = drone_path_flags
