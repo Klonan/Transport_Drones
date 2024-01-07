@@ -10,37 +10,53 @@ supply_depot.corpse_offsets =
   [6] = {-2, 0},
 }
 
-function supply_depot.new(entity, tags)
+local get_corpse_position = function(entity)
+
   local position = entity.position
   local direction = entity.direction
+  local offset = supply_depot.corpse_offsets[direction]
+  return {position.x + offset[1], position.y + offset[2]}
+
+end
+
+function supply_depot.new(entity, tags)
+  local position = entity.position
   local force = entity.force
   local surface = entity.surface
-  local offset = supply_depot.corpse_offsets[direction]
   entity.destructible = false
   entity.minable = false
   entity.rotatable = false
   entity.active = false
   local chest = surface.create_entity{name = "supply-depot-chest", position = position, force = force, player = entity.last_user}
-  local corpse_position = {position.x + offset[1], position.y + offset[2]}
-  local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
-  corpse.corpse_expires = false
 
   local depot =
   {
     entity = chest,
     assembler = entity,
-    corpse = corpse,
     to_be_taken = {},
-    node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     index = tostring(chest.unit_number),
     old_contents = {}
   }
   setmetatable(depot, supply_depot.metatable)
 
+  depot:get_corpse()
   depot:read_tags(tags)
 
   return depot
 
+end
+
+function supply_depot:get_corpse()
+  if self.corpse and self.corpse.valid then
+    return self.corpse
+  end
+
+  local corpse_position = get_corpse_position(self.assembler)
+  local corpse = self.entity.surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
+  corpse.corpse_expires = false
+  self.corpse = corpse
+  self.node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
+  return corpse
 end
 
 function supply_depot:read_tags(tags)

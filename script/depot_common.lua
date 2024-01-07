@@ -495,6 +495,8 @@ lib.on_load = function()
   end
 end
 
+
+
 lib.on_configuration_changed = function()
 
   global.transport_depots = global.transport_depots or script_data
@@ -505,6 +507,7 @@ lib.on_configuration_changed = function()
     else
       script.register_on_entity_destroyed(depot.entity)
       depot.surface_index = depot.entity.surface.index
+      depot:get_corpse()
       if depot.on_config_changed then
         depot:on_config_changed()
       end

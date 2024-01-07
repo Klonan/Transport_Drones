@@ -39,26 +39,34 @@ function fuel_depot.new(entity, tags)
   entity.active = false
   entity.rotatable = false
 
-  local corpse_position = get_corpse_position(entity)
-  local corpse = surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
-  corpse.corpse_expires = false
-
   local depot =
   {
     entity = entity,
-    corpse = corpse,
     index = tostring(entity.unit_number),
-    node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     item = false,
     drones = {},
     next_spawn_tick = 0
   }
   setmetatable(depot, fuel_depot.metatable)
 
+  depot:get_corpse()
   depot:read_tags(tags)
 
   return depot
 
+end
+
+function fuel_depot:get_corpse()
+  if self.corpse and self.corpse.valid then
+    return self.corpse
+  end
+
+  local corpse_position = get_corpse_position(self.entity)
+  local corpse = self.entity.surface.create_entity{name = "transport-caution-corpse", position = corpse_position}
+  corpse.corpse_expires = false
+  self.corpse = corpse
+  self.node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
+  return corpse
 end
 
 function fuel_depot:read_tags(tags)

@@ -26,23 +26,32 @@ function mining_depot.new(entity)
   entity.active = false
   entity.rotatable = false
 
-  local corpse_position = get_corpse_position(entity)
-  local corpse = surface.create_entity{name = "invisible-transport-caution-corpse", position = corpse_position}
-  corpse.corpse_expires = false
 
   local depot =
   {
     entity = entity,
-    corpse = corpse,
     index = tostring(entity.unit_number),
-    node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])},
     to_be_taken = {},
     old_contents = {}
   }
   setmetatable(depot, mining_depot.metatable)
+  depot:get_corpse()
 
   return depot
 
+end
+
+function mining_depot:get_corpse()
+  if self.corpse and self.corpse.valid then
+    return self.corpse
+  end
+
+  local corpse_position = get_corpse_position(self.entity)
+  local corpse = self.entity.surface.create_entity{name = "invisible-transport-caution-corpse", position = corpse_position}
+  corpse.corpse_expires = false
+  self.corpse = corpse
+  self.node_position = {math.floor(corpse_position[1]), math.floor(corpse_position[2])}
+  return corpse
 end
 
 function mining_depot:get_to_be_taken(name)

@@ -103,7 +103,7 @@ local make_fluid_depot_recipe = function(fluid)
       icons = fluid.icons,
       ingredients =
       {
-        {type = "fluid", name = fluid.name, amount = 0}
+        {type = "fluid", name = fluid.name, amount = 0.0000001}
       },
       results =
       {

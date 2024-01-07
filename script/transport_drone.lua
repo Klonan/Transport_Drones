@@ -111,7 +111,7 @@ end
 
 transport_drone.new = function(request_depot, drone_name)
 
-  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(drone_name), position = request_depot.corpse.position, force = request_depot.entity.force}
+  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(drone_name), position = request_depot:get_corpse().position, force = request_depot.entity.force}
   if not (entity and entity.valid) then return end
 
   local drone =
@@ -555,7 +555,7 @@ function transport_drone:refund_fuel()
   --self:say(fuel_refund)
 
   if fuel_refund > 0 then
-  self.request_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = fuel_refund})
+    self.request_depot.entity.insert_fluid({name = get_fuel_fluid(), amount = fuel_refund})
   elseif fuel_refund < 0 then
     self.request_depot.entity.remove_fluid({name = get_fuel_fluid(), amount = -fuel_refund})
   end
@@ -629,8 +629,10 @@ end
 local random = math.random
 local drone_path_flags = {prefer_straight_paths = true, use_cache = false, no_break = true}
 local insert = table.insert
+
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
 
+  local corpse = depot:get_corpse()
   local commands = {}
 
   --if sprite_switch then
@@ -651,7 +653,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
   insert(commands,
   {
     type = defines.command.go_to_location,
-    destination_entity = depot.corpse,
+    destination_entity = corpse,
     distraction = defines.distraction.none,
     radius = radius or 0.5,
     pathfind_flags = drone_path_flags
