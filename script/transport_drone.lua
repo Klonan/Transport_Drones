@@ -111,7 +111,17 @@ end
 
 transport_drone.new = function(request_depot, drone_name)
 
-  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(drone_name), position = request_depot:get_corpse().position, force = request_depot.entity.force}
+  local corpse = request_depot.corpse
+  if not (corpse and corpse.valid) then
+    if request_depot.get_corpse then
+      corpse = request_depot:get_corpse()
+    end
+  end
+  if not (corpse and corpse.valid) then
+    error("No corpse found")
+  end
+
+  local entity = request_depot.entity.surface.create_entity{name = get_drone_name(drone_name), position = corpse.position, force = request_depot.entity.force}
   if not (entity and entity.valid) then return end
 
   local drone =
@@ -632,7 +642,19 @@ local insert = table.insert
 
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
   local commands = {}
+  local corpse = depot.corpse
 
+  if not (corpse and corpse.valid) then
+    if depot.get_corpse then
+      corpse = depot:get_corpse()
+    end
+  end
+
+  if not (corpse and corpse.valid) then
+    --idk...
+    self:suicide()
+    return
+  end
   --if sprite_switch then
   --  local proxy = self.entity.surface.create_entity
   --  {
@@ -651,7 +673,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
   insert(commands,
   {
     type = defines.command.go_to_location,
-    destination_entity = depot:get_corpse(),
+    destination_entity = corpse,
     distraction = defines.distraction.none,
     radius = radius or 0.5,
     pathfind_flags = drone_path_flags
