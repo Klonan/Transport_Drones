@@ -152,6 +152,17 @@ local tips =
   },
   {
     type = "tips-and-tricks-item",
+    name = "depot-writer-priority",
+    localised_name = {"transport_drones.title_depot_writer_priority"},
+    localised_description = {"transport_drones_pages.depot-writer-priority"},
+    order = "k",
+    dependencies = {"transport-drones"},
+    category = "transport-drones",
+    indent = 2,
+    tag = "[item=transport-depot-writer]"
+  },
+  {
+    type = "tips-and-tricks-item",
     name = "network-reader",
     localised_name = {"transport_drones.title_network_reader"},
     localised_description = {"transport_drones_pages.network-reader"},

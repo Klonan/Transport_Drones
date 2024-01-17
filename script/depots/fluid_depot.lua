@@ -194,4 +194,23 @@ function fluid_depot:on_config_changed()
   self.old_contents = self.old_contents or {}
 end
 
+function fluid_depot:get_road_network_priority()
+  if not (self.circuit_writer and self.circuit_writer.valid) then
+    return 0
+  end
+
+  local merged_signals = self.circuit_writer.get_merged_signals()
+  local road_network_priority = 0
+
+  if merged_signals then
+    for _, signal_data in pairs(merged_signals) do
+      if signal_data.signal.name == "signal-0" then
+        road_network_priority = signal_data.count
+      end
+    end
+  end
+
+  return road_network_priority
+end
+
 return fluid_depot

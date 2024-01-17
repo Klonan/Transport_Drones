@@ -279,6 +279,7 @@ local update_supply_depot_gui = function(depot, gui, filter)
   end
   local visible = (not filter) or depot.old_contents[filter.name]
   if visible then
+    gui.priority_label.caption = "Priority: " .. depot:get_road_network_priority()
     update_contents(holding_table, depot.old_contents)
   end
   gui.visible = visible
@@ -295,6 +296,7 @@ local update_supply_tab = function(depots, gui, filter)
       local depot_frame = gui[index]
       if not depot_frame then
         depot_frame = gui.add{type = "flow", name = index, direction = "vertical"}
+        depot_frame.add{type = "label", name = "priority_label"}
         depot_frame.style.horizontally_stretchable = true
         --depot_frame.style.vertically_stretchable = true
         depot_frame.style.vertical_align = "top"
@@ -496,6 +498,21 @@ local update_request_depot_gui = function(depot, gui, filter)
   gui.visible = visible
 
   if not visible then return end
+
+  if depot["get_road_network_priority"] then
+    local priority_flow = flow.priority_flow
+    if not priority_flow then
+      priority_flow = flow.add{type = "flow", name = "priority_flow"}
+      priority_flow.style.vertical_align = "center"
+    end
+
+    local priority_label = priority_flow.priority_label
+    if not priority_label then
+      priority_label = priority_flow.add{type = "label", name = "priority_label"}
+    end
+
+    priority_label.caption = "Priority: " .. depot:get_road_network_priority()
+  end
 
   if not item then
     if flow.current_item_flow then

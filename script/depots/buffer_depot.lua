@@ -264,6 +264,21 @@ local distance = function(a, b)
   return ((dx * dx) + (dy * dy)) ^ 0.5
 end
 
+local find_non_empty_priority_depot_group = function(depot_groups)
+  local max_priority = nil
+  local depot_group = nil
+
+  for priority, d_group in pairs(depot_groups) do
+      if type(priority) == 'number' and type(d_group) == 'table' and next(d_group) ~= nil then
+          if max_priority == nil or priority > max_priority then
+              max_priority = priority
+              depot_group = d_group
+          end
+      end
+  end
+  return depot_group
+end
+
 local big = math.huge
 local min = math.min
 local item_heuristic_bonus = 50
@@ -278,9 +293,30 @@ function buffer_depot:make_request()
   local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
   if not supply_depots then return end
 
-  local request_size = self:get_request_size()
+  local get_depot = self.get_depot
   local minimum_size = self:get_minimum_request_size()
-  local stack_size = self:get_stack_size()
+  local supply_depots_by_priority = {}
+  local request_size = self:get_request_size()
+
+  for depot_index, count in pairs (supply_depots) do
+    if count >= minimum_size then
+      local depot = get_depot(depot_index)
+
+      if depot and not depot.is_buffer_depot then
+        local depot_priority = depot:get_road_network_priority()
+
+        if not supply_depots_by_priority[depot_priority] then
+          supply_depots_by_priority[depot_priority] = {}
+          supply_depots_by_priority[depot_priority][depot_index] = depot
+        else
+          supply_depots_by_priority[depot_priority][depot_index] = depot
+        end
+      end
+    end
+  end
+
+  local priority_depots = find_non_empty_priority_depot_group(supply_depots_by_priority)
+  if not priority_depots then return end
 
   local node_position = self.node_position
   local heuristic = function(depot, count)
@@ -295,16 +331,17 @@ function buffer_depot:make_request()
   local best_buffer
   local best_index
   local lowest_score = big
-  local get_depot = self.get_depot
 
   for depot_index, count in pairs (supply_depots) do
-    local depot = get_depot(depot_index)
-    if depot then
-      local score = heuristic(depot, count)
-      if score < lowest_score then
-        best_buffer = depot
-        lowest_score = score
-        best_index = depot_index
+    if priority_depots[depot_index] then
+      local depot = get_depot(depot_index)
+      if depot then
+        local score = heuristic(depot, count)
+        if score < lowest_score then
+          best_buffer = depot
+          lowest_score = score
+          best_index = depot_index
+        end
       end
     end
   end
@@ -695,6 +732,25 @@ function buffer_depot:on_config_changed()
   self:set_request_mode()
   self.to_be_taken = self.to_be_taken or {}
   self.old_contents = self.old_contents or {}
+end
+
+function buffer_depot:get_road_network_priority()
+  if not (self.circuit_writer and self.circuit_writer.valid) then
+    return 0
+  end
+
+  local merged_signals = self.circuit_writer.get_merged_signals()
+  local road_network_priority = 0
+
+  if merged_signals then
+    for _, signal_data in pairs(merged_signals) do
+      if signal_data.signal.name == "signal-0" then
+        road_network_priority = signal_data.count
+      end
+    end
+  end
+
+  return road_network_priority
 end
 
 return buffer_depot
