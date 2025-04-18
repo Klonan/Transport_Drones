@@ -5,9 +5,9 @@ supply_depot.metatable = {__index = supply_depot}
 supply_depot.corpse_offsets =
 {
   [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
+  [4] = {2, 0},
+  [8] = {0, 2},
+  [12] = {-2, 0},
 }
 
 local get_corpse_position = function(entity)
@@ -77,13 +77,12 @@ function supply_depot:save_to_blueprint_tags()
   }
 end
 
-function supply_depot:get_to_be_taken(name)
-  return self.to_be_taken[name] or 0
+function supply_depot:get_to_be_taken(name,quality)
+  return self.to_be_taken[name..quality] or 0
 end
 
 function supply_depot:update_contents()
   local supply = self.road_network.get_network_item_supply(self.network_id)
-
   local new_contents
   if (self.circuit_writer and self.circuit_writer.valid) then
     local behavior = self.circuit_writer.get_control_behavior()
@@ -96,22 +95,22 @@ function supply_depot:update_contents()
     new_contents = self.entity.get_output_inventory().get_contents()
   end
 
-  for name, count in pairs (self.old_contents) do
-    if not new_contents[name] then
-      local item_supply = supply[name]
+  for _,content in pairs (self.old_contents) do
+    if not new_contents[{name = content.name,quality = content.quality}] then
+      local item_supply = supply[content.name..content.quality]
       if item_supply then
         item_supply[self.index] = nil
       end
     end
   end
 
-  for name, count in pairs (new_contents) do
-    local item_supply = supply[name]
+  for _,content in pairs (new_contents) do
+    local item_supply = supply[content.name..content.quality]
     if not item_supply then
       item_supply = {}
-      supply[name] = item_supply
+      supply[content.name..content.quality] = item_supply
     end
-    local new_count = count - self:get_to_be_taken(name)
+    local new_count = content.count - self:get_to_be_taken(content.name,content.quality)
     if new_count > 0 then
       item_supply[self.index] = new_count
     else
@@ -135,23 +134,23 @@ function supply_depot:update()
 end
 
 function supply_depot:say(string)
-  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
+  -- self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
-function supply_depot:give_item(requested_name, requested_count)
+function supply_depot:give_item(requested_name,requested_quality, requested_count)
   local inventory = self.entity.get_output_inventory()
-  local removed_count = inventory.remove({name = requested_name, count = requested_count})
+  local removed_count = inventory.remove({name = requested_name,quality = requested_quality, count = requested_count})
   return removed_count
 end
 
-function supply_depot:add_to_be_taken(name, count)
+function supply_depot:add_to_be_taken(name,quality, count)
   --if not (name and count) then return end
-  self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
+  self.to_be_taken[name..quality] = (self.to_be_taken[name..quality] or 0) + count
   --self:say(name.." - "..self.to_be_taken[name]..": "..count)
 end
 
-function supply_depot:get_available_item_count(name)
-  return self.entity.get_output_inventory().get_item_count(name) - self:get_to_be_taken(name)
+function supply_depot:get_available_item_count(name, quality)
+  return self.entity.get_output_inventory().get_item_count({name = name,quality = quality}) - self:get_to_be_taken(name,quality)
 end
 
 function supply_depot:add_to_network()

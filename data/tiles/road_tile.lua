@@ -3,9 +3,11 @@ local tile = util.copy(data.raw.tile["stone-path"])
 tile.name = "transport-drone-road"
 tile.localised_name = {"road"}
 tile.tint = {0.5, 0.5, 0.5}
-tile.collision_mask = {"ooga wooga error"}
+tile.collision_mask = {layers={
+  ground_tile=true
+}}
 tile.minable.result = "road"
-tile.layer = 250
+tile.layer = 61
 tile.placeable_by = {{item = "road", count = 1}}
 tile.map_color={r=86/2, g=82/2, b=74/2}
 tile.walking_speed_modifier = 1.5
@@ -42,9 +44,11 @@ local better_tile = util.copy(data.raw.tile["refined-concrete"])
 better_tile.name = "transport-drone-road-better"
 better_tile.localised_name = {"fast-road"}
 better_tile.tint = {0.5, 0.5, 0.5}
-better_tile.collision_mask = {"ooga wooga error"}
+better_tile.collision_mask = {layers={
+  ground_tile=true
+}}
 better_tile.minable.result = "fast-road"
-better_tile.layer = 251
+better_tile.layer = 62
 better_tile.placeable_by = {{item = "fast-road", count = 1}}
 better_tile.map_color={r=86/2, g=82/2, b=74/2}
 better_tile.walking_speed_modifier = 2
@@ -86,12 +90,13 @@ local recipe =
   enabled = false,
   ingredients =
   {
-    {"stone-brick", 10},
-    {"coal", 10},
+    {type = "item",name = "stone-brick",amount = 10},
+    {type = "item",name = "coal",amount = 10},
   },
   energy_required = 1,
-  result = "road",
-  result_count = 10
+  results = {
+    {type="item",name="road",amount=10}
+  }
 }
 
 local fast_recipe =
@@ -105,12 +110,13 @@ local fast_recipe =
   enabled = false,
   ingredients =
   {
-    {"concrete", 10},
+    {type = "item",name = "concrete",amount =10},
     {type = "fluid", name = "crude-oil", amount = 50},
   },
   energy_required = 1,
-  result = "fast-road",
-  result_count = 10
+  results = {
+    {type="item",name="fast-road",amount=10}
+  }
 }
 
 data:extend

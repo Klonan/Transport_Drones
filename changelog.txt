@@ -1,4 +1,71 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.26
+Date: 2025-4-18
+  Changes:
+    - Reduce the capacity of the Fluid Depot.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.25
+Date: 2025-2-13
+  Changes:
+    - Add compatibility for factorio+.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.24
+Date: 2025-2-13
+  Changes:
+    - Add localization for technology-description and effect-description.
+    - Add Russian localization
+---------------------------------------------------------------------------------------------------
+Version: 1.0.23
+Date: 2025-2-13
+  Changes:
+    - Fix the conflict issue with the cargo-ships mod.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.22
+Date: 2025-2-13
+  Changes:
+    - Fixed Fixed the bug where there are objects resembling tracks on the road that cause instant teleportation.
+    - Add some fixes from SanDK
+---------------------------------------------------------------------------------------------------
+Version: 1.0.21
+Date: 2025-2-13
+  Changes:
+     (Derringer's emergency patch job on Meglinge's fork)
+    - Fixed parameter recipe crashing request depot (Derringer)
+    - Fixed hackiness going crash on emptying fluid requester depot (Derringer)
+    - Transport system technology unlocks crafting iron sticks (Derringer)
+    - Request depot capacity increased to 1M fluid, with some hackiness to help keep up output pressure (Derringer)
+    - Mostly repaired the road network GUI back to a usable state (Derringer)
+    - Fixed crash on destruction of a transport drone now that 2.0 separates kill statistics by surface (Derringer)
+    - Attempted to fix crash on using a depot circuit reader on an empty fluid depot (Derringer)
+---------------------------------------------------------------------------------------------------
+Version: 1.0.20
+Date: 2025-2-13
+  Changes:
+    - Fix: Fixed crashes caused by Mod changes.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.19
+Date: 2025-2-12
+  Changes:
+    - Fix: various fix collection
+    - Fix: 'request-depot' has stopped sending drones endlessly
+    - Remove helper function empty_sprite
+---------------------------------------------------------------------------------------------------
+Version: 1.0.18
+Date: 2024-10-31
+  Changes:
+    - Fixed Fluid depot icon
+---------------------------------------------------------------------------------------------------
+Version: 1.0.17
+Date: 2024-10-31
+  Changes:
+    - Upgrade to API version 2.0.10
+    - Remove the transport drones unit recipe in factoriopedia
+    - Fixed the issue of memory overflow caused by resetting the road network filter being invalid
+    - Disabled the code regarding mining_depot
+    - Fixed the display error of the requested item/fluid name
+    - Fixed the issue with Factoriopedia displaying request recipes
+    - Fixed the issue of the repository fluid output being too slow
+---------------------------------------------------------------------------------------------------
 Version: 1.0.16
 Date: 2024-01-07
   Changes:

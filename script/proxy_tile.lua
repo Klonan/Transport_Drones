@@ -4,14 +4,16 @@ local road_network = require("script/road_network")
 
 local road_tile_list_name = "road-tile-list"
 local road_tiles
+local tile_filters = {
+  "transport-drone-road",
+  "transport-drone-road-better"
+}
 local get_road_tiles = function()
   if road_tiles then return road_tiles end
   road_tiles = {}
-  local tile_list_item = game.item_prototypes[road_tile_list_name]
-  for tile_name, prototype in pairs (tile_list_item.tile_filters) do
+  for _, tile_name in pairs (tile_filters) do
     road_tiles[tile_name] = true
   end
-  --game.print(serpent.line(road_tiles))
   return road_tiles
 end
 
@@ -68,7 +70,6 @@ local non_road_tile_built = function(event)
 end
 
 local on_built_tile = function(event)
-
   if is_road_tile(event.tile.name) then
     raw_road_tile_built(event)
   else

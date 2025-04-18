@@ -1,6 +1,6 @@
 local affected_by_tiles = true
 
-local util = require "__Transport_Drones__/data/tf_util/tf_util"
+local util = require "__Transport_Drones_Meglinge_Fork__/data/tf_util/tf_util"
 
 local fuel = settings.startup["fuel-fluid"].value
 if not data.raw.fluid[fuel] then
@@ -285,6 +285,7 @@ local make_unit = function(k)
 
   local unit =
   {
+    hidden_in_factoriopedia= true,
     type = "unit",
     name = name.."-"..k,
     localised_name = {name},
@@ -315,7 +316,7 @@ local make_unit = function(k)
     max_pursue_distance = 64,
     min_persue_time = (60 * 15),
     --sticker_box = {{-0.2, -0.2}, {0.2, 0.2}},
-    distraction_cooldown = (15),
+    distraction_cooldown = 15,
     move_while_shooting = true,
     can_open_gates = true,
     ai_settings =
@@ -358,7 +359,7 @@ local make_unit = function(k)
     not_controllable = true,
     movement_speed = 0.15,
     distance_per_frame = 0.15,
-    pollution_to_join_attack = 1000,
+    absorptions_to_join_attack ={pollution = 1000},
     rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
     --corpse = name.." Corpse",
     dying_explosion = "explosion",
@@ -392,7 +393,7 @@ local make_unit = function(k)
     vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
     working_sound =
     {
-      sound = sprite_base.working_sound.sound,
+      sound = "__base__/sound/fight/tank-engine.ogg",
       max_sounds_per_type = 5,
       audible_distance_modifier = 0.7
     },
@@ -471,6 +472,7 @@ local make_ore_truck = function(resource, item_name)
 
     local unit =
     {
+      hidden_in_factoriopedia= true,
       type = "unit",
       name = name.."-"..item_name.."-"..k,
       localised_name = {name},
@@ -544,7 +546,7 @@ local make_ore_truck = function(resource, item_name)
       not_controllable = true,
       movement_speed = 0.15,
       distance_per_frame = 0.15,
-      pollution_to_join_attack = 1000,
+      absorptions_to_join_attack ={pollution = 1000},
       rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
       --corpse = name.." Corpse",
       dying_explosion = "explosion",
@@ -578,7 +580,7 @@ local make_ore_truck = function(resource, item_name)
       vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
       working_sound =
       {
-        sound = sprite_base.working_sound.sound,
+        sound = "__base__/sound/fight/tank-engine.ogg",
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },
@@ -629,6 +631,7 @@ local make_fluid_truck = function(fluid)
 
     local unit =
     {
+      hidden_in_factoriopedia= true,
       type = "unit",
       name = name.."-"..fluid.name.."-"..k,
       localised_name = {name},
@@ -702,7 +705,7 @@ local make_fluid_truck = function(fluid)
       not_controllable = true,
       movement_speed = 0.15,
       distance_per_frame = 0.15,
-      pollution_to_join_attack = 1000,
+      absorptions_to_join_attack ={pollution = 1000},
       rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
       --corpse = name.." Corpse",
       dying_explosion = "explosion",
@@ -736,7 +739,7 @@ local make_fluid_truck = function(fluid)
       vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
       working_sound =
       {
-        sound = sprite_base.working_sound.sound,
+        sound = "__base__/sound/fight/tank-engine.ogg",
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },
@@ -767,7 +770,7 @@ local sprite_switch_hack_proxy =
   picture = util.empty_sprite(),
   flags = {"placeable-off-grid", "not-in-kill-statistics"},
   selectable_in_game = false,
-  collision_mask = {},
+  -- collision_mask = {},
   max_health = 1
 }
 
@@ -798,6 +801,7 @@ local make_fuel_truck = function(fluid)
 
     local unit =
     {
+      hidden_in_factoriopedia= true,
       type = "unit",
       name = name.."-fuel-truck-"..k,
       localised_name = {name},
@@ -871,7 +875,7 @@ local make_fuel_truck = function(fluid)
       not_controllable = true,
       movement_speed = 0.15,
       distance_per_frame = 0.15,
-      pollution_to_join_attack = 1000,
+      absorptions_to_join_attack ={pollution = 1000},
       rotation_speed = 1 / (60 * 1 + (math.random() / 20)),
       --corpse = name.." Corpse",
       dying_explosion = "explosion",
@@ -905,7 +909,7 @@ local make_fuel_truck = function(fluid)
       vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
       working_sound =
       {
-        sound = sprite_base.working_sound.sound,
+        sound = "__base__/sound/fight/tank-engine.ogg",
         max_sounds_per_type = 5,
         audible_distance_modifier = 0.7
       },

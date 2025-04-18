@@ -7,15 +7,15 @@ request_depot.metatable = {__index = request_depot}
 request_depot.corpse_offsets =
 {
   [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
+  [4] = {2, 0},
+  [8] = {0, 2},
+  [12] = {-2, 0},
 }
 
 local fuel_fluid
 local get_fuel_fluid = function()
   if not fuel_fluid then
-    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+    fuel_fluid = prototypes.recipe["fuel-depots"].products[1].name
   end
   return fuel_fluid
 end
@@ -78,6 +78,8 @@ function request_depot:read_tags(tags)
   if tags then
     if tags.transport_depot_tags then
       local drone_count = tags.transport_depot_tags.drone_count
+      local drone_quality = tags.transport_depot_tags.drone_quality
+      
       if drone_count and drone_count > 0 then
         self.entity.surface.create_entity
         {
@@ -85,7 +87,7 @@ function request_depot:read_tags(tags)
           position = self.entity.position,
           force = self.entity.force,
           target = self.entity,
-          modules = {["transport-drone"] = drone_count}
+          modules = {{id = {name = "transport-drone",quality = drone_quality},items = {in_inventory = {{inventory = defines.inventory.assembling_machine_input,stack = 0,count =drone_count }}}}},
         }
       end
     end
@@ -97,7 +99,8 @@ function request_depot:save_to_blueprint_tags()
   if count == 0 then return end
   return
   {
-    drone_count = count
+    drone_count = count,
+    drone_quality = self.quality
   }
 end
 
@@ -209,19 +212,19 @@ local big = math.huge
 local min = math.min
 local item_heuristic_bonus = 50
 function request_depot:make_request()
-
   local name = self.item
+  local quality = self.type == "fluid" and "" or self.quality
   if not name then return end
-
+  if not quality then return end
+  
   if not self:can_spawn_drone() then return end
   if not self:should_order() then return end
-  local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
+  local supply_depots = self.road_network.get_supply_depots(self.network_id, name ,quality)
+  -- game.print("supply_depots: "..serpent.block(supply_depots))
   if not supply_depots then return end
-
   local request_size = self:get_request_size()
   local minimum_size = self:get_minimum_request_size()
   local stack_size = self:get_stack_size()
-
   if self.circuit_limit then
     local missing = self.circuit_limit - self:get_current_amount()
     request_size = math.min(missing, request_size)
@@ -269,16 +272,26 @@ end
 function request_depot:update_circuit_reader()
   if self.circuit_reader and self.circuit_reader.valid then
     local behavior = self.circuit_reader.get_or_create_control_behavior()
-    local signal
+
+    if (behavior.sections_count == 0) then behavior.add_section() end
+    local section = behavior.get_section(1)
     if self.item then
-      signal = {signal = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item}, count = self:get_current_amount()}
+      section.set_slot(1, { value = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item,quality  = self.quality}, min = self:get_current_amount(),max = self:get_current_amount()})
+      section.set_slot(2, { value = {type = "virtual", name = "signal-D",quality  = "normal"},min = self:get_drone_item_count(),max = self:get_drone_item_count()})
     end
-    behavior.set_signal(1, signal)
-    local drone_signal
-    if self.item then
-      drone_signal = {signal = {type = "virtual", name = "signal-D"}, count = self:get_drone_item_count()}
-    end
-    behavior.set_signal(2, drone_signal)
+
+
+
+    -- local signal
+    -- if self.item then
+    --   signal = {signal = {type = self.mode == request_mode.item and "item" or "fluid", name = self.item}, count = self:get_current_amount()}
+    -- end
+    -- behavior.set_signal(1, signal)
+    -- local drone_signal
+    -- if self.item then
+    --   drone_signal = {signal = {type = "virtual", name = "signal-D"}, count = self:get_drone_item_count()}
+    -- end
+    -- behavior.set_signal(2, drone_signal)
   end
 end
 
@@ -291,6 +304,7 @@ function request_depot:update()
   self:make_request()
   self:update_sticker()
   self:update_circuit_reader()
+  self:push_fluid_hack()
 end
 
 function request_depot:suicide_all_drones()
@@ -326,7 +340,13 @@ end
 
 function request_depot:check_request_change()
   local requested_item = self:get_requested_item()
-  if self.item == requested_item then
+  if not requested_item then
+    self.item = nil
+    self.quality = nil
+    self.type = nil
+    return
+  end
+  if self.item == requested_item.name and self.quality == requested_item.quality then
     return
   end
 
@@ -337,7 +357,9 @@ function request_depot:check_request_change()
     self:suicide_all_drones()
   end
 
-  self.item = requested_item
+  self.item = requested_item.name
+  self.quality = requested_item.quality
+  self.type = requested_item.type
 
   if not self.item then return end
 
@@ -346,16 +368,16 @@ function request_depot:check_request_change()
 end
 
 function request_depot:get_requested_item()
-  local recipe = self.entity.get_recipe()
-  if not recipe then return end
-  return recipe.products[1].name
+  local recipe,quality = self.entity.get_recipe()
+  if not recipe or not recipe.products or not recipe.products[1] then return end
+  return {name = recipe.products[1].name,quality = quality.name,type = recipe.products[1].type}
 end
 
 local stack_cache = {}
 local get_stack_size = function(item)
   local size = stack_cache[item]
   if not size then
-    local prototype = game.item_prototypes[item]
+    local prototype = prototypes.item[item]
     if not prototype then error("what? "..item) end
     size = prototype.stack_size
     stack_cache[item] = size
@@ -409,7 +431,7 @@ function request_depot:can_spawn_drone()
 end
 
 function request_depot:get_drone_item_count()
-  return self:get_drone_inventory().get_item_count("transport-drone")
+  return self:get_drone_inventory().get_item_count({name = "transport-drone",quality = self.quality})
 end
 
 function request_depot:get_output_fluidbox()
@@ -421,16 +443,44 @@ function request_depot:set_output_fluidbox(box)
 end
 
 function request_depot:get_current_amount()
-
   if self.mode == request_mode.item then
-    return self:get_output_inventory().get_item_count(self.item)
+    return self:get_output_inventory().get_item_count({name = self.item, quality = self.quality})
   end
 
   if self.mode == request_mode.fluid then
     local box = self:get_output_fluidbox()
-    return box and box.amount or 0
+    return (box and box.amount or 0)
   end
 end
+
+function request_depot:push_fluid_hack()
+  if self.mode == request_mode.fluid then
+    local box = self:get_output_fluidbox()
+    local connected_pipelines = self.entity.fluidbox.get_connections(2)
+	for i, next_box in ipairs(connected_pipelines) do
+	  for j = 1, #next_box do
+		local next_fluid = next_box[j]
+		if (box and next_fluid and next_fluid.name == box.name) or not next_fluid then
+		  local old_amount = next_fluid and next_fluid.amount or 0
+		  local old_temperature = next_fluid and next_fluid.temperature or 0
+		  local space = next_box.get_capacity(j) - old_amount
+		  local push_amount = math.min(space, box and box.amount or 0)
+		  if push_amount > 0 then
+			next_box[j] = { name = box.name, amount = old_amount + push_amount, temperature = ((old_amount * old_temperature) + (push_amount * box.temperature)) / (old_amount + push_amount) }
+			local new_next_fluid = next_box[j]
+			local new_amount = new_next_fluid and new_next_fluid.amount or 0
+			local pushed_amount = math.max(new_amount - old_amount, 0)
+			box.amount = box.amount - pushed_amount
+			if box.amount <= 0 then box = nil end
+			self:set_output_fluidbox(box)
+			box = self:get_output_fluidbox()
+		  end
+		end
+	  end
+	end	
+  end
+end
+
 
 function request_depot:get_storage_size()
   return self:get_drone_item_count() * self:get_request_size()
@@ -469,7 +519,7 @@ function request_depot:update_circuit_writer()
 
   local circuit_condition = behavior.connect_to_logistic_network and behavior.logistic_condition or behavior.circuit_condition
   if circuit_condition then
-    local condition = circuit_condition.condition
+    local condition = circuit_condition
     if condition.comparator == "=" then
       local first_signal = condition.first_signal
       if first_signal then
@@ -503,7 +553,7 @@ local min = math.min
 function request_depot:dispatch_drone(depot, count)
 
   local drone = self.transport_drone.new(self, self.item)
-  drone:pickup_from_supply(depot, self.item, count)
+  drone:pickup_from_supply(depot, self.item,self.quality, count)
   self:remove_fuel(fuel_amount_per_drone)
 
   self.drones[drone.index] = drone
@@ -517,7 +567,7 @@ local is_valid_item = function(item_name)
   if bool ~= nil then
     return bool
   end
-  valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
+  valid_item_cache[item_name] = prototypes.item[item_name] ~= nil
   return valid_item_cache[item_name]
 end
 
@@ -527,15 +577,14 @@ local is_valid_fluid = function(fluid_name)
   if bool ~= nil then
     return bool
   end
-  valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
+  valid_fluid_cache[fluid_name] = prototypes.fluid[fluid_name] ~= nil
   return valid_fluid_cache[fluid_name]
 end
 
-function request_depot:take_item(name, count, temperature)
+function request_depot:take_item(name,quality, count, temperature)
   if not count then error("NO COUMT?") end
-
   if self.mode == request_mode.item and is_valid_item(name) then
-    self.entity.get_output_inventory().insert({name = name, count = count})
+    self.entity.get_output_inventory().insert({name = name,quality = quality, count = count})
     return
   end
 
@@ -565,15 +614,16 @@ end
 function request_depot:update_sticker()
 
   if not self.item then
-    if self.rendering and rendering.is_valid(self.rendering) then
-      rendering.destroy(self.rendering)
+    -- if self.rendering and rendering.is_valid(self.rendering) then
+    if self.rendering~= nil then
+      self.rendering.destroy()
       self.rendering = nil
     end
     return
   end
 
-  if self.rendering and rendering.is_valid(self.rendering) then
-    rendering.set_text(self.rendering, self:get_active_drone_count().."/"..self:get_drone_item_count())
+  if self.rendering ~= nil then
+    self.rendering.text = self:get_active_drone_count().."/"..self:get_drone_item_count()
     return
   end
 
@@ -592,7 +642,7 @@ function request_depot:update_sticker()
 end
 
 function request_depot:say(string)
-  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
+  -- self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 function request_depot:add_to_network()

@@ -18,7 +18,7 @@ local get_fuel_fluid = function()
   if fuel_fluid then
     return fuel_fluid
   end
-  fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+  fuel_fluid = prototypes.recipe["fuel-depots"].products[1].name
   return fuel_fluid
 end
 
@@ -74,7 +74,7 @@ local is_special_drone = function(name)
   if bool ~= nil then
     return bool
   end
-  bool = game.entity_prototypes["transport-drone-"..name.."-1"] ~= nil
+  bool = prototypes.entity["transport-drone-"..name.."-1"] ~= nil
   is_drone_cache[name] = bool
   return bool
 end
@@ -157,7 +157,7 @@ function transport_drone:add_slow_sticker()
   self.entity.surface.create_entity{name = "drone-slowdown-sticker", position = self.entity.position, target = self.entity, force = "neutral"}
 end
 
-function transport_drone:pickup_from_supply(supply, item, count)
+function transport_drone:pickup_from_supply(supply, item,quality, count)
 
   if not supply.entity.valid then
     self:return_to_requester()
@@ -167,7 +167,8 @@ function transport_drone:pickup_from_supply(supply, item, count)
   self.supply_depot = supply
   self.requested_count = count
   self.requested_item = item
-  self.supply_depot:add_to_be_taken(item, count)
+  self.requested_quality = quality
+  self.supply_depot:add_to_be_taken(item,quality, count)
 
   self:add_slow_sticker()
   self:update_speed()
@@ -305,7 +306,7 @@ function transport_drone:process_pickup()
     return
   end
 
-  local available_count = self.requested_count + self.supply_depot:get_available_item_count(self.request_depot.item)
+  local available_count = self.requested_count + self.supply_depot:get_available_item_count(self.request_depot.item,self.request_depot.quality)
 
   local to_take
   if not self.request_depot.circuit_limit then
@@ -320,10 +321,11 @@ function transport_drone:process_pickup()
 
   if to_take > 0 then
     local temperature = self.supply_depot.get_temperature and self.supply_depot:get_temperature()
-    local given_count = self.supply_depot:give_item(self.requested_item, to_take)
+    local given_count = self.supply_depot:give_item(self.requested_item,self.requested_quality, to_take)
 
     if given_count > 0 then
       self.held_item = self.requested_item
+      self.held_quality = self.requested_quality
       self.held_count = given_count
       self.held_temperature = temperature
       self:update_sticker()
@@ -359,7 +361,7 @@ function transport_drone:clear_reservations()
 
   if self.state == states.going_to_supply then
     if self.supply_depot and self.supply_depot.entity.valid and self.requested_item then
-      self.supply_depot:add_to_be_taken(self.requested_item, -self.requested_count)
+      self.supply_depot:add_to_be_taken(self.requested_item,self.requested_quality, -self.requested_count)
       self.requested_item = nil
       self.requested_count = nil
     end
@@ -397,7 +399,7 @@ local is_valid_item = function(item_name)
   if bool ~= nil then
     return bool
   end
-  valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
+  valid_item_cache[item_name] = prototypes.item[item_name] ~= nil
   return valid_item_cache[item_name]
 end
 
@@ -407,7 +409,7 @@ local is_valid_fluid = function(fluid_name)
   if bool ~= nil then
     return bool
   end
-  valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
+  valid_fluid_cache[fluid_name] = prototypes.fluid[fluid_name] ~= nil
   return valid_fluid_cache[fluid_name]
 end
 
@@ -415,12 +417,12 @@ function transport_drone:update_sticker()
 
 
   if self.background_rendering then
-    rendering.destroy(self.background_rendering)
+    self.background_rendering.destroy()
     self.background_rendering = nil
   end
 
   if self.item_rendering then
-    rendering.destroy(self.item_rendering)
+    self.item_rendering.destroy()
     self.item_rendering = nil
   end
 
@@ -520,7 +522,7 @@ function transport_drone:process_return_to_requester()
   end
 
   if self.held_item then
-    self.request_depot:take_item(self.held_item, self.held_count, self.held_temperature)
+    self.request_depot:take_item(self.held_item,self.held_quality, self.held_count, self.held_temperature)
     self.held_item = nil
   end
 
@@ -556,11 +558,11 @@ function transport_drone:refund_fuel()
   local age = game.tick - (self.tick_created or game.tick - 1)
   local consumption = age * self.entity.speed * fuel_consumption_per_meter
 
-  local pollution = (age / 60) * drone_pollution_per_second
-  game.pollution_statistics.on_flow("transport-drone-1", pollution)
+  local pollution = (age / 60) * drone_pollution_per_second.pollution
+  game.get_pollution_statistics(self.entity.surface).on_flow("transport-drone-1", pollution)
 
   --self:say(consumption)
-  self.entity.force.fluid_production_statistics.on_flow(get_fuel_fluid(), -consumption)
+  self.entity.force.get_fluid_production_statistics(self.entity.surface).on_flow(get_fuel_fluid(), -consumption)
   local fuel_refund = fuel_amount_per_drone - consumption
   --self:say(fuel_refund)
 
@@ -611,7 +613,7 @@ function transport_drone:update(event)
 end
 
 function transport_drone:say(text)
-  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = text}
+  -- self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = text}
 end
 
 function transport_drone:go_to_position(position, radius)
@@ -637,7 +639,7 @@ function transport_drone:go_to_entity(entity, radius)
 end
 
 local random = math.random
-local drone_path_flags = {prefer_straight_paths = true, use_cache = false, no_break = true}
+local drone_path_flags = {allow_paths_through_own_entities = true, prefer_straight_paths = true, use_cache = false, no_break = true}
 local insert = table.insert
 
 function transport_drone:go_to_depot(depot, radius, sprite_switch)
@@ -686,7 +688,7 @@ function transport_drone:go_to_depot(depot, radius, sprite_switch)
     ticks_to_wait = 15
   })
 
-  self.entity.set_command
+  self.entity.commandable.set_command
   {
     type = defines.command.compound,
     distraction = defines.distraction.none,
@@ -738,8 +740,8 @@ local on_entity_removed = function(event)
   if not drone then return end
 
   if event.force then
-    entity.force.kill_count_statistics.on_flow("transport-drone-1", 1)
-    event.force.kill_count_statistics.on_flow("transport-drone-1", -1)
+    entity.force.get_kill_count_statistics(entity.surface).on_flow("transport-drone-1", 1)
+    event.force.get_kill_count_statistics(entity.surface).on_flow("transport-drone-1", -1)    
   end
 
   drone:handle_drone_deletion()
@@ -862,14 +864,14 @@ transport_drone.events =
 }
 
 transport_drone.on_load = function()
-  script_data = global.transport_drone or script_data
+  script_data = storage.transport_drone or script_data
   for unit_number, drone in pairs (script_data.drones) do
     setmetatable(drone, transport_drone.metatable)
   end
 end
 
 transport_drone.on_init = function()
-  global.transport_drone = global.transport_drone or script_data
+  storage.transport_drone = storage.transport_drone or script_data
   set_map_settings()
 end
 
@@ -881,7 +883,8 @@ transport_drone.on_configuration_changed = function()
       if drone.state == states.going_to_supply then
         local count = drone.requested_count or 0
         local item = drone.requested_item or drone.request_depot.item
-        drone:pickup_from_supply(drone.supply_depot, item, count)
+        local quality = drone.requested_quality or drone.request_depot.quality
+        drone:pickup_from_supply(drone.supply_depot, item,quality, count)
       end
       if drone.state == states.deliver_fuel then
         drone.target_depot.fuel_on_the_way = drone.target_depot.fuel_on_the_way + (drone.fuel_amount or 0)

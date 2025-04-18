@@ -4,9 +4,9 @@ mining_depot.metatable = {__index = mining_depot}
 mining_depot.corpse_offsets =
 {
   [0] = {0, 4.5},
-  [2] = {-4.5, 0},
-  [4] = {0, -4.5},
-  [6] = {4.5, 0},
+  [4] = {-4.5, 0},
+  [8] = {0, -4.5},
+  [12] = {4.5, 0},
 }
 
 local get_corpse_position = function(entity)

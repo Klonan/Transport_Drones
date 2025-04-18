@@ -32,7 +32,7 @@ add_depot_lib("request-depot", require("script/depots/request_depot"))
 add_depot_lib("supply-depot", require("script/depots/supply_depot"))
 add_depot_lib("supply-depot-chest", require("script/depots/supply_depot"))
 add_depot_lib("fuel-depot", require("script/depots/fuel_depot"))
-add_depot_lib("mining-depot", require("script/depots/mining_depot"))
+-- add_depot_lib("mining-depot", require("script/depots/mining_depot"))
 add_depot_lib("fluid-depot", require("script/depots/fluid_depot"))
 add_depot_lib("buffer-depot", require("script/depots/buffer_depot"))
 add_depot_lib("road-network-reader", require("script/depots/network_reader"))
@@ -78,7 +78,7 @@ local mineable_tiles
 local is_tile_mineable = function(name)
   if not mineable_tiles then
     mineable_tiles = {}
-    for _, tile in pairs (game.tile_prototypes) do
+    for _, tile in pairs (prototypes.tile) do
       if tile.mineable_properties and tile.mineable_properties.minable then
         mineable_tiles[tile.name] = true
       end
@@ -177,9 +177,9 @@ end
 local circuit_offsets =
 {
   [0] = {0, 1},
-  [2] = {-1, 0},
-  [4] = {0, -1},
-  [6] = {1, 0},
+  [4] = {-1, 0},
+  [8] = {0, -1},
+  [12] = {1, 0},
 }
 
 local circuit_writer_built = function(entity)
@@ -188,12 +188,12 @@ local circuit_writer_built = function(entity)
   local search_position = entity.position
   search_position.x = search_position.x + offset[1]
   search_position.y = search_position.y + offset[2]
-
   entity.rotatable = false
 
   for k, found_entity in pairs (entity.surface.find_entities_filtered{position = search_position}) do
     local this_depot = get_depot(found_entity)
     if this_depot then
+
       if not (this_depot.circuit_writer and this_depot.circuit_writer.valid) then
         this_depot.circuit_writer = entity
         this_depot:say("Circuit writer attached")
@@ -269,7 +269,7 @@ local on_created_entity = function(event)
   end
 
   local depot = depot_lib.new(entity, event.tags)
-  script.register_on_entity_destroyed(entity)
+  script.register_on_object_destroyed(entity)
   depot.surface_index = entity.surface.index
   script_data.depots[depot.index] = depot
   if add_depot_to_node(depot) then
@@ -294,6 +294,8 @@ local remove_depot = function(depot, event)
   local index = depot.index
   local x, y = depot.node_position[1], depot.node_position[2]
   remove_depot_from_node(surface, x, y, index)
+  -- log("Depot: " .. serpent.block(script_data.depots))
+  -- log("type: " .. type(index) .. "index: " .. index)
   script_data.depots[index] = nil
   depot:on_removed(event)
 end
@@ -341,7 +343,6 @@ local update_depots = function(tick)
   if not update_list then return end
 
   local depots = script_data.depots
-
   local k = 1
   while true do
     local depot_index = update_list[k]
@@ -397,7 +398,6 @@ local refresh_update_rate = function()
   if script_data.update_rate == update_rate then return end
   script_data.update_rate = update_rate
   refresh_update_buckets()
-  --game.print(script_data.update_rate)
 end
 
 local on_runtime_mod_setting_changed = function(event)
@@ -472,7 +472,7 @@ lib.events =
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
-  [defines.events.on_entity_destroyed] = on_entity_destroyed,
+  [defines.events.on_object_destroyed] = on_entity_destroyed,
 
   [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
 
@@ -481,14 +481,14 @@ lib.events =
 }
 
 lib.on_init = function()
-  global.transport_depots = global.transport_depots or script_data
+  storage.transport_depots = storage.transport_depots or script_data
   setup_lib_values()
   refresh_update_rate()
   picker_dolly_blacklist()
 end
 
 lib.on_load = function()
-  script_data = global.transport_depots or script_data
+  script_data = storage.transport_depots or script_data
   setup_lib_values()
   for k, depot in pairs (script_data.depots) do
     load_depot(depot)
@@ -499,13 +499,13 @@ end
 
 lib.on_configuration_changed = function()
 
-  global.transport_depots = global.transport_depots or script_data
+  storage.transport_depots = storage.transport_depots or script_data
 
   for k, depot in pairs (script_data.depots) do
     if not depot.entity.valid then
       script_data.depots[k] = nil
     else
-      script.register_on_entity_destroyed(depot.entity)
+      script.register_on_object_destroyed(depot.entity)
       depot.surface_index = depot.entity.surface.index
       if depot.on_config_changed then
         depot:on_config_changed()

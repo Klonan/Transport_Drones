@@ -56,7 +56,6 @@ end
 local get_filter_value = function(player)
   local frame = get_frame(player)
   if not frame then return end
-  --game.print(serpent.line(frame.inner_frame.subheader_frame.depot_filter_button.elem_value))
   return frame.inner_frame.subheader_frame.depot_filter_button.elem_value
 end
 
@@ -74,16 +73,7 @@ local get_item_icon_and_locale = function(name)
     return cache[name]
   end
 
-  local items = game.item_prototypes
-  if items[name] then
-    local icon = "item/"..name
-    local locale = items[name].localised_name
-    local value = {icon = icon, locale = locale}
-    cache[name] = value
-    return value
-  end
-
-  local fluids = game.fluid_prototypes
+  local fluids = prototypes.fluid
   if fluids[name] then
     local icon = "fluid/"..name
     local locale = fluids[name].localised_name
@@ -92,6 +82,24 @@ local get_item_icon_and_locale = function(name)
     return value
   end
 
+  local items = prototypes.item
+  local qualities = prototypes.quality
+  
+  for k, v in pairs(qualities) do
+    if string.sub(name, 1 + string.len(name) - string.len(k), string.len(name)) == k then
+	  local found_quality = k
+	  local found_name = string.sub(name, 1, string.len(name) - string.len(found_quality))
+	  if items[found_name] then
+		local icon = "item/"..found_name
+		local overlay = "quality/"..found_quality
+		if not v.draw_sprite_by_default then overlay = nil end
+		local locale = items[found_name].localised_name
+		local value = {icon = icon, overlay = overlay, locale = locale}
+		cache[name] = value
+		return value
+	  end
+	end
+  end
 end
 
 local signal_cache = {}
@@ -100,14 +108,14 @@ local get_signal_id = function(name)
     return signal_cache[name]
   end
 
-  local items = game.item_prototypes
+  local items = prototypes.item
   if items[name] then
     local value = {type = "item", name = name}
     signal_cache[name] = value
     return value
   end
 
-  local fluids = game.fluid_prototypes
+  local fluids = prototypes.fluid
   if fluids[name] then
     local value = {type = "fluid", name = name}
     signal_cache[name] = value
@@ -143,7 +151,7 @@ local update_contents_table = function(contents_table, network, filter, sort)
 
   for name, counts in pairs (supply) do
     local item_locale = get_item_icon_and_locale(name)
-
+    
     if item_locale then
       local visible = (not filter or filter.name == name)
       local flow = contents_table[name]
@@ -210,9 +218,13 @@ end
 
 local update_contents = function(gui, contents)
 
-  for name, count in pairs (contents) do
+  local names = {}
+  for key, itemWithQualityCounts in pairs (contents) do
+    local name = itemWithQualityCounts.name .. itemWithQualityCounts.quality
+    names[name] = true
     local item_locale = get_item_icon_and_locale(name)
     if item_locale then
+	  local count = tostring(itemWithQualityCounts.count)
       local button = gui[name]
       if not button then
         button = gui.add
@@ -232,7 +244,7 @@ local update_contents = function(gui, contents)
   end
 
   for k, element in pairs (gui.children) do
-    if not contents[element.name] then
+    if not names[element.name] then
       element.destroy()
     end
   end
@@ -277,11 +289,18 @@ local update_supply_depot_gui = function(depot, gui, filter)
   if not holding_table then
     holding_table = gui.add{type = "table", column_count = 5, name = "table"}
   end
-  local visible = (not filter) or depot.old_contents[filter.name]
+  local visible = false
+  if filter then
+    for k, itemWithQualityCounts in pairs(depot.old_contents) do
+	  if itemWithQualityCounts.name == filter.name then visible = true end
+	end
+  else
+    visible = true
+  end
   if visible then
     update_contents(holding_table, depot.old_contents)
   end
-  gui.visible = visible
+  gui.visible = visible or false
 end
 
 local map_size = 64 * 3
@@ -674,7 +693,7 @@ local make_network_gui = function(inner, network)
   add_contents_tab(tabbed_pane, network)
   add_supply_tab(tabbed_pane, network)
   add_fluid_tab(tabbed_pane, network)
-  add_mining_tab(tabbed_pane, network)
+  -- add_mining_tab(tabbed_pane, network)
   add_fuel_tab(tabbed_pane, network)
   add_request_tab(tabbed_pane, network)
   add_buffer_tab(tabbed_pane, network)
@@ -691,7 +710,7 @@ local refresh_network_gui = function(player, selected_index)
 
   if not network then return end
 
-  local inner = frame.add{type = "frame", style = "inside_deep_frame_for_tabs", name = "inner_frame", direction = "vertical"}
+  local inner = frame.add{type = "frame", style = "mod_gui_inside_deep_frame", name = "inner_frame", direction = "vertical"}
   local subheader = inner.add{type = "flow", name = "subheader_frame"}
   subheader.style.vertical_align = "center"
   local pusher = subheader.add{type = "empty-widget"}
@@ -764,7 +783,7 @@ local open_gui = function(player, network_index)
 
   local drop_down = title_flow.add{type = "drop-down", name = "road_network_drop_down"}
 
-  title_flow.add{type = "sprite-button", style = "frame_action_button", sprite = "utility/close_white", name = "close_road_network_gui"}
+  title_flow.add{type = "sprite-button", style = "frame_action_button", sprite = "utility/close", name = "close_road_network_gui"}
 
 
   local selected
@@ -815,7 +834,8 @@ local on_gui_click = function(event)
     local depot_index = gui.name:sub(("open_depot_map_"):len() + 1)
     local depot = depot_common.get_depot_by_index(depot_index)
     if depot then
-      player.zoom_to_world(depot.entity.position, 1)
+      -- player.zoom_to_world(depot.entity.position, 1)
+      player.set_controller({type = defines.controllers.remote,start_position = depot.entity.position,start_zoom= 1})
       close_gui(player)
     end
     return

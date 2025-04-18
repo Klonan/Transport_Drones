@@ -22,7 +22,7 @@ if not data.raw.fluid[fuel] then
 end
 
 local category = "transport-drone-request"
-local util = require("__Transport_Drones__/data/tf_util/tf_util")
+local util = require("__Transport_Drones_Meglinge_Fork__/data/tf_util/tf_util")
 local shared = require("shared")
 
 local recipes = data.raw.recipe
@@ -41,21 +41,23 @@ local make_recipe = function(item)
   if not item.name then
     return
   end
-  if util.has_flag(item, "hidden") then return end
+  if item.hidden then return end
   local max_stack = 65000
   if util.has_flag(item, "not-stackable") or item.type == "armor" then
     max_stack = 1
   end
   local recipe =
   {
+    hidden_in_factoriopedia = true,
     type = "recipe",
     name = "request-"..item.name,
+    localised_name = {"request-item",item.localised_name or item.place_result and {"entity-name."..item.name} or {"item-name."..item.name}},
     icon = item.dark_background_icon or item.icon,
     icon_size = item.icon_size,
     icons = item.icons,
     ingredients =
     {
-      {type = "item", name = "transport-drone", amount = 1},
+      {type = "item", name = "transport-drone", amount = 1,},
       {type = "fluid", name = fuel, amount = 5000}
     },
     results =
@@ -78,7 +80,8 @@ local make_recipe = function(item)
     allow_as_intermediate = false,
     allow_intermediates = true,
     allow_inserter_overload = false,
-    energy_required = 2 ^ 50
+    energy_required = 2 ^ 50,
+    allow_quality = false
   }
   data:extend{recipe}
 end
@@ -96,6 +99,7 @@ local make_fluid_depot_recipe = function(fluid)
   data:extend
   {
     {
+      hidden_in_factoriopedia = true,
       type = "recipe",
       name = "fluid-depot-"..fluid.name,
       icon = fluid.icon,
@@ -127,8 +131,10 @@ local make_fluid_request_recipe = function(fluid)
 
   local recipe =
   {
+    hidden_in_factoriopedia = true,
     type = "recipe",
     name = "request-"..fluid.name,
+    localised_name = {"request-item",{"fluid-name."..fluid.name}},
     icon = fluid.icon,
     icon_size = fluid.icon_size,
     icons = fluid.icons,
@@ -139,7 +145,7 @@ local make_fluid_request_recipe = function(fluid)
     },
     results =
     {
-      {type = "fluid", name = fluid.name, amount = 1000000, show_details_in_recipe_tooltip = false}
+      {type = "fluid", name = fluid.name, amount = 10000, show_details_in_recipe_tooltip = false}
     },
     category = category,
     order = fluid.order,

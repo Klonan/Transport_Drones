@@ -4,9 +4,9 @@ fluid_depot.metatable = {__index = fluid_depot}
 fluid_depot.corpse_offsets =
 {
   [0] = {0, -2},
-  [2] = {2, 0},
-  [4] = {0, 2},
-  [6] = {-2, 0},
+  [4] = {2, 0},
+  [8] = {0, 2},
+  [12] = {-2, 0},
 }
 
 local get_corpse_position = function(entity)
@@ -73,6 +73,7 @@ end
 
 function fluid_depot:update_contents()
 
+
   local supply = self.road_network.get_network_item_supply(self.network_id)
 
   local new_contents = {}
@@ -89,26 +90,26 @@ function fluid_depot:update_contents()
   if enabled then
     local box = self:get_output_fluidbox()
     if box then
-      new_contents[box.name] = box.amount
+      new_contents[box.name] = {name = box.name,count = box.amount,quality = ""}
     end
   end
 
-  for name, count in pairs (self.old_contents) do
-    if not new_contents[name] then
-      local item_supply = supply[name]
+  for name, content in pairs (self.old_contents) do
+    if not new_contents[content.name] then
+      local item_supply = supply[content.name]
       if item_supply then
         item_supply[self.index] = nil
       end
     end
   end
 
-  for name, count in pairs (new_contents) do
-    local item_supply = supply[name]
+  for name, content in pairs (new_contents) do
+    local item_supply = supply[content.name]
     if not item_supply then
       item_supply = {}
-      supply[name] = item_supply
+      supply[content.name] = item_supply
     end
-    local new_count = count - self:get_to_be_taken(name)
+    local new_count = content.count - self:get_to_be_taken(name)
     if new_count > 0 then
       item_supply[self.index] = new_count
     else
@@ -117,24 +118,28 @@ function fluid_depot:update_contents()
   end
 
   self.old_contents = new_contents
-
+  -- game.print("contents: " .. serpent.block(new_contents))
   if self.circuit_reader and self.circuit_reader.valid then
     local behavior = self.circuit_reader.get_or_create_control_behavior()
-    local name, count = next(new_contents)
+    if (behavior.sections_count == 0) then behavior.add_section() end
+    local section = behavior.get_section(1)
+
+    local name, content = next(new_contents)
     if not name then
       local box = self:get_output_fluidbox()
       if box then
-        name = box.name
-        count = box.amount
+        content.name = box.name
+        content.count = box.amount
       end
     end
     local signal
-    if name and count and count > 0 then
-      signal = {signal = {type = "fluid", name = name}, count = count}
+    if name and content.count and content.count > 0 then
+      signal = {value = {type = "fluid", name = name,quality = "normal"}, min = content.count , max = content.count}
+    section.set_slot(1, signal)
+	else
+	  section.clear_slot(1)
     end
-    behavior.set_signal(1, signal)
   end
-
 end
 
 function fluid_depot:update()
@@ -159,14 +164,14 @@ function fluid_depot:update()
 end
 
 function fluid_depot:say(string)
-  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
+  -- self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
-function fluid_depot:give_item(requested_name, requested_count)
-  return self.entity.remove_fluid{name = requested_name, amount = requested_count}
+function fluid_depot:give_item(requested_name, requested_quality,requested_count)
+  return self.entity.remove_fluid{name = requested_name,quality = "normal", amount = requested_count}
 end
 
-function fluid_depot:add_to_be_taken(name, count)
+function fluid_depot:add_to_be_taken(name, quality,count)
   --if not (name and count) then return end
   self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
   --self:say(self.to_be_taken[name])

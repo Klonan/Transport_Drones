@@ -30,12 +30,14 @@ local recipe =
   enabled = false,
   ingredients =
   {
-    {"engine-unit", 1},
-    {"steel-plate", 5},
-    {"iron-gear-wheel", 5},
+    {type = "item",name = "engine-unit",amount = 1},
+    {type = "item",name = "steel-plate",amount = 5},
+    {type = "item",name = "iron-gear-wheel", amount = 5},
   },
   energy_required = 2,
-  result = name
+  results = {
+    {type="item",name=name,amount=1}
+  }
 }
 
 data:extend{item, recipe}

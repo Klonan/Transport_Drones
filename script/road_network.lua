@@ -20,7 +20,7 @@ local new_id = function()
     item_supply = {},
     depots = {}
   }
-  --print("New network "..id)
+  -- print("New network "..id)
   return id
 end
 
@@ -300,9 +300,10 @@ road_network.get_network_item_supply = function(id)
   return network.item_supply
 end
 
-road_network.get_supply_depots = function(id, name)
+road_network.get_supply_depots = function(id, name, quality)
   local network = get_network_by_id(id)
-  return network.item_supply[name]
+  -- log(serpent.block(network.item_supply))
+  return network.item_supply[name..quality]
 end
 
 road_network.add_node = function(surface, x, y)
@@ -468,11 +469,17 @@ road_network.remove_depot = function(depot, category)
 
   if depot.old_contents then
     local item_supply = network.item_supply
-    for name, count in pairs (depot.old_contents) do
-      if item_supply[name] then
-        item_supply[name][depot.index] = nil
+    for _,content in pairs (depot.old_contents) do
+      -- game.print("old_contents: ".. serpent.block(depot.old_contents))
+      -- game.print("content: ".. serpent.block(content))
+      -- game.print("item_supply1 ".. serpent.block(item_supply))
+      -- game.print("target: " .. content.name..content.quality)
+      -- game.print("depot.index: " .. depot.index .. " type: " .. type(depot.index))
+      if item_supply[content.name..content.quality] then
+        item_supply[content.name..content.quality][depot.index] = nil
       end
     end
+    -- game.print("item_supply2 ".. serpent.block(item_supply))
   end
 
   if network.depots[category] then
@@ -523,14 +530,14 @@ end
 local floor = math.floor
 
 local get_tiles = function()
-  local mask = game.tile_prototypes["transport-drone-road"].collision_mask
+  local mask = prototypes.tile["transport-drone-road"].collision_mask
   local tiles = {}
-  for name, tile in pairs (game.tile_prototypes) do
+  for name, tile in pairs (prototypes.tile) do
     local tile_mask = tile.collision_mask or {}
     if table_size(tile_mask) == table_size(mask) then
       local good = true
-      for layer, bool in pairs (mask) do
-        if not tile_mask[layer] then
+      for layer, bool in pairs (mask.layers) do
+        if not tile_mask.layers[layer] then
           good = false
           break
         end
@@ -620,11 +627,11 @@ road_network.check_clear_lonely_node = function(surface, x, y)
 end
 
 road_network.on_init = function()
-  global.road_network = global.road_network or script_data
+  storage.road_network = storage.road_network or script_data
 end
 
 road_network.on_load = function()
-  script_data = global.road_network or script_data
+  script_data = storage.road_network or script_data
 end
 
 road_network.on_configuration_changed = function()

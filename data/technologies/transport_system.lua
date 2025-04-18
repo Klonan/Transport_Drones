@@ -38,7 +38,11 @@ local transport_system =
     {
       type = "unlock-recipe",
       recipe = "road"
-    }
+    },
+    {
+      type = "unlock-recipe",
+      recipe = "iron-stick"
+    }	
   },
   prerequisites = {"engine"},
   unit =

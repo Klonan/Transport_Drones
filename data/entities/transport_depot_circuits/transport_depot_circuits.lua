@@ -36,11 +36,13 @@ writer.circuit_connector_sprites =
 writer.circuit_wire_connection_points = writer_sprite.circuit_wire_connection_points
 writer.fluid_box =
 {
+  volume = 50,
   pipe_connections =
   {
     {
-      position = {0, 1},
-      type = "output"
+      direction = defines.direction.south,
+      position = {0, 0},
+      flow_direction = "output"
     }
   }
 }
@@ -71,11 +73,13 @@ local writer_recipe =
   enabled = false,
   ingredients =
   {
-    {"copper-cable", 5},
-    {"electronic-circuit", 10},
+    {type = "item",name = "copper-cable", amount = 5},
+    {type = "item",name = "electronic-circuit", amount  = 10},
   },
   energy_required = 5,
-  result = "transport-depot-writer"
+  results = {
+    {type="item",name="transport-depot-writer",amount=1}
+  }
 }
 
 data:extend
@@ -128,11 +132,13 @@ local reader_recipe =
   enabled = false,
   ingredients =
   {
-    {"copper-cable", 5},
-    {"electronic-circuit", 10},
+    {type = "item",name = "copper-cable", amount = 5},
+    {type = "item",name = "electronic-circuit", amount = 10},
   },
   energy_required = 5,
-  result = "transport-depot-reader"
+  results = {
+    {type="item",name="transport-depot-reader",amount=1}
+  }
 }
 
 data:extend

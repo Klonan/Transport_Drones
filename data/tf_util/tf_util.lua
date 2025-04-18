@@ -159,7 +159,7 @@ util.base_player = function()
 end
 
 util.path = function(str)
-  return "__Transport_Drones__/" .. str
+  return "__Transport_Drones_Meglinge_Fork__/" .. str
 end
 
 util.empty_sound = function()
@@ -167,17 +167,6 @@ util.empty_sound = function()
   {
     filename = util.path("data/tf_util/empty-sound.ogg"),
     volume = 0
-  }
-end
-
-util.empty_sprite = function()
-  return
-  {
-    filename = util.path("data/tf_util/empty-sprite.png"),
-    height = 1,
-    width = 1,
-    frame_count = 1,
-    direction_count = 1
   }
 end
 

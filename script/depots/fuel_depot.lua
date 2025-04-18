@@ -8,9 +8,9 @@ fuel_depot.metatable = {__index = fuel_depot}
 fuel_depot.corpse_offsets =
 {
   [0] = {0, -3},
-  [2] = {3, 0},
-  [4] = {0, 3},
-  [6] = {-3, 0},
+  [4] = {3, 0},
+  [8] = {0, 3},
+  [12] = {-3, 0},
 }
 
 local fuel_fluid
@@ -18,7 +18,7 @@ local get_fuel_fluid = function()
   if fuel_fluid then
     return fuel_fluid
   end
-  fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+  fuel_fluid = prototypes.recipe["fuel-depots"].products[1].name
   return fuel_fluid
 end
 
@@ -80,7 +80,7 @@ function fuel_depot:read_tags(tags)
           position = self.entity.position,
           force = self.entity.force,
           target = self.entity,
-          modules = {["transport-drone"] = drone_count}
+          modules = {{id = {name = "transport-drone"},items = {in_inventory = {{inventory = defines.inventory.assembling_machine_input,stack = 0,count =drone_count }}}}},
         }
       end
     end
@@ -108,7 +108,6 @@ function fuel_depot:update()
   self:check_drone_validity()
   self:update_circuit_reader()
   self:update_sticker()
-  --game.print("AHOY!")
 end
 
 function fuel_depot:add_to_network()
@@ -190,7 +189,7 @@ function fuel_depot:handle_fuel_request(depot)
 end
 
 function fuel_depot:say(string)
-  self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
+  -- self.entity.surface.create_entity{name = "tutorial-flying-text", position = self.entity.position, text = string}
 end
 
 
@@ -204,8 +203,8 @@ end
 
 function fuel_depot:update_sticker()
 
-  if self.rendering and rendering.is_valid(self.rendering) then
-    rendering.set_text(self.rendering, self:get_active_drone_count().."/"..self:get_drone_item_count())
+  if self.rendering ~= nil then
+    self.rendering.text = self:get_active_drone_count().."/"..self:get_drone_item_count()
     return
   end
 
