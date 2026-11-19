@@ -60,12 +60,22 @@ function fluid_depot:get_to_be_taken(name)
   return util.get_quality_item(self.to_be_taken, util.normal_quality, name) or 0
 end
 
+-- The stock has to be read from the depot's own fluid boxes, never from its fluid segment:
+-- get_fluid_segment_fluid reports the whole connected pipe network (every pipe and tank on it),
+-- while drones take from the depot itself (get_fluid_count/extract_fluid in give_item and
+-- get_available_item_count). Advertising the segment made the network book far more than the
+-- depot held, so arriving drones saw nothing left after the reservations and drove away empty.
+-- Which index holds the fluid depends on the recipe the furnace picked (see script_util.lua),
+-- so check every box the prototype defines.
+local fluid_box_indexes = {1, 2}
+
 function fluid_depot:get_output_fluidbox()
-  local ok, has_segment = pcall(self.entity.has_fluid_segment, 1)
-  if not (ok and has_segment) then return end
-  local ok2, fluid = pcall(self.entity.get_fluid_segment_fluid, 1)
-  if not ok2 then return end
-  return fluid
+  for _, index in pairs(fluid_box_indexes) do
+    local box = util.get_fluid_box_content(self.entity, index)
+    if box and box.name and box.amount > 0 then
+      return box
+    end
+  end
 end
 
 function fluid_depot:get_temperature()
@@ -87,9 +97,10 @@ function fluid_depot:update_contents()
 
   -- Provider-side depots (supply/mining/fluid) always offer their stock to the network now - see
   -- supply_depot.lua for why. Only request/buffer depots are circuit-gateable.
+  -- Count the same way give_item takes, so the advertised amount is what a drone can get.
   local box = self:get_output_fluidbox()
   if box then
-    util.set_quality_item(new_contents, util.normal_quality, box.name, box.amount)
+    util.set_quality_item(new_contents, util.normal_quality, box.name, self.entity.get_fluid_count(box.name))
   end
 
   util.for_each_quality_item(self.old_contents, function(quality, name, count)
@@ -116,6 +127,9 @@ function fluid_depot:update()
       self.entity.disabled_by_script = false
       self.entity.crafting_progress = 0
     end
+    -- Still refresh: an emptied depot must drop out of the network supply, or requesters keep
+    -- sending drones to it.
+    self:update_contents()
     return
   end
 
